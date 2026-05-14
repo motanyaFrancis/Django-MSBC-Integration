@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Reset Password{% endblock %}
+
+{% block body %}
+<div class="container-fluid page-body-wrapper full-page-wrapper">
+    <div class="content-wrapper d-flex align-items-center auth px-0">
+        <div class="row w-100 mx-0">
+            <div class="col-lg-4 mx-auto">
+                <div class="auth-form-light text-left py-5 px-4 px-sm-5">
+
+                    <!-- Logo -->
+                    <div class="brand-logo text-center">
+                        <img src="{% static 'assets/images/logo.svg' %}" alt="logo" style="max-width: 120px;">
+                    </div>
+
+                    <!-- Header -->
+                    <h4 class="text-center">Reset Your Password</h4>
+                    <h6 class="fw-light text-center mb-4">
+                        Enter your verification token and set a new password.
+                    </h6>
+                    
+                    <!-- Form -->
+                    <form class="pt-3" method="post" action="/reset-password/">
+                        {% csrf_token %}
+                        <!-- username
+                        <div class="form-group">
+                            <input type="text" class="form-control form-control-lg" name="username"
+                                id="username" placeholder="Username" required>
+                        </div> -->
+
+                        <!-- Token -->
+                        <div class="form-group">
+                            <input type="text" class="form-control form-control-lg" name="token"
+                                placeholder="Verification Token" required>
+                        </div>
+
+                        <!-- New Password -->
+                        <div class="form-group">
+                            <input type="password" class="form-control form-control-lg" name="password"
+                                placeholder="New Password" required>
+                        </div>
+
+                        <!-- Confirm Password -->
+                        <div class="form-group">
+                            <input type="password" class="form-control form-control-lg" name="confirm_password"
+                                placeholder="Confirm New Password" required>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="mt-4 d-grid gap-2">
+                            <button class="btn btn-primary btn-lg fw-medium auth-form-btn" type="submit">
+                                RESET PASSWORD
+                            </button>
+                        </div>
+
+                        <!-- Back Link -->
+                        <div class="text-center mt-4 fw-light">
+                            <a href="/" class="text-primary">
+                                Back to Login
+                            </a>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

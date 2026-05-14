@@ -1,0 +1,478 @@
+<!-- NEW LEAVE REQUEST MODAL -->
+
+<div class="modal fade" id="raise_leave" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-hidden="true">
+
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+
+            <!-- HEADER -->
+            <div class="modal-header bg-primary text-white border-0 px-4 py-3">
+                <div>
+                    <h4 class="modal-title fw-bold mb-1">
+                        <i class="las la-calendar-plus me-2"></i>
+                        New Leave Request
+                    </h4>
+                    <small class="opacity-75">
+                        Complete the steps below to submit your leave request
+                    </small>
+                </div>
+
+                <button type="button" class="btn-close btn-close-white" id="leave_close-modal" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+
+            <!-- BODY -->
+            <div class="modal-body bg-light p-0">
+
+                <!-- STEPPER -->
+                <div class="bg-white border-bottom px-4 py-4">
+
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+
+                        <div class="step-item active" id="stage-1-step">
+                            <div class="step-circle">1</div>
+                            <div class="step-title">Leave Details</div>
+                        </div>
+
+                        <div class="step-line"></div>
+
+                        <div class="step-item" id="stage-2-step">
+                            <div class="step-circle">2</div>
+                            <div class="step-title">Attachments</div>
+                        </div>
+
+                        <div class="step-line"></div>
+
+                        <div class="step-item" id="stage-3-step">
+                            <div class="step-circle">3</div>
+                            <div class="step-title">Approval</div>
+                        </div>
+
+                        <div class="step-line"></div>
+
+                        <div class="step-item" id="stage-4-step">
+                            <div class="step-circle">4</div>
+                            <div class="step-title">Completed</div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- STAGES -->
+                <div class="p-4">
+
+                    <!-- ================================================= -->
+                    <!-- STAGE 1 -->
+                    <!-- ================================================= -->
+                    <div id="stage1" class="s-stepper-stage active">
+
+                        <div class="card border-0 shadow-sm rounded-4">
+                            <div class="card-body p-4">
+
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="bg-primary-subtle rounded-circle px-2 py-2 me-3">
+                                        <i class="mdi mdi-file-document text-primary fs-5"></i>
+                                    </div>
+
+                                    <div>
+                                        <h5 class="mb-1 fw-bold">
+                                            Leave Information
+                                        </h5>
+                                        <small class="text-muted">
+                                            Fill in your leave request details
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <!-- LOADER -->
+                                <div class="text-center py-5" id="leave-spinner" style="display:none;">
+
+                                    <div class="spinner-border text-primary" style="width:4rem;height:4rem;"></div>
+
+                                    <p class="mt-3 text-muted">
+                                        Saving leave request...
+                                    </p>
+                                </div>
+
+                                <!-- FORM -->
+                                <form id="leave_form" method="post" novalidate>
+                                    {% csrf_token %}
+
+                                    <input type="hidden" name="applicationNo" id="applicationNo">
+                                    <input type="hidden" name="dimension3" id="dimension3">
+                                    <input type="hidden" name="myAction" id="myAction" value="insert">
+
+                                    <div class="row g-4">
+
+                                        <!-- LEAVE TYPE -->
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">
+                                                Leave Type
+                                                <span class="text-danger">*</span>
+                                            </label>
+
+                                            <select class="form-select form-select-md" name="leaveType" id="leaveType"
+                                                required>
+
+                                                <option value="0" disabled selected>
+                                                    Select Leave Type
+                                                </option>
+
+                                                {% for res in leave %}
+                                                <option value="{{res.Code}}">
+                                                    {{res.Description}}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+
+                                        <!-- START DATE -->
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">
+                                                Start Date
+                                                <span class="text-danger">*</span>
+                                            </label>
+
+                                            <input type="date" class="form-control form-control-md"
+                                                name="plannerStartDate" id="start-date" required>
+                                        </div>
+
+                                        <!-- BALANCE -->
+                                        <div class="col-md-12" id="leaveBalanceRow" style="display:none;">
+
+                                            <div class="alert alert-info border-0 rounded-3 mb-0">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="las la-wallet fs-3 me-2"></i>
+
+                                                    <div class="w-100">
+                                                        <small class="fw-semibold d-block">
+                                                            Leave Balance
+                                                        </small>
+
+                                                        <input type="text" class="form-control mt-2" id="leaveBalance"
+                                                            disabled>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- RETURN SAME DAY -->
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">
+                                                Return Same Day
+                                            </label>
+
+                                            <select class="form-select form-select-md" id="isReturnSameDay"
+                                                name="isReturnSameDay">
+
+                                                <option value="0" disabled selected>
+                                                    Select Option
+                                                </option>
+
+                                                <option value="True">Yes</option>
+                                                <option value="False">No</option>
+                                            </select>
+                                        </div>
+
+                                        <!-- DAYS APPLIED -->
+                                        <div class="col-md-6" id="daysAppliedRow" style="display:none;">
+
+                                            <label class="form-label fw-semibold">
+                                                Days Applied
+                                            </label>
+
+                                            <input type="number" class="form-control form-control-md" id="daysApplied"
+                                                name="daysApplied" disabled>
+                                        </div>
+
+                                        <!-- RELIEVER -->
+                                        <div class="col-md-12" id="directorRelieverRow" style="display:none;">
+
+                                            <label class="form-label fw-semibold">
+                                                Reliever
+                                                <span class="text-danger">*</span>
+                                            </label>
+
+                                            <select class="form-select form-select-md" name="directorReliever"
+                                                id="directorReliever" disabled>
+
+                                                <option value="0" disabled selected>
+                                                    Select Reliever
+                                                </option>
+
+                                                {% for reliever in directorReliever %}
+                                                <option value="{{reliever.No_}}">
+                                                    {{reliever.First_Name}}
+                                                    {{reliever.Last_Name}}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+
+                                    </div>
+
+                                    <!-- BUTTONS -->
+                                    <div class="d-flex justify-content-end mt-5 gap-3">
+
+                                        <button type="submit" class="btn btn-primary  px-5 ">
+
+                                            Save & Continue
+                                            <i class="las la-arrow-right ms-2"></i>
+                                        </button>
+
+                                        <button id="next1" type="button" hidden class="btn btn-outline-primary px-4 ">
+
+                                            Next
+                                        </button>
+
+                                    </div>
+
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================================================= -->
+                    <!-- STAGE 2 -->
+                    <!-- ================================================= -->
+                    <div id="stage2" class="s-stepper-stage">
+
+                        <div class="card border-0 shadow-sm rounded-4">
+                            <div class="card-body p-4">
+
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="bg-success-subtle rounded-circle p-3 me-3">
+                                        <i class="las la-paperclip text-success fs-3"></i>
+                                    </div>
+
+                                    <div>
+                                        <h5 class="fw-bold mb-1">
+                                            Attach Supporting Documents
+                                        </h5>
+
+                                        <small class="text-muted">
+                                            Upload any supporting files if needed
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <!-- SPINNER -->
+                                <div class="text-center py-5" id="attachment-spinner" style="display:none;">
+
+                                    <div class="spinner-border text-success" style="width:4rem;height:4rem;"></div>
+
+                                    <p class="mt-3 text-muted">
+                                        Uploading attachments...
+                                    </p>
+                                </div>
+
+                                <!-- FORM -->
+                                <form method="post" id="leave_attachment_form" enctype="multipart/form-data">
+
+                                    {% csrf_token %}
+
+                                    <div class="border rounded-4 p-4 bg-light">
+
+                                        <label class="form-label fw-semibold">
+                                            Upload Files
+                                        </label>
+
+                                        <input class="form-control form-control-md" name="attachments" id="attachments"
+                                            type="file" multiple>
+
+                                        <small class="text-muted mt-2 d-block">
+                                            Accepted multiple file uploads
+                                        </small>
+
+                                    </div>
+
+                                    <div class="d-flex justify-content-between mt-4">
+
+                                        <button id="prev-btn" type="button"
+                                            class="btn btn-outline-secondary rounded-pill px-4">
+
+                                            <i class="las la-arrow-left me-2"></i>
+                                            Previous
+                                        </button>
+
+                                        <div class="d-flex gap-3">
+
+                                            <button type="submit" class="btn btn-success rounded-pill px-4">
+
+                                                Upload Files
+                                            </button>
+
+                                            <button id="next-btn" type="button"
+                                                class="btn btn-primary rounded-pill px-4">
+
+                                                Continue
+                                                <i class="las la-arrow-right ms-2"></i>
+                                            </button>
+
+                                        </div>
+
+                                    </div>
+
+                                </form>
+
+                                <!-- ATTACHMENTS -->
+                                <div id="leave_attachments_row" style="display:none;" class="mt-5">
+
+                                    <h6 class="fw-bold mb-3">
+                                        Uploaded Attachments
+                                    </h6>
+
+                                    <div class="row g-3" id="attachments-container">
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================================================= -->
+                    <!-- STAGE 3 -->
+                    <!-- ================================================= -->
+                    <div id="stage3" class="s-stepper-stage">
+
+                        <div class="card border-0 shadow-sm rounded-4">
+                            <div class="card-body text-center p-5">
+
+                                <div class="bg-info-subtle rounded-circle d-inline-flex p-4 mb-4">
+                                    <i class="las la-paper-plane text-info fs-1"></i>
+                                </div>
+
+                                <h4 class="fw-bold">
+                                    Ready To Submit
+                                </h4>
+
+                                <p class="text-muted mb-5">
+                                    Your leave request has been prepared successfully.
+                                    Send it for approval.
+                                </p>
+
+                                <!-- LOADER -->
+                                <div id="approve-spinner" style="display:none;" class="mb-4">
+
+                                    <div class="spinner-border text-info"></div>
+
+                                    <p class="mt-3 text-muted">
+                                        Sending approval request...
+                                    </p>
+                                </div>
+
+                                <!-- APPROVAL FORM -->
+                                <form method="POST" id="approvalForm">
+
+                                    {% csrf_token %}
+
+                                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+
+                                        <button class="btn btn-info  px-5" type="submit">
+
+                                            <i class="las la-check-circle me-2"></i>
+                                            Send For Approval
+                                        </button>
+
+                                        <button id="prev3-btn" type="button" class="btn btn-outline-secondary px-4">
+
+                                            Previous
+                                        </button>
+
+                                    </div>
+
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================================================= -->
+                    <!-- STAGE 4 -->
+                    <!-- ================================================= -->
+                    <div id="stage4" class="s-stepper-stage">
+
+                        <div class="card border-0 shadow-sm rounded-4">
+
+                            <div class="card-body p-5">
+
+                                <!-- SUCCESS -->
+                                <div class="text-center mb-5">
+
+                                    <div class="bg-success-subtle rounded-circle d-inline-flex p-4 mb-4">
+                                        <i class="las la-check-circle text-success fs-1"></i>
+                                    </div>
+
+                                    <h3 class="fw-bold text-success">
+                                        Leave Request Submitted
+                                    </h3>
+
+                                    <p class="text-muted">
+                                        Your request has been sent successfully
+                                        for approval.
+                                    </p>
+
+                                </div>
+
+                                <!-- APPROVERS -->
+                                <div class="table-responsive">
+
+                                    <table id="leave_approvers_table" class="table align-middle table-hover">
+
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Entry No.</th>
+                                                <th>Approver</th>
+                                                <th>Sequence</th>
+                                                <th>Status</th>
+                                                <th>Modified By</th>
+                                                <th>Date Modified</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            <tr>
+                                                <td colspan="6" class="text-center py-4 text-muted">
+
+                                                    Loading approvers...
+                                                </td>
+                                            </tr>
+                                        </tbody>
+
+                                    </table>
+                                </div>
+
+                                <!-- ACTIONS -->
+                                <div class="d-flex justify-content-center gap-3 mt-5 flex-wrap">
+
+                                    <form method="POST" id="CancelApprovalForm">
+
+                                        {% csrf_token %}
+
+                                        <button class="btn btn-outline-danger rounded-pill px-4" type="submit">
+
+                                            Cancel Approval
+                                        </button>
+                                    </form>
+
+                                    <a href="" id="detailsBtn" class="btn btn-primary  px-4">
+
+                                        View Leave Details
+                                    </a>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>

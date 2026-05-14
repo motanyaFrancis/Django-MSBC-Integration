@@ -1,0 +1,182 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Employee Profile{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+
+    <!-- HEADER SECTION (Inspired by image_856db4.jpg) -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+        <div class="profile-banner-modern bg-hero-image position-relative">
+            <div class="container-fluid p-4 p-lg-5">
+                <div class="row align-items-end">
+                    <div class="col-auto">
+                        <div class="profile-avatar-container">
+                            <img src="{% static 'assets/images/user.png' %}"
+                                class="rounded-circle border border-4 border-white shadow" width="120" height="120">
+                        </div>
+                    </div>
+                    <div class="col py-2">
+                        <h2 class="fw-bold text-white mb-1">{{ employee.First_Name }} {{ employee.Last_Name }}</h2>
+                        <p class="text-white mb-0">
+                            <i class="mdi mdi-briefcase-outline me-1"></i> {{ employee.Global_Dimension_1_Code }} |
+                            {{ employee.Global_Dimension_2_Code }}
+                        </p>
+                    </div>
+                    <div class="col-lg-auto py-2">
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-light rounded-pill px-4" data-bs-toggle="modal"
+                                data-bs-target="#editProfileModal">
+                                <i class="mdi mdi-pencil-outline me-1"></i> Update Data
+                            </button>
+                            <div class="dropdown">
+                                <button class="btn btn-primary rounded-pill px-4 dropdown-toggle text-white"
+                                    type="button" data-bs-toggle="dropdown">
+                                    Actions 
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
+                                            data-bs-target="#changePasswordModal">Change Password</a></li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li><a class="dropdown-item text-danger" href="#">Logout</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB NAVIGATION (Inspired by image_856db4.jpg) -->
+        <div class="bg-white px-4 border-top">
+            <ul class="nav nav-tabs border-0 profile-tabs" id="profileTab" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#info">Information</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#beneficiaries">Beneficiaries</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#faqs">FAQs</button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- TAB CONTENT -->
+    <div class="tab-content p-0 border-0" id="profileTabContent">
+
+        <!-- Personal & Work Info Tab -->
+        <div class="tab-pane fade show active" id="info">
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm rounded-4 p-4">
+                        <h5 class="fw-bold mb-4">Personal Details</h5>
+                        <div class="info-group mb-3">
+                            <label class="text-muted small d-block">Full Name</label>
+                            <span class="fw-medium">{{ employee.First_Name }} {{ employee.Middle_Name }}
+                                {{ employee.Last_Name }}</span>
+                        </div>
+                        <div class="info-group mb-3">
+                            <label class="text-muted small d-block">Personal Email</label>
+                            <span class="fw-medium">{{ employee.PersonalE_Mail }}</span>
+                        </div>
+                        <div class="info-group">
+                            <label class="text-muted small d-block">Phone Number</label>
+                            <span class="fw-medium">{{ employee.Personal_Phone_No_ }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm rounded-4 p-4">
+                        <h5 class="fw-bold mb-4">Employment Info</h5>
+                        <div class="info-group mb-3">
+                            <label class="text-muted small d-block">Employee ID</label>
+                            <span class="fw-medium">{{ employee.No_ }}</span>
+                        </div>
+                        <div class="info-group mb-3">
+                            <label class="text-muted small d-block">Employment Date</label>
+                            <span class="fw-medium" id="employmentDateText">{{ employee.Employment_Date }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Beneficiaries Tab -->
+        <div class="tab-pane fade" id="beneficiaries">
+            <div class="card border-0 shadow-sm rounded-4 p-4 text-center py-5">
+                <i class="mdi mdi-account-group-outline mdi-48px text-muted"></i>
+                <h5 class="mt-3">No Beneficiaries Added</h5>
+                <p class="text-muted">You haven't listed any next of kin or beneficiaries yet.</p>
+                <button class="btn btn-outline-primary rounded-pill mx-auto">Add Beneficiary</button>
+            </div>
+        </div>
+
+        <!-- FAQs Tab -->
+        <div class="tab-pane fade" id="faqs">
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <h5 class="fw-bold mb-4">Frequently Asked Questions</h5>
+                <div class="accordion accordion-flush" id="faqAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#faq1">
+                                How do I update my bank details?
+                            </button>
+                        </h2>
+                        <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">Please submit a formal request via the 'Update Data' button or
+                                contact HR.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- CHANGE PASSWORD MODAL -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow rounded-0">
+            <div class="modal-header border-0 py-3 bg-primary text-white rounded-0">
+                <h5 class="modal-title fw-bold">Change Password</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label class="form-label">Current Password</label>
+                        <input type="password" name="current_password" class="form-control rounded-0">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">New Password</label>
+                        <input type="password" name="new_password" class="form-control rounded-0">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Confirm Password</label>
+                        <input type="password" name="confirm_password" class="form-control rounded-0">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 text-white">Update
+                        Password</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        const rawDate = '{{ employee.Employment_Date }}';
+        if (rawDate && rawDate !== 'None') {
+            $("#employmentDateText").text(moment(rawDate).format('Do MMM YYYY'));
+        }
+    });
+</script>
+{% endblock %}

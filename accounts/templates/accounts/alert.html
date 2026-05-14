@@ -1,0 +1,82 @@
+<!-- Alerts -->
+{% if messages %}
+{% for message in messages %}
+
+{% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+<script>
+    iziToast.success({
+        title: 'Success',
+        message: '{{ message }}',
+        position: 'topCenter',
+        timeout: 4000,
+        theme: 'dark',
+        progressBarColor: '#ffffff',
+        backgroundColor: '#198754',
+        titleColor: '#fff',
+        messageColor: '#fff',
+        maxWidth: '400px',
+        transitionIn: 'fadeInDown',
+        transitionOut: 'fadeOutUp'
+    });
+</script>
+{% endif %}
+
+{% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+<script>
+    iziToast.error({
+        title: 'Error',
+        message: '{{ message }}',
+        position: 'topCenter',
+        timeout: 5000,
+        theme: 'dark',
+        progressBarColor: '#ffffff',
+        backgroundColor: '#dc3545',
+        titleColor: '#fff',
+        messageColor: '#fff',
+        maxWidth: '400px',
+        transitionIn: 'fadeInDown',
+        transitionOut: 'fadeOutUp'
+    });
+</script>
+{% endif %}
+
+{% if message.level == DEFAULT_MESSAGE_LEVELS.INFO %}
+<script>
+    iziToast.info({
+        title: 'Info',
+        message: '{{ message }}',
+        position: 'topCenter',
+        timeout: 4000,
+        theme: 'dark',
+        progressBarColor: '#ffffff',
+        backgroundColor: '#0dcaf0',
+        titleColor: '#fff',
+        messageColor: '#fff',
+        maxWidth: '400px',
+        transitionIn: 'fadeInDown',
+        transitionOut: 'fadeOutUp'
+    });
+</script>
+{% endif %}
+
+{% if message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
+<script>
+    iziToast.warning({
+        title: 'Warning',
+        message: '{{ message }}',
+        position: 'topCenter',
+        timeout: 4000,
+        theme: 'dark',
+        progressBarColor: '#ffffff',
+        backgroundColor: '#ffc107',
+        titleColor: '#000',
+        messageColor: '#000',
+        maxWidth: '400px',
+        transitionIn: 'fadeInDown',
+        transitionOut: 'fadeOutUp'
+    });
+</script>
+{% endif %}
+
+{% endfor %}
+{% endif %}

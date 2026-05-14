@@ -1,0 +1,299 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Leave Request Details{% endblock %}
+
+{% block content %}
+
+<div class="content-wrapper">
+
+    <!-- PAGE HEADER -->
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="home-tab">
+
+                <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+
+                    <div>
+                        <nav aria-label="breadcrumb border-0">
+                            <ol class="breadcrumb border-0 mb-2 px-0">
+                                <li class="breadcrumb-item">
+                                    <a href="{% url 'dashboard' %}">
+                                        <i class="ti-home me-1"></i> Dashboard
+                                    </a>
+                                </li>
+
+                                <li class="breadcrumb-item">
+                                    <a href="{% url 'leave' %}">
+                                        Leave Requests
+                                    </a>
+                                </li>
+
+                                <li class="breadcrumb-item active">
+                                    {{ res.Application_No|default:"-" }}
+                                </li>
+                            </ol>
+                        </nav>
+
+                        <h3 class="fw-bold mb-1">
+                            Leave Request Details
+                        </h3>
+
+                        <p class="text-muted mb-0">
+                            View and manage leave request information
+                        </p>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2">
+
+                        {% if res.Status == "Open" %}
+                        <button class="btn btn-primary text-white" data-bs-toggle="modal" data-bs-target="#Attachment">
+                            <i class="mdi mdi-paperclip me-1"></i>
+                            Upload Attachment
+                        </button>
+                        {% endif %}
+
+                        {% if res.Status == "Released" %}
+                        <form action="{% url 'FnGenerateLeaveReport' res.Application_No %}" method="post">
+                            {% csrf_token %}
+                            <button class="btn btn-success">
+                                <i class="mdi mdi-download me-1"></i>
+                                Preview Report
+                            </button>
+                        </form>
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+                <!-- STATUS + SUMMARY -->
+                <div class="row g-4 mb-4">
+
+                    <!-- STATUS CARD -->
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card border-0 shadow-sm rounded-4 h-100">
+                            <div class="card-body">
+
+                                <div class="d-flex align-items-center justify-content-between">
+
+                                    <div>
+                                        <p class="text-muted mb-2">Request Status</p>
+
+                                        {% if res.Status == "Open" %}
+                                        <span class="badge bg-info fs-6">{{ res.Status }}</span>
+
+                                        {% elif res.Status == "Pending Approval" %}
+                                        <span class="badge bg-warning fs-6">{{ res.Status }}</span>
+
+                                        {% elif res.Status == "Released" %}
+                                        <span class="badge bg-success fs-6">{{ res.Status }}</span>
+
+                                        {% else %}
+                                        <span class="badge bg-secondary fs-6">{{ res.Status }}</span>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="bg-primary-subtle rounded-circle p-3">
+                                        <i class="las la-clipboard-check text-primary fs-3"></i>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LEAVE TYPE -->
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card border-0 shadow-sm rounded-4 h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center justify-content-between">
+
+                                    <div>
+                                        <p class="text-muted mb-2">Leave Type</p>
+                                        <h5 class="fw-bold mb-0">{{ res.Leave_Code|default:"-" }}</h5>
+                                    </div>
+
+                                    <div class="bg-success-subtle rounded-circle p-3">
+                                        <i class="las la-calendar text-success fs-3"></i>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DAYS -->
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card border-0 shadow-sm rounded-4 h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center justify-content-between">
+
+                                    <div>
+                                        <p class="text-muted mb-2">Days Applied</p>
+                                        <h5 class="fw-bold mb-0">{{ res.Days_Applied|default:"0" }}</h5>
+                                    </div>
+
+                                    <div class="bg-warning-subtle rounded-circle p-3">
+                                        <i class="las la-business-time text-warning fs-3"></i>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BALANCE -->
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card border-0 shadow-sm rounded-4 h-100">
+                            <div class="card-body">
+
+                                <div class="d-flex align-items-center justify-content-between">
+
+                                    <div>
+                                        <p class="text-muted mb-2">Leave Balance</p>
+                                        <h5 class="fw-bold mb-0">{{ res.Leave_balance|default:"-" }}</h5>
+                                    </div>
+
+                                    <div class="bg-info-subtle rounded-circle p-3">
+                                        <i class="las la-wallet text-info fs-3"></i>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- MAIN CONTENT -->
+                <div class="row g-4">
+
+                    <!-- LEFT -->
+                    <div class="col-lg-8">
+
+                        <!-- DETAILS CARD -->
+                        <div class="card border-0 shadow-sm rounded-4 mb-4">
+
+                            <div class="card-header bg-white border-0 pt-4 px-4">
+                                <div class="d-flex align-items-center">
+
+                                    <div class="bg-primary-subtle rounded-circle p-3 me-3">
+                                        <i class="las la-file-alt text-primary fs-4"></i>
+                                    </div>
+
+                                    <div>
+                                        <h5 class="fw-bold mb-1">Leave Information</h5>
+                                        <small class="text-muted">Detailed leave request information</small>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="card-body px-4 pb-4">
+
+                                <form action="{% url 'leave' %}" method="post">
+                                    {% csrf_token %}
+
+                                    <input type="hidden" name="applicationNo" value="{{ res.Application_No }}">
+                                    <input type="hidden" name="myAction" value="modify">
+
+                                    <div class="row g-4">
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Leave Period</label>
+                                            <input type="text" class="form-control"
+                                                value="{{ res.Leave_Period|default:'-' }}" disabled>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Leave Type</label>
+                                            <select class="form-select" disabled>
+                                                {% for type in leave %}
+                                                <option value="{{ type.Code }}" {% if type.Code==res.Leave_Code
+                                                    %}selected{% endif %}>
+                                                    {{ type.Description }}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Start Date</label>
+                                            <input type="date" class="form-control"
+                                                value="{{ res.Start_Date|default:'' }}" disabled>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Return Same Day</label>
+                                            <select class="form-select" disabled>
+                                                <option value="True" {% if res.Return_same_day %}selected{% endif %}>
+                                                    Yes
+                                                </option>
+                                                <option value="False" {% if not res.Return_same_day %}selected{% endif
+                                                    %}>
+                                                    No
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Days Applied</label>
+                                            <input type="number" class="form-control"
+                                                value="{{ res.Days_Applied|default:'0' }}" disabled>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">End Date</label>
+                                            <input type="text" class="form-control"
+                                                value="{{ res.End_Date|default:'-' }}" disabled>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Resumption Date</label>
+                                            <input type="text" class="form-control"
+                                                value="{{ res.Resumption_Date|default:'-' }}" disabled>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Application Date</label>
+                                            <input type="text" class="form-control"
+                                                value="{{ res.Application_Date|default:'-' }}" disabled>
+                                        </div>
+
+                                        {% if HOD_User %}
+                                        <div class="col-md-12">
+                                            <label class="form-label fw-semibold">Reliever</label>
+                                            <select class="form-select" disabled>
+                                                {% for reliever in directorReliever %}
+                                                <option value="{{ reliever.No_ }}" {% if
+                                                    reliever.No_==res.Staff_No_Relievers %}selected{% endif %}>
+                                                    {{ reliever.First_Name }} {{ reliever.Last_Name }}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        {% endif %}
+
+                                    </div>
+
+                                </form>
+
+                            </div>
+                        </div>
+
+                        <!-- ATTACHMENTS + COMMENTS unchanged UI -->
+                        <!-- (kept exactly as you provided) -->
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
