@@ -7,8 +7,8 @@
 <div class="content-wrapper">
 
     <!-- HEADER SECTION (Inspired by image_856db4.jpg) -->
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
-        <div class="profile-banner-modern bg-hero-image position-relative">
+    <div class="card border-0 shadow-sm rounded-4  mb-4">
+        <div class="profile-banner-modern bg-hero-image position-relative rounded-top-4">
             <div class="container-fluid p-4 p-lg-5">
                 <div class="row align-items-end">
                     <div class="col-auto">
@@ -26,22 +26,35 @@
                     </div>
                     <div class="col-lg-auto py-2">
                         <div class="d-flex gap-2">
-                            <button class="btn btn-light rounded-pill px-4" data-bs-toggle="modal"
+                            <!-- <button class="btn btn-light rounded-pill px-4" data-bs-toggle="modal"
                                 data-bs-target="#editProfileModal">
                                 <i class="mdi mdi-pencil-outline me-1"></i> Update Data
-                            </button>
+                            </button> -->
                             <div class="dropdown">
                                 <button class="btn btn-primary rounded-pill px-4 dropdown-toggle text-white"
                                     type="button" data-bs-toggle="dropdown">
-                                    Actions 
+                                    Actions
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
-                                            data-bs-target="#changePasswordModal">Change Password</a></li>
+                                    <li>
+                                        <a class="dropdown-item" href="#" data-bs-toggle="modal"
+                                            data-bs-target="#editProfileModal">
+                                            <i class="mdi mdi-account-edit me-1 fs-5"></i>
+                                            Update Profile
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#" data-bs-toggle="modal"
+                                            data-bs-target="#changePasswordModal">
+                                            <i class="mdi mdi-pencil-lock me-1 fs-5"></i>
+                                            Change Password
+                                        </a>
+                                    </li>
                                     <li>
                                         <hr class="dropdown-divider">
                                     </li>
-                                    <li><a class="dropdown-item text-danger" href="#">Logout</a></li>
+                                    <li><a class="dropdown-item text-danger" href="#"> <i
+                                                class="mdi mdi-logout me-1 fs-5"></i>Logout</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -51,7 +64,7 @@
         </div>
 
         <!-- TAB NAVIGATION (Inspired by image_856db4.jpg) -->
-        <div class="bg-white px-4 border-top">
+        <div class="bg-white px-4 border-top rounded-bottom-4">
             <ul class="nav nav-tabs border-0 profile-tabs" id="profileTab" role="tablist">
                 <li class="nav-item">
                     <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#info">Information</button>
@@ -98,8 +111,16 @@
                             <span class="fw-medium">{{ employee.No_ }}</span>
                         </div>
                         <div class="info-group mb-3">
-                            <label class="text-muted small d-block">Employment Date</label>
-                            <span class="fw-medium" id="employmentDateText">{{ employee.Employment_Date }}</span>
+                            <label class="text-muted small d-block">Department</label>
+                            <span class="fw-medium" id="employmentDateText">{{ employee.Global_Dimension_2_Code }}</span>
+                        </div>
+                        <div class="info-group mb-3">
+                            <label class="text-muted small d-block">Region</label>
+                            <span class="fw-medium" id="employmentDateText">{{ employee.Global_Dimension_1_Code }}</span>
+                        </div>
+                        <div class="info-group mb-3">
+                            <label class="text-muted small d-block">Employment</label>
+                            <span class="fw-medium" id="employmentDateText">{{ employee.Employment_Type }}</span>
                         </div>
                     </div>
                 </div>
@@ -108,75 +129,115 @@
 
         <!-- Beneficiaries Tab -->
         <div class="tab-pane fade" id="beneficiaries">
-            <div class="card border-0 shadow-sm rounded-4 p-4 text-center py-5">
-                <i class="mdi mdi-account-group-outline mdi-48px text-muted"></i>
-                <h5 class="mt-3">No Beneficiaries Added</h5>
-                <p class="text-muted">You haven't listed any next of kin or beneficiaries yet.</p>
-                <button class="btn btn-outline-primary rounded-pill mx-auto">Add Beneficiary</button>
+            {% if beneficiaries %}
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-4">Beneficiaries</h5>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle" id="open_leave_table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>First Name</th>
+                                    <th>Middle Name</th>
+                                    <th>Last Name</th>
+                                    <th>Date of Birth</th>
+                                    <th>Gender</th>
+                                    <th>Phone</th>
+                                    <th>Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for beneficiary in beneficiaries %}
+                                <tr>
+                                    <td>{{ beneficiary.FirstName }}</td>
+                                    <td>{{ beneficiary.MiddleName }}</td>
+                                    <td>{{ beneficiary.LastName }}</td>
+                                    <td>{{ beneficiary.DateofBirth }}</td>
+                                    <td>{{ beneficiary.Gender }}</td>
+                                    <td>{{ beneficiary.PhoneNo }}</td>
+                                    <td>{{ beneficiary.Percentage }}</td>
+                                </tr>
+                                {% endfor %}
+                                <tr>
+                                    <td colspan="7">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% else %}
+                <div class="card border-0 shadow-sm rounded-4 p-4 text-center py-5">
+                    <i class="mdi mdi-account-group-outline mdi-48px text-muted"></i>
+                    <h5 class="mt-3">No Beneficiaries Added</h5>
+                    <p class="text-muted">You haven't listed any next of kin or beneficiaries yet.</p>
+                    <button class="btn btn-outline-primary rounded-pill mx-auto">Add Beneficiary</button>
+                </div>
+                {% endif %}
             </div>
-        </div>
 
-        <!-- FAQs Tab -->
-        <div class="tab-pane fade" id="faqs">
-            <div class="card border-0 shadow-sm rounded-4 p-4">
-                <h5 class="fw-bold mb-4">Frequently Asked Questions</h5>
-                <div class="accordion accordion-flush" id="faqAccordion">
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#faq1">
-                                How do I update my bank details?
-                            </button>
-                        </h2>
-                        <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                            <div class="accordion-body">Please submit a formal request via the 'Update Data' button or
-                                contact HR.</div>
+            <!-- FAQs Tab -->
+            <div class="tab-pane fade" id="faqs">
+                <div class="card border-0 shadow-sm rounded-4 p-4">
+                    <h5 class="fw-bold mb-4">Frequently Asked Questions</h5>
+                    <div class="accordion accordion-flush" id="faqAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#faq1">
+                                    How do I update my bank details?
+                                </button>
+                            </h2>
+                            <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">Please submit a formal request via the 'Update Data' button
+                                    or
+                                    contact HR.</div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-    </div>
-</div>
-
-<!-- CHANGE PASSWORD MODAL -->
-<div class="modal fade" id="changePasswordModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow rounded-0">
-            <div class="modal-header border-0 py-3 bg-primary text-white rounded-0">
-                <h5 class="modal-title fw-bold">Change Password</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <div class="mb-3">
-                        <label class="form-label">Current Password</label>
-                        <input type="password" name="current_password" class="form-control rounded-0">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">New Password</label>
-                        <input type="password" name="new_password" class="form-control rounded-0">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Confirm Password</label>
-                        <input type="password" name="confirm_password" class="form-control rounded-0">
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100 text-white">Update
-                        Password</button>
-                </form>
-            </div>
         </div>
     </div>
-</div>
+
+    <!-- CHANGE PASSWORD MODAL -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow rounded-0">
+                <div class="modal-header border-0 py-3 bg-primary text-white rounded-0">
+                    <h5 class="modal-title fw-bold">Change Password</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" action="{% url 'change_password' %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Current Password</label>
+                            <input type="password" name="current_password" class="form-control rounded-0">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">New Password</label>
+                            <input type="password" name="new_password" class="form-control rounded-0">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Confirm Password</label>
+                            <input type="password" name="confirm_password" class="form-control rounded-0">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 text-white">Update
+                            Password</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
-<script>
-    $(document).ready(function () {
-        const rawDate = '{{ employee.Employment_Date }}';
-        if (rawDate && rawDate !== 'None') {
-            $("#employmentDateText").text(moment(rawDate).format('Do MMM YYYY'));
-        }
-    });
-</script>
-{% endblock %}
+    <script>
+        $(document).ready(function () {
+            const rawDate = '{{ employee.Employment_Date }}';
+            if (rawDate && rawDate !== 'None') {
+                $("#employmentDateText").text(moment(rawDate).format('Do MMM YYYY'));
+            }
+        });
+    </script>
+    {% endblock %}

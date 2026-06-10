@@ -108,7 +108,7 @@
                                         <!-- LEAVE TYPE -->
                                         <div class="col-md-6">
                                             <label class="form-label fw-semibold">
-                                                Leave Type
+                                                Leave Type {{ session_user.leave_balance }}
                                                 <span class="text-danger">*</span>
                                             </label>
 
@@ -150,7 +150,7 @@
                                                             Leave Balance
                                                         </small>
 
-                                                        <input type="text" class="form-control mt-2" id="leaveBalance"
+                                                        <input type="text" class="form-control mt-2" id="leaveBalance" value="{{ session_user.leave_balance }}"
                                                             disabled>
                                                     </div>
                                                 </div>

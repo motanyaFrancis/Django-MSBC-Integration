@@ -1,93 +1,100 @@
-  <nav class="sidebar sidebar-offcanvas fixed" id="sidebar">
-        <ul class="nav">
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'dashboard' %}">
-                    <i class="mdi mdi-grid-large menu-icon"></i>
-                    <span class="menu-title">Dashboard</span>
-                </a>
-            </li>
-            <li class="nav-item nav-category">Menu</li>
-            <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#ui-basic" aria-expanded="false"
-                    aria-controls="ui-basic">
-                    <i class="menu-icon mdi mdi-folder-account-outline"></i>
-                    <span class="menu-title">HR</span>
-                    <i class="menu-arrow"></i>
-                </a>
-                <div class="collapse" id="ui-basic">
-                    <ul class="nav flex-column sub-menu">
-                        <li class="nav-item"> <a class="nav-link" href="/leave/">Leave Request</a></li>
-                        <li class="nav-item"> <a class="nav-link" href="#">Training Request</a>
-                        </li>
-                        <li class="nav-item"> <a class="nav-link" href="#">Salary Advance</a></li>
-                        <li class="nav-item"> <a class="nav-link" href="#">Employee Transfer</a></li>
-                        <li class="nav-item"> <a class="nav-link" href="#">Employee Promotion</a></li>
-                        <li class="nav-item"> <a class="nav-link" href="#">Pension & Beneficiaries</a></li>
-                        <li class="nav-item"> <a class="nav-link" href="#">Employee Targets</a></li>
-                        <li class="nav-item"> <a class="nav-link" href="#">Performance Management</a></li>
-                        <li class="nav-item"> <a class="nav-link" href="#">Acting</a></li>
-                        <li class="nav-item"> <a class="nav-link" href="#">Exit & Clearance</a></li>
-                    </ul>
-                </div>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#form-elements" aria-expanded="false"
-                    aria-controls="form-elements">
-                    <i class="menu-icon mdi mdi-cash"></i>
-                    <span class="menu-title">Finance</span>
-                    <i class="menu-arrow"></i>
-                </a>
-                <div class="collapse" id="form-elements">
-                    <ul class="nav flex-column sub-menu">
-                        <li class="nav-item"><a class="nav-link" href="#">Imprest Requisition</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Imprest Surrender</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Staff Claim</a></li>
-                    </ul>
-                </div>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#charts" aria-expanded="false"
-                    aria-controls="charts">
-                    <i class="menu-icon mdi mdi-cart-arrow-down"></i>
-                    <span class="menu-title">Procurement</span>
-                    <i class="menu-arrow"></i>
-                </a>
-                <div class="collapse" id="charts">
-                    <ul class="nav flex-column sub-menu">
-                        <li class="nav-item"> <a class="nav-link" href="#">Purchase Requests</a></li>
-                        <li class="nav-item"> <a class="nav-link" href="#">Store</a></li>
-                        <li class="nav-item"> <a class="nav-link" href="#">Repair/Maintenance</a></li>
-                    </ul>
-                </div>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'transport' %}">
-                    <i class="menu-icon mdi mdi-train-car"></i>
-                    <span class="menu-title">Transport</span>
-                    
-                </a>
+<nav class="sidebar sidebar-offcanvas fixed" id="sidebar">
+    <ul class="nav">
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'dashboard' %}">
+                <i class="mdi mdi-view-dashboard menu-icon"></i>
+                <span class="menu-title">Dashboard</span>
+            </a>
+        </li>
+        <li class="nav-item nav-category">Menu</li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="collapse" href="#ui-basic" aria-expanded="false"
+                aria-controls="ui-basic">
+                <i class="menu-icon mdi mdi-folder-account-outline"></i>
+                <span class="menu-title">HR</span>
+                <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="ui-basic">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item"> <a class="nav-link" href="/leave/">Leave Request</a></li>
+                    <li class="nav-item"> <a class="nav-link" href="/training/">Training Request</a>
+                    </li>
+                    <li class="nav-item"> <a class="nav-link" href="#">Salary Advance</a></li>
+                    <li class="nav-item"> <a class="nav-link" href="/transfer/">Employee Transfer</a></li>
+                    <li class="nav-item"> <a class="nav-link" href="#">Employee Promotion</a></li>
+                    <!-- <li class="nav-item"> <a class="nav-link" href="#">Pension & Beneficiaries</a></li> -->
+                    <li class="nav-item"> <a class="nav-link" href="#">Employee Targets</a></li>
+                    <li class="nav-item"> <a class="nav-link" href="#">Performance Management</a></li>
+                    <li class="nav-item"> <a class="nav-link" href="#">Acting</a></li>
+                    <li class="nav-item"> <a class="nav-link" href="/clearance/">Exit & Clearance</a></li>
+                </ul>
+            </div>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="collapse" href="#form-elements" aria-expanded="false"
+                aria-controls="form-elements">
+                <i class="menu-icon mdi mdi-cash"></i>
+                <span class="menu-title">Finance</span>
+                <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="form-elements">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item"><a class="nav-link" href="#">Imprest Requisition</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Imprest Surrender</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Staff Claim</a></li>
+                </ul>
+            </div>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="collapse" href="#charts" aria-expanded="false"
+                aria-controls="charts">
+                <i class="menu-icon mdi mdi-cart-arrow-down"></i>
+                <span class="menu-title">Procurement</span>
+                <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="charts">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item"> <a class="nav-link" href="#">Purchase Requests</a></li>
+                    <li class="nav-item"> <a class="nav-link" href="#">Store</a></li>
+                    <li class="nav-item"> <a class="nav-link" href="#">Repair/Maintenance</a></li>
+                </ul>
+            </div>
+        </li>
+        <!-- <li class="nav-item">
+            <a class="nav-link" href="{% url 'transport' %}">
+                <i class="menu-icon mdi mdi-train-car"></i>
+                <span class="menu-title">Transport</span>
                 
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#icons" >
-                    <i class="menu-icon mdi mdi-file-document-multiple-outline"></i>
-                    <span class="menu-title">Reports</span>
-                    
-                </a>
-                
-            </li>
+            </a>
             
-            <!-- <li class="nav-item">
-                <a class="nav-link" href="docs/documentation.html">
-                    <i class="menu-icon mdi mdi-file-document"></i>
-                    <span class="menu-title">Documentation</span>
-                </a>
-            </li> -->
-            <li class="nav-item">
-                <a class="nav-link" href="/logout/">
-                    <i class="menu-icon mdi mdi-logout"></i>
-                    <span class="menu-title">Logout</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
+        </li> -->
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'get_user_report' %}">
+                <i class="menu-icon mdi mdi-file-document-multiple-outline"></i>
+                <span class="menu-title">Reports</span>
+                
+            </a>
+            
+        </li>
+        
+        <!-- <li class="nav-item">
+            <a class="nav-link" href="docs/documentation.html">
+                <i class="menu-icon mdi mdi-file-document"></i>
+                <span class="menu-title">Documentation</span>
+            </a>
+        </li> -->
+        <li class="nav-item nav-category">Actions</li>
+        <li class="nav-item d-lg-none d-md-block">
+            <a class="nav-link" href="{% url 'profile' %}">
+                <i class="menu-icon mdi mdi-account"></i>
+                <span class="menu-title">Profile</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/logout/">
+                <i class="menu-icon mdi mdi-logout"></i>
+                <span class="menu-title">Logout</span>
+            </a>
+        </li>
+    </ul>
+</nav>

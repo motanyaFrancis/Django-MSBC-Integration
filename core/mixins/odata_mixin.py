@@ -1,3 +1,5 @@
+from dataclasses import field
+
 from core.services.odata_service import ODataService
 
 
@@ -22,14 +24,14 @@ class ODataMixin:
     async def filter_data(
         self,
         endpoint,
-        property,
+        field,
         operator,
         value,
     ):
 
         filters = [
             {
-                "field": property,
+                "field": field,
                 "operator": operator,
                 "value": value,
             }
@@ -47,11 +49,11 @@ class ODataMixin:
     async def filter_data_multi(
         self,
         endpoint,
-        property1,
+        field1,
         operator1,
         value1,
         logic=None,
-        property2=None,
+        field2=None,
         operator2=None,
         value2=None,
     ):
@@ -60,16 +62,16 @@ class ODataMixin:
             endpoint=endpoint,
             filters=[
                 {
-                    "field": property1,
+                    "field": field1,
                     "operator": operator1,
                     "value": value1,
                     "logic": logic,
                 },
                 {
-                    "field": property2,
+                    "field": field2,
                     "operator": operator2,
                     "value": value2,
-                } if property2 else None,
+                } if field2 else None,
             ]
         )
 
@@ -105,13 +107,13 @@ class ODataMixin:
     async def fetch_one(
         self,
         endpoint,
-        property,
+        field,
         value,
     ):
 
         return await ODataService.fetch_one(
             endpoint=endpoint,
-            property=property,
+            field=field,
             value=value,
         )
 

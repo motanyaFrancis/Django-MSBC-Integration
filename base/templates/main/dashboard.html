@@ -6,389 +6,366 @@
 {% block content %}
 
 <div class="content-wrapper">
-
-<!-- =========================
-    HEADER SUMMARY STRIP
-========================= -->
-<div class="row mb-3">
-    <div class="col-12">
-        <div class="card card-rounded border-0 shadow-sm bg-gradient-primary text-white">
-            <div class="card-body d-flex justify-content-between align-items-center">
-                <div>
-                    <h3 class="mb-0">Operational Dashboard</h3>
-                    <small>Live OData-driven HR & workflow analytics</small>
-                </div>
-
-                <div class="text-end">
-                    <div class="badge bg-light text-dark">
-                        {{ session_user.employee_no }}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="home-tab">
+                <!-- Header Section -->
+                <div class="d-sm-flex align-items-center justify-content-between border-bottom py-3">
+                    <div>
+                        <h4 class="card-title card-title-dash mb-0">Operational Dashboard</h4>
+                        <p class="text-muted small mt-1">Employee Self-Service Analytics and Reporting</p>
                     </div>
-                    <div class="badge bg-dark">
-                        {% if session_user.hod_user %}HOD{% else %}Staff{% endif %}
+                    <div class="text-end d-none d-md-block">
+                        <!-- <p class="mb-1" id="annual_leave_balance"><strong>0</strong></p> -->
+                        <p class="mb-1"><strong>{{ leave_balance|default:"0" }} days</strong></p>
+                        <small class="text-muted">Annual Leave Balance</small>
                     </div>
                 </div>
+
+                <div class="tab-content tab-content-basic">
+                    <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview">
+
+                        <!-- =====================================================
+                             STATISTICS STRIP (DYNAMIC FROM VIEW)
+                            ===================================================== -->
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="statistics-details d-flex align-items-center justify-content-between flex-wrap">
+                                    
+                                    <!-- Leave Card -->
+                                    <div>
+                                        <p class="statistics-title">Leave Requests</p>
+                                        <h3 class="rate-percentage">{{ total_leaves|default:"0" }}</h3>
+                                        <p class="text-muted small">
+                                            <span class="text-warning">Open: {{ leaves_stats.Open|default:"0" }}</span>
+                                            <span class="text-info ms-1">Pending: {{ leaves_stats.Pending_Approval|default:"0" }}</span>
+                                        </p>
+                                    </div>
+
+                                    <!-- Training Card -->
+                                    <div >
+                                        <p class="statistics-title">Training Requests</p>
+                                        <h3 class="rate-percentage">{{ total_training|default:"0" }}</h3>
+                                        <p class="text-muted small">
+                                            <span class="text-warning">Open: {{ training_stats.Open|default:"0" }}</span>
+                                            <span class="text-info ms-1">Pending: {{ training_stats.Pending_Approval|default:"0" }}</span>
+                                        </p>
+                                    </div>
+
+                                    <!-- Claims Card -->
+                                    <div>
+                                        <p class="statistics-title">Claims</p>
+                                        <h3 class="rate-percentage">{{ total_claims|default:"0" }}</h3>
+                                        <p class="text-muted small">
+                                            <span class="text-warning">Open: {{ claims_stats.Open|default:"0" }}</span>
+                                            <span class="text-info ms-1">Pending: {{ claims_stats.Pending_Approval|default:"0" }}</span>
+                                        </p>
+                                    </div>
+
+                                    <!-- Approvals Queue Card -->
+                                    <div class="d-none d-md-block">
+                                        <p class="statistics-title">Approvals Queue</p>
+                                        <h3 class="rate-percentage">{{ pending_approval_count|default:"0" }}</h3>
+                                        <p class="text-muted small">Awaiting Your Action</p>
+                                    </div>
+
+                                    <!-- Purchase Card -->
+                                    <div class="d-none d-md-block">
+                                        <p class="statistics-title">Purchases</p>
+                                        <h3 class="rate-percentage">{{ total_purchase|default:"0" }}</h3>
+                                        <p class="text-muted small">
+                                            <span class="text-warning">Open: {{ purchase_stats.Open|default:"0" }}</span>
+                                            <span class="text-info ms-1">Pending: {{ purchase_stats.Pending_Approval|default:"0" }}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- =====================================================
+                             MAIN CONTENT GRID
+                            ===================================================== -->
+                        <div class="row mt-5">
+                            
+                            <!-- LEFT COLUMN (8 cols) -->
+                            <div class="col-lg-8 d-flex flex-column gap-4">
+
+                                <!-- Request Summary Table -->
+                                <div class="card card-rounded">
+                                    <div class="card-body">
+                                        <div class="d-sm-flex justify-content-between align-items-start mb-3">
+                                            <div>
+                                                <h5 class="card-title card-title-dash">Request Summary by Status</h5>
+                                                <p class="card-subtitle card-subtitle-dash">Status overview across all modules</p>
+                                            </div>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Module</th>
+                                                        <th class="text-center">Total</th>
+                                                        <th class="text-center">Open</th>
+                                                        <th class="text-center">Pending Approval</th>
+                                                        <th class="text-center">Released</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <!-- Leaves Row -->
+                                                    <tr>
+                                                        <td><strong>Leaves</strong></td>
+                                                        <td class="text-center">{{ total_leaves|default:"0" }}</td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-warning">{{ leaves_stats.Open|default:"0" }}</span>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-info">{{ leaves_stats.Pending_Approval|default:"0" }}</span>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-success">{{ leaves_stats.Released|default:"0" }}</span>
+                                                        </td>
+                                                    </tr>
+
+                                                    <!-- Training Row -->
+                                                    <tr>
+                                                        <td><strong>Training</strong></td>
+                                                        <td class="text-center">{{ total_training|default:"0" }}</td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-warning">{{ training_stats.Open|default:"0" }}</span>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-info">{{ training_stats.Pending_Approval|default:"0" }}</span>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-success">{{ training_stats.Released|default:"0" }}</span>
+                                                        </td>
+                                                    </tr>
+
+                                                    <!-- Claims Row -->
+                                                    <tr>
+                                                        <td><strong>Claims</strong></td>
+                                                        <td class="text-center">{{ total_claims|default:"0" }}</td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-warning">{{ claims_stats.Open|default:"0" }}</span>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-info">{{ claims_stats.Pending_Approval|default:"0" }}</span>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-success">{{ claims_stats.Released|default:"0" }}</span>
+                                                        </td>
+                                                    </tr>
+
+                                                    <!-- Purchase Row -->
+                                                    <tr>
+                                                        <td><strong>Purchases</strong></td>
+                                                        <td class="text-center">{{ total_purchase|default:"0" }}</td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-warning">{{ purchase_stats.Open|default:"0" }}</span>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-info">{{ purchase_stats.Pending_Approval|default:"0" }}</span>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-success">{{ purchase_stats.Released|default:"0" }}</span>
+                                                        </td>
+                                                    </tr>
+
+                                                    <!-- Repair Row -->
+                                                    <tr>
+                                                        <td><strong>Repairs</strong></td>
+                                                        <td class="text-center">{{ total_repair|default:"0" }}</td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-warning">{{ repair_stats.Open|default:"0" }}</span>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-info">{{ repair_stats.Pending_Approval|default:"0" }}</span>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-success">{{ repair_stats.Released|default:"0" }}</span>
+                                                        </td>
+                                                    </tr>
+
+                                                    <!-- Store Row -->
+                                                    <tr>
+                                                        <td><strong>Store Requisitions</strong></td>
+                                                        <td class="text-center">{{ total_store|default:"0" }}</td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-warning">{{ store_stats.Open|default:"0" }}</span>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-info">{{ store_stats.Pending_Approval|default:"0" }}</span>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-success">{{ store_stats.Released|default:"0" }}</span>
+                                                        </td>
+                                                    </tr>
+
+                                                    <!-- General Row -->
+                                                    <tr>
+                                                        <td><strong>General Requisitions</strong></td>
+                                                        <td class="text-center">{{ total_general|default:"0" }}</td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-warning">{{ general_stats.Open|default:"0" }}</span>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-info">{{ general_stats.Pending_Approval|default:"0" }}</span>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-success">{{ general_stats.Released|default:"0" }}</span>
+                                                        </td>
+                                                    </tr>
+
+                                                    <!-- Surrender Row -->
+                                                    <tr>
+                                                        <td><strong>Imprest Surrenders</strong></td>
+                                                        <td class="text-center">{{ total_surrender|default:"0" }}</td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-warning">{{ surrender_stats.Open|default:"0" }}</span>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-info">{{ surrender_stats.Pending_Approval|default:"0" }}</span>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-success">{{ surrender_stats.Released|default:"0" }}</span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!-- RIGHT COLUMN (4 cols) -->
+                            <div class="col-lg-4 d-flex flex-column gap-4">
+
+                                <!-- Quick Actions Card -->
+                                <div class="card card-rounded">
+                                    <div class="card-body">
+                                        <h5 class="card-title card-title-dash mb-3">Quick Actions</h5>
+                                        <div class="d-grid gap-2">
+                                            <a href="#" class="btn btn-primary text-white btn-sm">
+                                                <i class="mdi mdi-plus"></i> New Leave
+                                            </a>
+                                            <a href="#" class="btn btn-success text-white btn-sm">
+                                                <i class="mdi mdi-plus"></i> New Claim
+                                            </a>
+                                            <a href="#" class="btn btn-info text-white btn-sm">
+                                                <i class="mdi mdi-plus"></i> Training Request
+                                            </a>
+                                            <a href="#" class="btn btn-warning text-white btn-sm">
+                                                <i class="mdi mdi-plus"></i> Purchase Request
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Role-Based Panel -->
+                                {% if HOD_User %}
+                                    <div class="card card-rounded bg-white">
+                                        <div class="card-body">
+                                            <h5 class="card-title card-title-dash mb-3">
+                                                <i class="mdi mdi-shield-account"></i> HOD Command Center
+                                            </h5>
+                                            <ul class="list-group list-group-flush">
+                                                <li class="list-group-item d-flex justify-content-between ps-0 pe-0">
+                                                    <span>Pending Approvals</span>
+                                                    <span class="badge bg-danger">{{ pending_approval_count|default:"0" }}</span>
+                                                </li>
+                                                <li class="list-group-item d-flex justify-content-between ps-0 pe-0">
+                                                    <span>Open Requests</span>
+                                                    <span class="badge bg-warning">{{ total_leaves|add:total_training|add:total_claims|add:total_purchase|default:"0" }}</span>
+                                                </li>
+                                                <li class="list-group-item d-flex justify-content-between ps-0 pe-0 border-bottom-0">
+                                                    <span>Released This Month</span>
+                                                    <span class="badge bg-success">0</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <div class="card card-rounded bg-light">
+                                        <div class="card-body">
+                                            <h5 class="card-title card-title-dash mb-3">
+                                                <i class="mdi mdi-briefcase"></i> My Workflow
+                                            </h5>
+                                            <ul class="list-group list-group-flush">
+                                                <li class="list-group-item d-flex justify-content-between ps-0 pe-0">
+                                                    <span>Pending Approvals</span>
+                                                    <span class="badge bg-info">{{ pending_approval_count|default:"0" }}</span>
+                                                </li>
+                                                <li class="list-group-item d-flex justify-content-between ps-0 pe-0">
+                                                    <span>Total Submissions</span>
+                                                    <span class="badge bg-primary">{{ total_leaves|add:total_training|add:total_claims|add:total_purchase|default:"0" }}</span>
+                                                </li>
+                                                <li class="list-group-item d-flex justify-content-between ps-0 pe-0 border-bottom-0">
+                                                    <span>Released Items</span>
+                                                    <span class="badge bg-success">0</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                <!-- Employee Info Card -->
+                                {% if employee %}
+                                    <div class="card card-rounded">
+                                        <div class="card-body">
+                                            <h5 class="card-title card-title-dash mb-3">Employee Information</h5>
+                                            <dl class="row small">
+                                                <dt class="col-sm-5">Employee No:</dt>
+                                                <dd class="col-sm-7">{{ employee.No_|default:"N/A" }}</dd>
+                                                
+                                                <dt class="col-sm-5">Department:</dt>
+                                                <dd class="col-sm-7">{{ employee.Department_Code|default:"N/A" }}</dd>
+                                                
+                                                <dt class="col-sm-5">Status:</dt>
+                                                <dd class="col-sm-7">
+                                                    <span class="badge bg-success">{{ employee.Status|default:"N/A" }}</span>
+                                                </dd>
+                                            </dl>
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
 </div>
 
-
-<!-- =========================
-    FULL KPI GRID (RESTORED)
-========================= -->
-<div class="row">
-
-    <div class="col-md-3 mb-3">
-        <div class="card bg-info text-white card-rounded shadow-sm">
-            <div class="card-body">
-                <h6>Leave Requests</h6>
-                <h3 id="leave_total">0</h3>
-                <small id="leave_pending">Pending: 0</small>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3 mb-3">
-        <div class="card bg-success text-white card-rounded shadow-sm">
-            <div class="card-body">
-                <h6>Training Requests</h6>
-                <h3 id="training_total">0</h3>
-                <small id="training_pending">Pending: 0</small>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3 mb-3">
-        <div class="card bg-warning text-dark card-rounded shadow-sm">
-            <div class="card-body">
-                <h6>Approvals Queue</h6>
-                <h3 id="approvals_total">0</h3>
-                <small>Awaiting Action</small>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3 mb-3">
-        <div class="card bg-danger text-white card-rounded shadow-sm">
-            <div class="card-body">
-                <h6>Claims</h6>
-                <h3 id="claims_total">0</h3>
-                <small id="claims_pending">Pending: 0</small>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-
-<!-- =========================
-    SECOND KPI ROW (FULL RESTORE)
-========================= -->
-<div class="row">
-
-    <div class="col-md-3 mb-3">
-        <div class="card card-rounded shadow-sm border-0">
-            <div class="card-body">
-                <h6>Purchase Requests</h6>
-                <h3 id="purchase_total">0</h3>
-                <small id="purchase_pending">Pending: 0</small>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3 mb-3">
-        <div class="card card-rounded shadow-sm border-0">
-            <div class="card-body">
-                <h6>Repair Requests</h6>
-                <h3 id="repair_total">0</h3>
-                <small id="repair_pending">Pending: 0</small>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3 mb-3">
-        <div class="card card-rounded shadow-sm border-0">
-            <div class="card-body">
-                <h6>Store Requisitions</h6>
-                <h3 id="store_total">0</h3>
-                <small id="store_pending">Pending: 0</small>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3 mb-3">
-        <div class="card card-rounded shadow-sm border-0">
-            <div class="card-body">
-                <h6>General Requests</h6>
-                <h3 id="general_total">0</h3>
-                <small id="general_pending">Pending: 0</small>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-
-<!-- =========================
-    ROLE BASED PANEL
-========================= -->
-<div class="row mb-3">
-
-{% if session_user.hod_user %}
-
-<div class="col-md-6">
-    <div class="card card-rounded shadow-sm border-0">
-        <div class="card-body">
-            <h5>HOD Command Center</h5>
-
-            <ul class="list-group">
-                <li class="list-group-item d-flex justify-content-between">
-                    Team Approvals
-                    <span class="badge bg-primary" id="hod_team_approvals">0</span>
-                </li>
-
-                <li class="list-group-item d-flex justify-content-between">
-                    Pending Delegations
-                    <span class="badge bg-warning">0</span>
-                </li>
-
-                <li class="list-group-item d-flex justify-content-between">
-                    Overdue Requests
-                    <span class="badge bg-danger">0</span>
-                </li>
-            </ul>
-        </div>
-    </div>
-</div>
-
-{% else %}
-
-<div class="col-md-6">
-    <div class="card card-rounded shadow-sm border-0">
-        <div class="card-body">
-            <h5>My Workflow</h5>
-
-            <ul class="list-group">
-                <li class="list-group-item d-flex justify-content-between">
-                    Open Requests
-                    <span id="my_open_requests" class="badge bg-info">0</span>
-                </li>
-
-                <li class="list-group-item d-flex justify-content-between">
-                    In Progress
-                    <span class="badge bg-warning">0</span>
-                </li>
-
-                <li class="list-group-item d-flex justify-content-between">
-                    Completed
-                    <span class="badge bg-success">0</span>
-                </li>
-            </ul>
-        </div>
-    </div>
-</div>
-
-{% endif %}
-
-
-<!-- QUICK ACTIONS -->
-<div class="col-md-6">
-    <div class="card card-rounded shadow-sm border-0">
-        <div class="card-body">
-            <h5>Quick Actions</h5>
-
-            <div class="d-grid gap-2">
-                <button class="btn btn-primary">New Leave</button>
-                <button class="btn btn-success">New Claim</button>
-                <button class="btn btn-warning">Training Request</button>
-                <button class="btn btn-dark">Purchase Request</button>
-            </div>
-
-        </div>
-    </div>
-</div>
-
-</div>
-
-
-<!-- =========================
-    CHARTS SECTION (EXPANDED)
-========================= -->
-<div class="row">
-
-<div class="col-lg-8 mb-3">
-    <div class="card card-rounded shadow-sm border-0">
-        <div class="card-body">
-            <h5>Activity Trends (All Modules)</h5>
-            <canvas id="activityChart"></canvas>
-        </div>
-    </div>
-</div>
-
-<div class="col-lg-4 mb-3">
-    <div class="card card-rounded shadow-sm border-0">
-        <div class="card-body">
-            <h5>Distribution</h5>
-            <canvas id="donutChart"></canvas>
-        </div>
-    </div>
-</div>
-
-</div>
-
-
-<!-- =========================
-    APPROVAL INTELLIGENCE TABLE
-========================= -->
-<div class="row">
-
-<div class="col-12">
-    <div class="card card-rounded shadow-sm border-0">
-        <div class="card-body">
-            <h5>Approval Intelligence</h5>
-
-            <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Module</th>
-                            <th>Total</th>
-                            <th>Open</th>
-                            <th>Pending</th>
-                            <th>Released</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Leave</td>
-                            <td id="t_leave">0</td>
-                            <td id="o_leave">0</td>
-                            <td id="p_leave">0</td>
-                            <td id="r_leave">0</td>
-                        </tr>
-
-                        <tr>
-                            <td>Training</td>
-                            <td id="t_training">0</td>
-                            <td id="o_training">0</td>
-                            <td id="p_training">0</td>
-                            <td id="r_training">0</td>
-                        </tr>
-
-                        <tr>
-                            <td>Claims</td>
-                            <td id="t_claims">0</td>
-                            <td id="o_claims">0</td>
-                            <td id="p_claims">0</td>
-                            <td id="r_claims">0</td>
-                        </tr>
-
-                        <tr>
-                            <td>Purchases</td>
-                            <td id="t_purchase">0</td>
-                            <td id="o_purchase">0</td>
-                            <td id="p_purchase">0</td>
-                            <td id="r_purchase">0</td>
-                        </tr>
-
-                    </tbody>
-                </table>
-            </div>
-
-        </div>
-    </div>
-</div>
-
-</div>
-
-</div>
-
-
-<!-- =========================
-    JS (LIVE ODATA API)
-========================= -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
 <script>
+    function updateGreeting() {
+        const greetingElement = document.getElementById("greeting-text");
+        const currentHour = new Date().getHours();
 
-let activityChart;
-let donutChart;
+        let greeting = "Hello";
 
-function renderCharts(data) {
-
-    const ctx = document.getElementById("activityChart");
-    const dtx = document.getElementById("donutChart");
-
-    if (activityChart) activityChart.destroy();
-    if (donutChart) donutChart.destroy();
-
-    activityChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: data.labels,
-            datasets: [
-                { label: "Leave", data: data.leave_series },
-                { label: "Training", data: data.training_series },
-                { label: "Claims", data: data.claim_series },
-                { label: "Purchases", data: data.purchase_series }
-            ]
+        if (currentHour >= 5 && currentHour < 12) {
+            greeting = "Good Morning";
+        } else if (currentHour >= 12 && currentHour < 17) {
+            greeting = "Good Afternoon";
+        } else if (currentHour >= 17 && currentHour < 21) {
+            greeting = "Good Evening";
+        } else {
+            greeting = "Good Night";
         }
-    });
 
-    donutChart = new Chart(dtx, {
-        type: 'doughnut',
-        data: {
-            labels: ["Leave", "Training", "Claims", "Purchases"],
-            datasets: [{
-                data: data.donut,
-            }]
-        }
-    });
-}
+        greetingElement.textContent = greeting;
+    }
 
-async function loadDashboard() {
-
-    const res = await fetch("/api/dashboard/live/");
-    const data = await res.json();
-
-    // KPI UPDATES
-    document.getElementById("leave_total").innerText = data.leave.total;
-    document.getElementById("training_total").innerText = data.training.total;
-    document.getElementById("approvals_total").innerText = data.approvals;
-    document.getElementById("claims_total").innerText = data.claims.total;
-
-    document.getElementById("purchase_total").innerText = data.purchase.total;
-    document.getElementById("repair_total").innerText = data.repair.total;
-    document.getElementById("store_total").innerText = data.store.total;
-    document.getElementById("general_total").innerText = data.general.total;
-
-    // TABLE DATA
-    document.getElementById("t_leave").innerText = data.leave.total;
-    document.getElementById("o_leave").innerText = data.leave.open;
-    document.getElementById("p_leave").innerText = data.leave.pending;
-    document.getElementById("r_leave").innerText = data.leave.released;
-
-    document.getElementById("t_training").innerText = data.training.total;
-    document.getElementById("o_training").innerText = data.training.open;
-    document.getElementById("p_training").innerText = data.training.pending;
-    document.getElementById("r_training").innerText = data.training.released;
-
-    document.getElementById("t_claims").innerText = data.claims.total;
-    document.getElementById("o_claims").innerText = data.claims.open;
-    document.getElementById("p_claims").innerText = data.claims.pending;
-    document.getElementById("r_claims").innerText = data.claims.released;
-
-    document.getElementById("t_purchase").innerText = data.purchase.total;
-    document.getElementById("o_purchase").innerText = data.purchase.open;
-    document.getElementById("p_purchase").innerText = data.purchase.pending;
-    document.getElementById("r_purchase").innerText = data.purchase.released;
-
-    renderCharts(data.charts);
-}
-
-loadDashboard();
-setInterval(loadDashboard, 30000);
-
+    // Run when page loads
+    updateGreeting();
 </script>
 
 {% endblock %}

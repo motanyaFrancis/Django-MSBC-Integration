@@ -62,7 +62,7 @@ class LoginView(
             users = asyncio.run(
                 self.filter_data(
                     endpoint="/QyUserSetup",
-                    property="User_ID",
+                    field="User_ID",
                     operator="eq",
                     value=username,
                 )
@@ -124,7 +124,7 @@ class LoginView(
             employees = asyncio.run(
                 self.filter_data(
                     endpoint="/QyEmployees",
-                    property="No_",
+                    field="No_",
                     operator="eq",
                     value=employee_no,
                 )
@@ -158,13 +158,17 @@ class LoginView(
                     "Region": employee.get("Global_Dimension_1_Code"),
                     "User_Responsibility_Center": employee.get("Global_Dimension_2_Code"),
                     "Employment_Type": employee.get("Employment_Type"),
+                    "leave_balance": employee.get("Leave_Balance"),
 
                     "Portal_Password": decrypted_password,
-                    "password": password,
+                    "password": encrypted_password,
+                    # "password": password,
 
                     "is_authenticated": True,
                 }
             )
+
+            print("Session Data:", self.get_session_context(request))
 
             # =====================================================
             # DEVICE TRACKING (SYNC SAFE)
@@ -174,7 +178,7 @@ class LoginView(
             # =====================================================
             # PROFILE PHOTO (ASYNC WRAPPED)
             # =====================================================
-            self.load_profile_photo(employee_no)
+            # self.load_profile_photo(employee_no)
 
             messages.success(
                 request,
@@ -288,42 +292,40 @@ class ProfileView(
 
             employee = await self.fetch_one(
                 endpoint="/QyEmployees",
-                property="No_",
+                field="No_",
                 value=employee_no,
             )
 
-            # related = await self.fetch_related(
-            #     relations=[
-            #         {
-            #             "endpoint": "/QyEmployeeBeneficiaries",
-            #             "filters": [
-            #                 {
-            #                     "property": "EmployeeNo",
-            #                     "operator": "eq",
-            #                     "value": employee_no,
-            #                 }
-            #             ],
-            #             "alias": "beneficiaries",
-            #         },
-            #         {
-            #             "endpoint": "/QyEmployeeUpdateRequests",
-            #             "filters": [
-            #                 {
-            #                     "property": "No",
-            #                     "operator": "eq",
-            #                     "value": employee_no,
-            #                 }
-            #             ],
-            #             "alias": "update_requests",
-            #         }
-            #     ]
-            # )
-
-            # print("Employee Data:", employee)
+            related = await self.fetch_related(
+                queries=[
+                    {
+                        "endpoint": "/QyEmployeeBeneficiaries",
+                        "filters": [
+                            {
+                                "field": "EmployeeNo",
+                                "operator": "eq",
+                                "value": employee_no,
+                            }
+                        ],
+                        "alias": "beneficiaries",
+                    },
+                    {
+                        "endpoint": "/QyEmployeeUpdateRequests",
+                        "filters": [
+                            {
+                                "field": "No",
+                                "operator": "eq",
+                                "value": employee_no,
+                            }
+                        ],
+                        "alias": "update_requests",
+                    }
+                ]
+            )
 
             ctx = {
                 "employee": employee,
-                # **related,
+                **related,
             }
 
             return render(request, self.template_name, ctx,)
@@ -377,11 +379,11 @@ class ProfileView(
             messages.error(
                 request, "An error occurred while submitting your request.")
             return redirect("profile")
-        
+
 
 class ForgotPasswordView(
-    SOAPMixin,
-    View):
+        SOAPMixin,
+        View):
     def post(self, request):
         try:
             username = request.POST.get("username", "").upper().strip()
@@ -409,7 +411,8 @@ class ForgotPasswordView(
 
         except Exception as e:
             logging.exception(e)
-            messages.error(request, "An error occurred while processing your request.")
+            messages.error(
+                request, "An error occurred while processing your request.")
             return redirect("auth")
 
 
@@ -424,7 +427,7 @@ class ResetPasswordView(
     def get(self, request):
         """Synchronous GET handler"""
         try:
-            
+
             return render(request, self.template_name)
 
         except Exception as e:
@@ -440,7 +443,8 @@ class ResetPasswordView(
             token = request.POST.get("token")
             password = request.POST.get("password")
             confirm_password = request.POST.get("confirm_password")
-            print(f"Reset Password POST - User: {user_id}, Token: {token}, Password: {'*' * len(password)}, Confirm: {'*' * len(confirm_password)}")    
+            print(
+                f"Reset Password POST - User: {user_id}, Token: {token}, Password: {'*' * len(password)}, Confirm: {'*' * len(confirm_password)}")
 
             if not token:
                 messages.error(request, "Reset token is required.")
@@ -481,3 +485,68 @@ class ResetPasswordView(
             logger.exception(e)
             messages.error(request, "An error occurred during password reset.")
             return redirect("reset")
+
+
+class ChangePortalPasswordView(
+    AuthRequiredMixin,
+    SOAPMixin,
+    EncryptionMixin,
+    SessionMixin,
+    View,
+):
+    def post(self, request):
+        try:
+            session = self.get_session_context(request)
+            user_id = session.get("User_ID")
+            Portal_Password = session.get("Portal_Password")
+            current_password = request.POST.get("current_password")
+            new_password = request.POST.get("new_password")
+            confirm_password = request.POST.get("confirm_password")
+
+            print('Portal_Password:', Portal_Password)
+
+            print('current_password:', current_password)
+            print('new_password:', new_password)
+            print('confirm_password:', confirm_password)
+
+            encrypted_current = self.encrypt_password(current_password)
+            encrypted_new = self.encrypt_password(new_password)
+
+            print('encrypted_current:', encrypted_current)
+            print('encrypted_new:', encrypted_new)
+
+            if not current_password or not new_password or not confirm_password:
+                messages.error(request, "All fields are required.")
+                return redirect("profile")
+
+            if new_password != confirm_password:
+                messages.error(request, "New passwords do not match.")
+                return redirect("profile")
+
+            if current_password != Portal_Password:
+                messages.error(request, "Current password is incorrect.")
+                return redirect("profile")
+
+            if encrypted_current == encrypted_new:
+                messages.error(
+                    request, "New password cannot be the same as current password.")
+                return redirect("profile")
+
+            response = self.call_soap(
+                soap_method="FnChangePortalPassword",
+                params=[user_id, encrypted_new],
+            )
+
+            if response is True:
+                messages.success(request, "Password changed successfully.")
+            else:
+                messages.error(request, "Current password is incorrect.")
+
+            return redirect("profile")
+
+        except Exception as e:
+            logging.exception(e)
+            print(str(e))
+            messages.error(
+                request, "An error occurred while changing password.")
+            return redirect("profile")

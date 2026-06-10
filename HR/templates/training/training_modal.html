@@ -1,0 +1,929 @@
+<!-- ===================================================== -->
+<!-- NEW TRAINING REQUEST MODAL -->
+<!-- ===================================================== -->
+
+<div class="modal fade" id="raise_training" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-hidden="true">
+
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+
+            <!-- HEADER -->
+            <div class="modal-header bg-primary text-white border-0 px-4 py-3">
+
+                <div>
+                    <h4 class="modal-title fw-bold mb-1">
+                        <i class="las la-graduation-cap me-2"></i>
+                        New Training Request
+                    </h4>
+
+                    <small class="opacity-75">
+                        Complete all steps to submit your training request
+                    </small>
+                </div>
+
+                <button type="button" class="btn-close" id="training_close-modal" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+
+            </div>
+
+            <!-- BODY -->
+            <div class="modal-body bg-light p-0">
+
+                <!-- ===================================================== -->
+                <!-- STEPPER -->
+                <!-- ===================================================== -->
+
+                <div class="bg-white border-bottom px-4 py-4">
+
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+
+                        <!-- STEP 1 -->
+                        <div class="step-item active" id="stage-1-step">
+                            <div class="step-circle">1</div>
+                            <div class="step-title">Training Header</div>
+                        </div>
+
+                        <div class="step-line"></div>
+
+                        <!-- STEP 2 -->
+                        <div class="step-item" id="stage-2-step">
+                            <div class="step-circle">2</div>
+                            <div class="step-title">Training Lines</div>
+                        </div>
+
+                        <div class="step-line"></div>
+
+                        <!-- STEP 3 -->
+                        <div class="step-item" id="stage-3-step">
+                            <div class="step-circle">3</div>
+                            <div class="step-title">Attachments</div>
+                        </div>
+
+                        <div class="step-line"></div>
+
+                        <!-- STEP 4 -->
+                        <div class="step-item" id="stage-4-step">
+                            <div class="step-circle">4</div>
+                            <div class="step-title">Submission</div>
+                        </div>
+
+                        <div class="step-line"></div>
+
+                        <!-- STEP 5 -->
+                        <div class="step-item" id="stage-5-step">
+                            <div class="step-circle">5</div>
+                            <div class="step-title">Done</div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- ===================================================== -->
+                <!-- CONTENT -->
+                <!-- ===================================================== -->
+
+                <div class="p-4">
+
+                    <!-- ===================================================== -->
+                    <!-- STAGE 1 : HEADER -->
+                    <!-- ===================================================== -->
+
+                    <div id="stage1" class="s-stepper-stage active">
+
+                        <div class="card border-0 shadow-sm rounded-4">
+
+                            <div class="card-body p-4">
+
+                                <div class="d-flex align-items-center mb-4">
+
+                                    <div class="bg-primary-subtle timeline-icon p-3 me-3">
+                                        <i class="mdi mdi-file-document-outline text-primary fs-3"></i>
+                                    </div>
+
+                                    <div>
+                                        <h5 class="fw-bold mb-1">
+                                            Training Header
+                                        </h5>
+
+                                        <small class="text-muted">
+                                            Fill in your training request details
+                                        </small>
+                                    </div>
+
+                                </div>
+
+                                <!-- SPINNER -->
+                                <div class="text-center py-5" id="training-spinner" style="display:none;">
+
+                                    <div class="spinner-border text-primary" style="width:4rem;height:4rem;"></div>
+
+                                    <p class="mt-3 text-muted">
+                                        Saving training request...
+                                    </p>
+
+                                </div>
+
+                                <!-- FORM -->
+                                <form id="trainingForm" method="post" novalidate>
+
+                                    {% csrf_token %}
+
+                                    <input type="hidden" name="requestNo" id="requestNo">
+                                    <input type="hidden" name="myAction" id="myAction" value="insert">
+
+                                    <div class="row g-4">
+
+                                        <!-- ADHOC -->
+                                        <div class="col-md-6">
+
+                                            <label class="form-label fw-semibold">
+                                                Adhoc Training
+                                                <span class="text-danger">*</span>
+                                            </label>
+
+                                            <select class="form-select" id="isAdhocT" name="isAdhoc" required>
+
+                                                <option disabled selected value="">
+                                                    Select Option
+                                                </option>
+
+                                                <option value="true">
+                                                    Yes
+                                                </option>
+
+                                                <option value="false">
+                                                    No
+                                                </option>
+
+                                            </select>
+
+                                        </div>
+
+                                        <!-- TRAINING NEED -->
+                                        <div class="col-md-6" id="trainingNeedRow" style="display:none;">
+
+                                            <label class="form-label fw-semibold">
+                                                Training Need
+                                            </label>
+
+                                            <select class="form-select" id="trainingNeed" name="trainingNeed" disabled>
+
+                                                <option disabled selected value="">
+                                                    Select Training Need
+                                                </option>
+
+                                                {% for res in train %}
+                                                <option value="{{res.Code}}">
+                                                    {{res.Description}}
+                                                </option>
+                                                {% endfor %}
+
+                                            </select>
+
+                                        </div>
+
+                                    </div>
+
+                                    <!-- BUTTON -->
+                                    <div class="d-flex justify-content-end mt-5">
+
+                                        <button type="submit" class="btn btn-primary px-5">
+
+                                            Save & Continue
+                                            <i class="las la-arrow-right ms-2"></i>
+
+                                        </button>
+
+                                    </div>
+
+                                </form>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- ===================================================== -->
+                    <!-- STAGE 2 : LINES -->
+                    <!-- ===================================================== -->
+
+                    <div id="stage2" class="s-stepper-stage">
+
+                        <div class="card border-0 shadow-sm rounded-4">
+
+                            <div class="card-body p-4">
+
+                                <div class="d-flex align-items-center mb-4">
+
+                                    <div class="bg-warning-subtle timeline-icon p-3 me-3">
+                                        <i class="mdi mdi-format-list-bulleted text-warning fs-3"></i>
+                                    </div>
+
+                                    <div>
+                                        <h5 class="fw-bold mb-1">
+                                            Training Lines
+                                        </h5>
+
+                                        <small class="text-muted">
+                                            Add your training line details
+                                        </small>
+                                    </div>
+
+                                </div>
+
+                                <!-- SPINNER -->
+                                <div class="text-center py-5" id="lines-spinner" style="display:none;">
+
+                                    <div class="spinner-border text-warning" style="width:4rem;height:4rem;"></div>
+
+                                    <p class="mt-3 text-muted">
+                                        Saving training line...
+                                    </p>
+
+                                </div>
+
+                                <!-- FORM -->
+                                <form id="trainingLinesForm" method="post" novalidate>
+
+                                    {% csrf_token %}
+
+                                    <input type="hidden" name="myAction" id="lineAction" value="insert">
+
+                                    <input type="hidden" name="no" id="no">
+
+                                    <div class="row g-4">
+
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-semibold">
+                                                Training Course
+                                            </label>
+
+                                            <input type="text" class="form-control" name="trainingName"
+                                                id="trainingName" required>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-semibold">
+                                                Training Area
+                                            </label>
+
+                                            <input type="text" class="form-control" name="trainingArea"
+                                                id="trainingArea" required>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-semibold">
+                                                Training Type
+                                            </label>
+
+                                            <select class="form-select" name="trainType" id="trainType" required>
+
+                                                <option disabled selected value="">
+                                                    Select Type
+                                                </option>
+
+                                                <option value="1">
+                                                    Physical
+                                                </option>
+
+                                                <option value="2">
+                                                    Online
+                                                </option>
+
+                                            </select>
+
+                                        </div>
+
+                                    </div>
+
+                                    <!-- MORE FIELDS -->
+                                    <!-- Keep all your existing fields here -->
+                                    <!-- startDate, endDate, provider, sponsor, venue etc -->
+
+                                    <div class="d-flex justify-content-between mt-5">
+
+                                        <button type="button" id="prev-stage2-btn"
+                                            class="btn btn-outline-secondary px-4">
+
+                                            Previous
+                                        </button>
+
+                                        <div class="d-flex gap-3">
+
+                                            <button type="submit" class="btn btn-warning px-4 text-white">
+
+                                                Add Line
+                                            </button>
+
+                                            <button type="button" id="next-stage2-btn" class="btn btn-primary px-4">
+
+                                                Continue
+                                                <i class="las la-arrow-right ms-2"></i>
+
+                                            </button>
+
+                                        </div>
+
+                                    </div>
+
+                                </form>
+
+                                <!-- TABLE -->
+                                <div class="table-responsive mt-5">
+
+                                    <table id="lines_table" class="table table-hover align-middle">
+
+                                        <thead class="table-light">
+
+                                            <tr>
+                                                <th>Training Name</th>
+                                                <th>Training Area</th>
+                                                <th>Objectives</th>
+                                                <th>Venue</th>
+                                                <th>Provider</th>
+                                                <th>Action</th>
+                                            </tr>
+
+                                        </thead>
+
+                                        <tbody></tbody>
+
+                                    </table>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- ===================================================== -->
+                    <!-- STAGE 3 : ATTACHMENTS -->
+                    <!-- ===================================================== -->
+
+                    <div id="stage3" class="s-stepper-stage">
+
+                        <div class="card border-0 shadow-sm rounded-4">
+
+                            <div class="card-body p-4">
+
+                                <div class="d-flex align-items-center mb-4">
+
+                                    <div class="bg-success-subtle timeline-icon p-3 me-3">
+                                        <i class="lmdi mdi-paperclip text-success fs-3"></i>
+                                    </div>
+
+                                    <div>
+                                        <h5 class="fw-bold mb-1">
+                                            Upload Attachments
+                                        </h5>
+
+                                        <small class="text-muted">
+                                            Upload supporting documents
+                                        </small>
+                                    </div>
+
+                                </div>
+
+                                <!-- FORM -->
+                                <form method="post" id="attachment_form" enctype="multipart/form-data">
+
+                                    {% csrf_token %}
+
+                                    <div class="border rounded-4 p-4 bg-light">
+
+                                        <label class="form-label fw-semibold">
+                                            Upload Files
+                                        </label>
+
+                                        <input class="form-control" name="attachments" id="attachments" type="file"
+                                            multiple>
+
+                                    </div>
+
+                                    <div class="d-flex justify-content-between mt-4">
+
+                                        <button type="button" id="prev-stage3-btn"
+                                            class="btn btn-outline-secondary px-4">
+
+                                            Previous
+                                        </button>
+
+                                        <div class="d-flex gap-3">
+
+                                            <button type="submit" class="btn btn-success px-4">
+
+                                                Upload Files
+                                            </button>
+
+                                            <button type="button" id="next-stage3-btn" class="btn btn-primary px-4">
+
+                                                Continue
+                                            </button>
+
+                                        </div>
+
+                                    </div>
+
+                                </form>
+
+                                <!-- ATTACHMENTS -->
+                                <div id="leave_attachments_row" style="display:none;" class="mt-5">
+
+                                    <div class="row g-3" id="attachments-container">
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- ===================================================== -->
+                    <!-- STAGE 4 : SUBMISSION -->
+                    <!-- ===================================================== -->
+
+                    <div id="stage4" class="s-stepper-stage">
+
+                        <div class="card border-0 shadow-sm rounded-4">
+
+                            <div class="card-body text-center p-5">
+
+                                <div class="bg-info-subtle timeline-icon d-inline-flex p-4 mb-4">
+                                    <i class="mdi mdi-send text-info fs-1"></i>
+                                </div>
+
+                                <h4 class="fw-bold">
+                                    Ready For Submission
+                                </h4>
+
+                                <p class="text-muted mb-5">
+                                    Submit your training request for approval
+                                </p>
+
+                                <!-- FORM -->
+                                <form method="POST" id="approvalForm">
+
+                                    {% csrf_token %}
+
+                                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+
+                                        <button class="btn btn-info px-5" type="submit">
+
+                                            Send For Approval
+                                        </button>
+
+                                        <button id="prev-stage4-btn" type="button"
+                                            class="btn btn-outline-secondary px-4">
+
+                                            Previous
+                                        </button>
+
+                                    </div>
+
+                                </form>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- ===================================================== -->
+                    <!-- STAGE 5 : DONE -->
+                    <!-- ===================================================== -->
+
+                    <div id="stage5" class="s-stepper-stage">
+
+                        <div class="card border-0 shadow-sm rounded-4">
+
+                            <div class="card-body p-5">
+
+                                <div class="text-center mb-5">
+
+                                    <div class="bg-success-subtle timeline-icon d-inline-flex p-4 mb-4">
+                                        <i class="mdi mdi-progress-check text-success fs-1"></i>
+                                    </div>
+
+                                    <h3 class="fw-bold text-success">
+                                        Training Request Submitted
+                                    </h3>
+
+                                    <p class="text-muted">
+                                        Your training request has been submitted successfully
+                                    </p>
+
+                                </div>
+
+                                <!-- APPROVERS -->
+                                <div class="table-responsive">
+
+                                    <table id="approvers_table" class="table table-hover align-middle">
+
+                                        <thead class="table-light">
+
+                                            <tr>
+                                                <th>Entry No.</th>
+                                                <th>Approver</th>
+                                                <th>Sequence</th>
+                                                <th>Status</th>
+                                                <th>Modified By</th>
+                                                <th>Date Modified</th>
+                                            </tr>
+
+                                        </thead>
+
+                                        <tbody></tbody>
+
+                                    </table>
+
+                                </div>
+
+                                <!-- ACTIONS -->
+                                <div class="d-flex justify-content-center gap-3 mt-5 flex-wrap">
+
+                                    <form method="POST" id="CancelApprovalForm">
+
+                                        {% csrf_token %}
+
+                                        <button class="btn btn-outline-danger px-4" type="submit">
+
+                                            Cancel Approval
+
+                                        </button>
+
+                                    </form>
+
+                                    <a href="" id="detailsBtn" class="btn btn-primary px-4">
+
+                                        View Training Details
+
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+    (function () {
+
+        let needsLoaded = false;
+
+        $(document).on('change', '#isAdhocT', function () {
+
+            const isAdhoc = $(this).val();
+
+            Training_Needs();
+
+            if (isAdhoc === "false") {
+
+                $('#trainingNeedRow').slideDown(200);
+                $('#trainingNeed').prop('disabled', false);
+
+            } else {
+
+                $('#trainingNeedRow').slideUp(200);
+                $('#trainingNeed').prop('disabled', true);
+
+            }
+
+        });
+        Training_Data();
+        Training_Needs();
+
+
+        function Training_Data() {
+            $.ajax({
+                url: "/training-data/",
+                type: "GET",
+                success: function (data) {
+                    let open = 0, pending = 0, approved = 0;
+
+                    const openBody = $("#open_training_table tbody");
+                    const pendingBody = $("#pending_training_table tbody");
+                    const approvedBody = $("#approved_training_table tbody");
+
+                    openBody.empty(); pendingBody.empty(); approvedBody.empty();
+                    console.log(data)
+
+                    data.forEach(row => {
+
+                        let status = row.Status;
+
+                        // normalize Adhoc (boolean → Yes/No)
+                        let isAdhoc = row.Adhoc === true || row.Adhoc === "true" || row.Adhoc === 1;
+                        let adhocText = isAdhoc ? "Yes" : "No";
+
+                        // show dates/days only if NOT adhoc
+                        let startDate = isAdhoc ? "Adhoc" : row.Planned_Start_Date;
+                        let endDate = isAdhoc ? "Adhoc" : row.Planned_End_Date;
+                        let days = isAdhoc ? "Adhoc" : row.No__Of_Days;
+
+                        let tr = `
+                                                <tr>
+                                                    <td>${row.Request_No_}</td>
+                                                    <td>${row.Request_Date}</td>
+                                                    <td>${adhocText}</td>
+                                                    <td>${startDate}</td>
+                                                    <td>${endDate}</td>
+                                                    <td>${days}</td>
+                                                    <td>
+                                                        <a class="btn btn-primary text-white"
+                                                        href="/training/${row.Request_No_}">
+                                                        <i class="mdi mdi-folder-eye"></i> View
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            `;
+
+                        if (status === "Open") {
+                            openBody.append(tr);
+                            open++;
+                        }
+                        else if (status === "Pending Approval") {
+                            pendingBody.append(tr);
+                            pending++;
+                        }
+                        else if (status === "Released") {
+                            approvedBody.append(tr);
+                            approved++;
+                        }
+                    });
+
+                    $(".open_training_count").text(open);
+                    $(".pending_training_count").text(pending);
+                    $(".approved_training_count").text(approved);
+
+                }
+            });
+        }
+
+        function Training_Needs() {
+            if (needsLoaded) {
+                console.log("needs already Loaded")
+                return;
+            }
+            console.log("Fetching training needs...")
+
+            $.ajax({
+                url: "{% url 'get_training_needs' %}",
+                type: "GET",
+                dataType: "json",
+
+                success: function (response) {
+
+                    needsLoaded = true;
+
+                    let trainingOptions = `
+                        <option value="" disabled selected>
+                            Select Training Need
+                        </option>
+                    `;
+
+                    response.forEach(r => {
+                        trainingOptions += `
+                        <option value="${r.Code}">
+                            ${r.Description}
+                        </option>
+                    `;
+                    });
+
+                    $('#trainingNeed').html(trainingOptions);
+                }
+            });
+        }
+
+
+        let requestNo = null;
+
+        // =====================================================
+        // STAGE 1: TRAINING HEADER
+        // =====================================================
+        $("#trainingForm").on("submit", function (e) {
+            e.preventDefault();
+
+            $("#training-spinner").show();
+
+            $.ajax({
+                url: "/training/",
+                type: "POST",
+                data: $(this).serialize(),
+                success: function (res) {
+
+                    $("#training-spinner").hide();
+
+                    if (res.success) {
+
+                        requestNo = res.requestNo;
+                        $("#requestNo").val(requestNo);
+
+                        goToStage(2);
+                    } else {
+                        alert(res.message || "Failed to save header");
+                    }
+                },
+                error: function () {
+                    $("#training-spinner").hide();
+                    alert("Server error while saving header");
+                }
+            });
+        });
+
+
+        // =====================================================
+        // STAGE 2: TRAINING LINES
+        // =====================================================
+
+        $("#trainingLinesForm").on("submit", function (e) {
+            e.preventDefault();
+
+            $("#lines-spinner").show();
+
+            let formData = $(this).serialize() + "&requestNo=" + requestNo;
+
+            $.ajax({
+                url: "/training/save-line/",
+                type: "POST",
+                data: formData,
+                success: function (res) {
+
+                    $("#lines-spinner").hide();
+
+                    if (res.success) {
+                        loadLines();
+                        $("#trainingLinesForm")[0].reset();
+                    } else {
+                        alert(res.message || "Failed to save line");
+                    }
+                },
+                error: function () {
+                    $("#lines-spinner").hide();
+                    alert("Error saving line");
+                }
+            });
+        });
+
+
+        $("#next-stage2-btn").on("click", function () {
+            goToStage(3);
+        });
+
+        $("#prev-stage2-btn").on("click", function () {
+            goToStage(1);
+        });
+
+
+        // =====================================================
+        // STAGE 3: ATTACHMENTS
+        // =====================================================
+
+        $("#attachment_form").on("submit", function (e) {
+            e.preventDefault();
+
+            let formData = new FormData(this);
+            formData.append("requestNo", requestNo);
+
+            $("#leave_attachments_row").hide();
+
+            $.ajax({
+                url: `upload-attachments/${trainingCode}`,
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (res) {
+
+                    if (res.success) {
+                        loadAttachments();
+                    } else {
+                        alert(res.message || "Upload failed");
+                    }
+                }
+            });
+        });
+
+        $("#next-stage3-btn").on("click", function () {
+            goToStage(4);
+        });
+
+        $("#prev-stage3-btn").on("click", function () {
+            goToStage(2);
+        });
+
+
+        // =====================================================
+        // STAGE 4: SUBMISSION (FINAL)
+        // =====================================================
+
+        $("#approvalForm").on("submit", function (e) {
+            e.preventDefault();
+
+            $.ajax({
+                url: "/training/submit/",
+                type: "POST",
+                data: {
+                    csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val(),
+                    requestNo: requestNo
+                },
+                success: function (res) {
+
+                    if (res.success) {
+                        goToStage(5);
+                        loadApprovers();
+                    } else {
+                        alert(res.message || "Submission failed");
+                    }
+                },
+                error: function () {
+                    alert("Error sending for approval");
+                }
+            });
+        });
+
+
+        // =====================================================
+        // CANCEL APPROVAL
+        // =====================================================
+
+        $("#CancelApprovalForm").on("submit", function (e) {
+            e.preventDefault();
+
+            $.ajax({
+                url: "/training/cancel-approval/",
+                type: "POST",
+                data: {
+                    csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val(),
+                    requestNo: requestNo
+                },
+                success: function (res) {
+                    if (res.success) {
+                        goToStage(4);
+                    } else {
+                        alert(res.message);
+                    }
+                }
+            });
+        });
+
+
+        // =====================================================
+        // STAGE NAVIGATION
+        // =====================================================
+
+        function goToStage(stage) {
+
+            $(".s-stepper-stage").removeClass("active");
+            $("#stage" + stage).addClass("active");
+
+            $(".step-item").removeClass("active");
+            $("#stage-" + stage + "-step").addClass("active");
+        }
+
+
+        // =====================================================
+        // HELPERS (replace with your real loaders)
+        // =====================================================
+
+        function loadLines() {
+            $.get(`/training/${requestNo}/lines/`, function (data) {
+                $("#lines_table tbody").html(data);
+            });
+        }
+
+        function loadAttachments() {
+            $.get(`/training/${requestNo}/attachments/`, function (data) {
+                $("#attachments-container").html(data);
+                $("#leave_attachments_row").show();
+            });
+        }
+
+        function loadApprovers() {
+            $.get(`/training/${requestNo}/approvers/`, function (data) {
+                $("#approvers_table tbody").html(data);
+            });
+        }
+
+    })();
+</script>

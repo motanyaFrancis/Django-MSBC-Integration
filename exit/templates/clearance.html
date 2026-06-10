@@ -1,0 +1,652 @@
+{% extends 'layout.html' %}
+{% load static %}
+{% block title %}Exit & Clearance{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="home-tab">
+
+                <!-- HEADER -->
+                <div class="d-flex justify-content-between align-items-center border-bottom py-3">
+                    <div>
+                        <h4 class="card-title card-title-dash mb-0">Exit & Clearance</h4>
+                        <p class="text-muted small mt-1">Complete your exit interview and clearance process</p>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button id="sendApprovalBtn" class="btn btn-success text-white" style="display: none;">
+                            <i class="mdi mdi-send"></i> Send For Approval
+                        </button>
+                        <button id="cancelApprovalBtn" class="btn btn-danger text-white" style="display: none;">
+                            <i class="mdi mdi-close-circle-outline"></i> Cancel Approval
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STATUS CARDS -->
+                <div class="row mt-4">
+
+                    <div class="col-md-4 mb-3">
+                        <div class="card border-0 shadow-sm rounded-4 h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <p class="text-muted mb-1 small">Clearance No.</p>
+                                        <h5 class="fw-bold mb-0" id="clearance_id">--</h5>
+                                    </div>
+                                    <div
+                                        class="icon-lg bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center">
+                                        <i class="mdi mdi-file-document-outline fs-4"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <div class="card border-0 shadow-sm rounded-4 h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <p class="text-muted mb-1 small">Employee</p>
+                                        <h5 class="fw-bold mb-0" id="employee_name">--</h5>
+                                    </div>
+                                    <div
+                                        class="icon-lg bg-info-subtle text-info rounded-circle d-flex align-items-center justify-content-center">
+                                        <i class="mdi mdi-account-outline fs-4"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <div class="card border-0 shadow-sm rounded-4 h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <p class="text-muted mb-1 small">Status</p>
+                                        <h5 class="fw-bold mb-0" id="clear_status">--</h5>
+                                    </div>
+                                    <div
+                                        class="icon-lg bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center">
+                                        <i class="mdi mdi-check-decagram-outline fs-4"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- FORM SECTION -->
+                <div class="row mt-2">
+                    <div class="col-lg-12">
+                        <div class="card border-0 shadow-sm rounded-4">
+                            <div class="card-body">
+
+                                <!-- FORM IDENTIFIER -->
+                                <div class="d-flex justify-content-start mb-2">
+                                    <span class="fw-semibold text-primary fs-5">
+                                        <i class="mdi mdi-clipboard-check me-1"></i> Clearance Form
+                                    </span>
+                                </div>
+
+                                <hr class="my-4">
+
+                                <form id="clearanceForm" novalidate method="post">
+
+                                    {% csrf_token %}
+
+                                    <input type="hidden" id="myAction" name="myAction" value="insert">
+                                    <input type="hidden" id="exitNo" name="exitNo">
+
+                                    <!-- ==================== STEP 1 ==================== -->
+                                    <div class="tab">
+
+                                        <div class="border rounded-4 p-4 mb-4">
+                                            <h5 class="fw-semibold mb-4">Separation Information</h5>
+
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label">Primary Reason For Leaving</label>
+                                                    <select class="form-select" id="natureOfSeparation"
+                                                        name="natureOfSeparation">
+                                                        <option selected disabled value="0">-- Select --</option>
+                                                        <option value="1">Resignation</option>
+                                                        <option value="2">Retirement</option>
+                                                        <option value="3">Dismissal / Termination</option>
+                                                        <option value="4">Death</option>
+                                                        <option value="5">Other</option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label">Overall Satisfaction With Employer</label>
+                                                    <select class="form-select" id="satisfactionWithCurrentEmployer"
+                                                        name="satisfactionWithCurrentEmployer">
+                                                        <option selected disabled value="0">-- Select --</option>
+                                                        <option value="1">Very Dissatisfied</option>
+                                                        <option value="2">Somehow Dissatisfied</option>
+                                                        <option value="3">Somehow Satisfied</option>
+                                                        <option value="4">Very Satisfied</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <!-- Conditional: shown only when natureOfSeparation == "5" (Other) -->
+                                            <div class="row conditional-row" id="reasonForLeavingRow"
+                                                style="display: none;">
+                                                <div class="col-md-12">
+                                                    <label class="form-label">Please specify the other reason</label>
+                                                    <textarea class="form-control" rows="3" id="reasonForLeaving"
+                                                        name="reasonForLeaving" disabled></textarea>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="border rounded-4 p-4">
+                                            <h5 class="fw-semibold mb-4">Organization Relationship</h5>
+
+                                            <div class="row">
+
+                                                <div class="col-md-12 mb-3">
+                                                    <label class="form-label">
+                                                        Do you feel that the organization has a fair and equal policy
+                                                        for all employees?
+                                                    </label>
+                                                    <select class="form-select" id="fairandEqualPolicy"
+                                                        name="fairandEqualPolicy">
+                                                        <option selected disabled value="0">-- Select --</option>
+                                                        <option value="1">Yes</option>
+                                                        <option value="0">No</option>
+                                                    </select>
+                                                </div>
+
+                                                <!-- Conditional: shown only when fairandEqualPolicy == "0" -->
+                                                <div class="col-md-12 mb-3 conditional-row"
+                                                    id="reasonsForUnfairPolicyRow" name="reasonsForUnfairPolicyRow"
+                                                    style="display: none;">
+                                                    <label class="form-label">
+                                                        Please explain why you think the policy is unfair or unequal
+                                                    </label>
+                                                    <textarea class="form-control" rows="3" id="reasonsForUnfairPolicy"
+                                                        name="reasonsForUnfairPolicy" disabled></textarea>
+                                                </div>
+
+                                                <div class="col-md-12 mb-3">
+                                                    <label class="form-label">Overall Satisfaction With
+                                                        Supervisor</label>
+                                                    <select class="form-select" id="satisfactionWithSupervisor"
+                                                        name="satisfactionWithSupervisor">
+                                                        <option selected disabled value="0">-- Select --</option>
+                                                        <option value="1">Very Dissatisfied</option>
+                                                        <option value="2">Somehow Dissatisfied</option>
+                                                        <option value="3">Somehow Satisfied</option>
+                                                        <option value="4">Very Satisfied</option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="col-md-12 mb-3">
+                                                    <label class="form-label">Explain Your Relationship With
+                                                        Supervisor</label>
+                                                    <input type="text" class="form-control"
+                                                        id="relationshipWithSupervisor"
+                                                        name="relationshipWithSupervisor">
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <!-- ==================== STEP 2 ==================== -->
+                                    <div class="tab">
+
+                                        <div class="border rounded-4 p-4 mb-4">
+                                            <h5 class="fw-semibold mb-4">Work Environment</h5>
+
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label">How would you describe your Working
+                                                        Conditions?</label>
+                                                    <select class="form-select" id="workingConditions"
+                                                        name="workingConditions">
+                                                        <option selected disabled value="0">-- Select --</option>
+                                                        <option value="1">Very Dissatisfied</option>
+                                                        <option value="2">Somehow Dissatisfied</option>
+                                                        <option value="3">Somehow Satisfied</option>
+                                                        <option value="4">Very Satisfied</option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label">What is your opinion about the working
+                                                        environment?</label>
+                                                    <input type="text" class="form-control" id="workingEnvironment"
+                                                        name="workingEnvironment">
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="mb-3">
+                                                    <label class="form-label">What would you say about your performance
+                                                        during your time here?</label>
+                                                    <textarea class="form-control" rows="4" id="feedbackOnPerformance"
+                                                        name="feedbackOnPerformance"></textarea>
+                                                </div>
+
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label">How well did the appraisal system work for
+                                                        you?</label>
+                                                    <input type="text" class="form-control" id="appraisalSystemWorked"
+                                                        name="appraisalSystemWorked">
+                                                </div>
+
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label">What did you like most about working
+                                                        here?</label>
+                                                    <input type="text" class="form-control" id="whatYouLiked"
+                                                        name="whatYouLiked">
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label">What did you like least about working
+                                                        here?</label>
+                                                    <input type="text" class="form-control" id="whatYouDisliked"
+                                                        name="whatYouDisliked">
+                                                </div>
+
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label">How would you describe the culture and
+                                                        feel of the organization?</label>
+                                                    <input type="text" class="form-control" id="culture_and_feel"
+                                                        name="culture_and_feel">
+                                                </div>
+
+                                                <div class="col-md-12 mb-3">
+                                                    <label class="form-label">Were there policies that made your work
+                                                        difficult?</label>
+                                                    <select class="form-select" id="policesMakingWorkDifficult"
+                                                        name="policesMakingWorkDifficult">
+                                                        <option selected disabled value="0">-- Select --</option>
+                                                        <option value="1">Yes</option>
+                                                        <option value="0">No</option>
+                                                    </select>
+                                                </div>
+
+                                                <!-- Conditional: shown only when policesMakingWorkDifficult == "1" -->
+                                                <div class="col-md-12 mb-3 conditional-row" id="factorsDetrimentalRow"
+                                                    name="factorsDetrimentalRow" style="display: none;">
+                                                    <label class="form-label">
+                                                        Please explain the factors that are detrimental to your
+                                                        relationships with colleagues or supervisors
+                                                    </label>
+                                                    <textarea class="form-control" rows="4"
+                                                        id="factorsDetrimentalToRelations"
+                                                        name="factorsDetrimentalToRelations" disabled></textarea>
+                                                </div>
+
+                                                <div class="col-md-12 mb-3">
+                                                    <label class="form-label">
+                                                        Are there specific practices or procedures that you found
+                                                        particularly challenging that is making you consider leaving?
+                                                    </label>
+                                                    <select class="form-select" id="specificReasons"
+                                                        name="specificReasons">
+                                                        <option selected disabled value="0">-- Select --</option>
+                                                        <option value="1">Yes</option>
+                                                        <option value="0">No</option>
+                                                    </select>
+                                                </div>
+
+                                                <!-- Conditional: shown only when specificReasons == "1" -->
+                                                <div class="mb-3 conditional-row" id="suggestionsToImproveRow"
+                                                    style="display: none;">
+                                                    <label class="form-label">Please describe those challenges and any
+                                                        suggestions to improve them</label>
+                                                    <textarea class="form-control" rows="4" id="suggestionsToImprove"
+                                                        name="suggestionsToImprove" disabled></textarea>
+                                                </div>
+
+                                                <div class="col-md-12 mb-3">
+                                                    <label class="form-label">
+                                                        Are there specific practices or procedures that you found
+                                                        particularly beneficial and supportive that you would like to
+                                                        see continued or expanded?
+                                                    </label>
+                                                    <select class="form-select" id="specificPractices"
+                                                        name="specificPractices">
+                                                        <option selected disabled value="0">-- Select --</option>
+                                                        <option value="1">Yes</option>
+                                                        <option value="0">No</option>
+                                                    </select>
+                                                </div>
+
+                                                <!-- Conditional: shown only when specificPractices == "1" -->
+                                                <div class="mb-3 conditional-row" id="beneficialConditionsRow"
+                                                    style="display: none;">
+                                                    <label class="form-label">Please describe those beneficial
+                                                        practices</label>
+                                                    <textarea class="form-control" rows="4" id="beneficialConditions"
+                                                        name="beneficialConditions" disabled></textarea>
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label class="form-label">Given the opportunity, what would you
+                                                        change about the organization?</label>
+                                                    <textarea class="form-control" rows="4" id="whatToChange"
+                                                        name="whatToChange"></textarea>
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <!-- ==================== STEP 3 ==================== -->
+                                    <div class="tab">
+
+                                        <div class="border rounded-4 p-4 mb-4">
+                                            <h5 class="fw-semibold mb-4">Organizational Communication</h5>
+
+                                            <div class="mb-3">
+                                                <label class="form-label">How would you describe communication
+                                                    throughout the organization?</label>
+                                                <input type="text" class="form-control" id="organizationalThroughout"
+                                                    name="organizationalThroughout">
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label">How would you describe communication between
+                                                    managers and staff?</label>
+                                                <textarea class="form-control" rows="3"
+                                                    id="describeORganizationManagers"
+                                                    name="describeORganizationManagers"></textarea>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label">How would you describe communication between
+                                                    departments?</label>
+                                                <textarea class="form-control" rows="3"
+                                                    id="btwDepartmentsCommunications"
+                                                    name="btwDepartmentsCommunications"></textarea>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label">How would you describe communication within
+                                                    departments?</label>
+                                                <textarea class="form-control" rows="3"
+                                                    id="withinDepartmentCommunications"
+                                                    name="withinDepartmentCommunications"></textarea>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                    <!-- ==================== STEP 4 ==================== -->
+                                    <div class="tab">
+
+                                        <div class="border rounded-4 p-4">
+                                            <h5 class="fw-semibold mb-4">Final Comments</h5>
+                                            <div class="row">
+
+                                                <div class="mb-3">
+                                                    <label class="form-label">What could the organization have done to
+                                                        encourage you to stay?</label>
+                                                    <textarea class="form-control" rows="3" id="actionToStay"
+                                                        name="actionToStay"></textarea>
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label class="form-label">What does the new offer have that your
+                                                        current role doesn't have? (if leaving for a new
+                                                        employer)</label>
+                                                    <textarea class="form-control" rows="3" id="newOfferNotIncurrent"
+                                                        name="newOfferNotIncurrent"></textarea>
+                                                </div>
+
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label">If the organization gives the same offer,
+                                                        would you stay?</label>
+                                                    <select class="form-select" id="stayIfOffered" name="stayIfOffered">
+                                                        <option selected disabled value="0">-- Select --</option>
+                                                        <option value="1">Yes</option>
+                                                        <option value="0">No</option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label">Would You Recommend This Organization To
+                                                        Others?</label>
+                                                    <select class="form-select" id="recommendToAFriend"
+                                                        name="recommendToAFriend">
+                                                        <option selected disabled value="0">-- Select --</option>
+                                                        <option value="1">Yes</option>
+                                                        <option value="2">No</option>
+                                                    </select>
+                                                </div>
+
+                                                <!-- Conditional: shown only when recommendToAFriend == "2" (No) -->
+                                                <div class="mb-3 conditional-row" id="explanationForNotRecommendingRow"
+                                                    style="display: none;">
+                                                    <label class="form-label">Please explain why you would not recommend
+                                                        the organization</label>
+                                                    <textarea class="form-control" rows="3"
+                                                        id="explanationForNotRecommending"
+                                                        name="explanationForNotRecommending" disabled></textarea>
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label class="form-label">Additional Comments</label>
+                                                    <textarea class="form-control" rows="4" id="any_otherComment"
+                                                        name="any_otherComment"></textarea>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                    <!-- NAVIGATION -->
+                                    <div class="d-flex justify-content-between align-items-center mt-4">
+                                        <button type="button" class="btn btn-light" id="prevBtn" onclick="nextPrev(-1)">
+                                            <i class="fas fa-arrow-left"></i> Previous
+                                        </button>
+                                        <div class="d-flex gap-2">
+                                            <button type="button" class="btn btn-primary" id="nextBtn"
+                                                onclick="nextPrev(1)">
+                                                Next <i class="fas fa-arrow-right"></i>
+                                            </button>
+                                            <button type="submit" class="btn btn-primary fw-semibold" id="submitBtn"
+                                                style="display: none;">
+                                                <i class="fas fa-paper-plane"></i> Submit Clearance
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- STEP INDICATORS -->
+                                    <div class="d-flex justify-content-center align-items-center gap-3 mt-4">
+                                        <span class="step active"></span>
+                                        <span class="step"></span>
+                                        <span class="step"></span>
+                                        <span class="step"></span>
+                                    </div>
+
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .tab {
+        display: none;
+    }
+
+    .tab:first-of-type {
+        display: block;
+    }
+
+    .conditional-row {
+        overflow: hidden;
+    }
+
+    .step {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: #d1d5db;
+        display: inline-block;
+        transition: 0.3s ease;
+    }
+
+    .step.active {
+        background: #0d6efd;
+        transform: scale(1.1);
+    }
+
+    .step.finish {
+        background: #198754;
+    }
+
+    .icon-lg {
+        width: 55px;
+        height: 55px;
+    }
+
+    .rounded-4 {
+        border-radius: 1rem !important;
+    }
+</style>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script>
+
+    let currentTab = 0;
+    let headerStatus = "New";
+
+    /* ──────────────────────────────────────────────
+       Helper: toggle a dependent textarea / row
+       trigger   – the select element
+       rowId     – wrapper div to show/hide
+       fieldId   – textarea/input to enable/disable
+       condition – function(val) → bool: should row be visible?
+    ────────────────────────────────────────────── */
+    function bindConditional(triggerId, rowId, fieldId, conditionFn) {
+        $('#' + triggerId).on('change', function () {
+            const show = conditionFn($(this).val());
+            if (show) {
+                $('#' + rowId).slideDown(300);
+                $('#' + fieldId).prop('disabled', false);
+            } else {
+                $('#' + rowId).slideUp(300);
+                $('#' + fieldId).prop('disabled', true).val('');
+            }
+        });
+    }
+
+    $(document).ready(function () {
+
+        showTab(currentTab);
+
+        // 1. Nature of separation → "Other" reason
+        bindConditional(
+            'natureOfSeparation',
+            'reasonForLeavingRow',
+            'reasonForLeaving',
+            val => val === '5'
+        );
+
+        // 2. Fair & equal policy → "No" explanation
+        bindConditional(
+            'fairandEqualPolicy',
+            'reasonsForUnfairPolicyRow',
+            'reasonsForUnfairPolicy',
+            val => val === '0'
+        );
+
+        // 3. Policies making work difficult → explain detrimental factors
+        bindConditional(
+            'policesMakingWorkDifficult',
+            'factorsDetrimentalRow',
+            'factorsDetrimentalToRelations',
+            val => val === '1'
+        );
+
+        // 4. Specific challenging practices → describe & suggest improvements
+        bindConditional(
+            'specificReasons',
+            'suggestionsToImproveRow',
+            'suggestionsToImprove',
+            val => val === '1'
+        );
+
+        // 5. Specific beneficial practices → describe them
+        bindConditional(
+            'specificPractices',
+            'beneficialConditionsRow',
+            'beneficialConditions',
+            val => val === '1'
+        );
+
+        // 6. Would not recommend → explain why
+        bindConditional(
+            'recommendToAFriend',
+            'explanationForNotRecommendingRow',
+            'explanationForNotRecommending',
+            val => val === '2'
+        );
+
+    });
+
+    function showTab(n) {
+        let x = document.getElementsByClassName("tab");
+        for (let i = 0; i < x.length; i++) { x[i].style.display = "none"; }
+        x[n].style.display = "block";
+
+        $("#prevBtn").toggle(n !== 0);
+
+        if (n === x.length - 1) {
+            $("#nextBtn").hide();
+            $("#submitBtn").show();
+        } else {
+            $("#nextBtn").show();
+            $("#submitBtn").hide();
+        }
+
+        fixStepIndicator(n);
+    }
+
+    function nextPrev(n) {
+        let x = document.getElementsByClassName("tab");
+        x[currentTab].style.display = "none";
+        currentTab = Math.min(Math.max(currentTab + n, 0), x.length - 1);
+        showTab(currentTab);
+    }
+
+    function fixStepIndicator(n) {
+        let x = document.getElementsByClassName("step");
+        for (let i = 0; i < x.length; i++) {
+            x[i].className = x[i].className.replace(" active", "").replace(" finish", "");
+        }
+        for (let i = 0; i < n; i++) { x[i].className += " finish"; }
+        x[n].className += " active";
+    }
+
+</script>
+
+{% endblock %}

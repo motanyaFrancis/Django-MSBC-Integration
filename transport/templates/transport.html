@@ -12,7 +12,7 @@ Transport Requests
         <div class="col-sm-12">
             <div class="home-tab">
                 <!-- PAGE HEADER -->
-                <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex justify-content-between align-items-center border-bottom py-3">
                     <div>
                         <h4 class="font-weight-bold mb-0">
                             Transport Requests
@@ -22,63 +22,63 @@ Transport Requests
                         </p>
                     </div>
                     <div>
-                        <button type="button" class="btn btn-primary text-white" data-bs-toggle="modal"
-                            data-bs-target="#transportRequestModal">
-
-                            <i class="mdi mdi-plus-circle-outline"></i>
-                            New Transport Request
-                        </button>
+                       
                     </div>
                 </div>
 
                 <!-- TABS -->
                 <div class="d-sm-flex align-items-center justify-content-between border-bottom mb-1">
-
+                
                     <ul class="nav nav-tabs" role="tablist">
-
+                
                         <!-- OPEN -->
                         <li class="nav-item">
                             <a class="nav-link" id="open-tab" data-bs-toggle="tab" href="#open-requests" role="tab">
-
+                
                                 Open Requests
-
+                
                                 <span class="badge rounded-pill bg-info ms-2">
                                     {{ open_transport_requests|length }}
                                 </span>
-
+                
                             </a>
                         </li>
-
+                
                         <!-- PENDING -->
                         <li class="nav-item">
-                            <a class="nav-link" id="pending-tab" data-bs-toggle="tab" href="#pending-requests"
-                                role="tab">
-
+                            <a class="nav-link" id="pending-tab" data-bs-toggle="tab" href="#pending-requests" role="tab">
+                
                                 Pending Approval
-
+                
                                 <span class="badge rounded-pill bg-warning ms-2">
                                     {{ pending_transport_requests|length }}
                                 </span>
-
+                
                             </a>
                         </li>
-
+                
                         <!-- APPROVED -->
                         <li class="nav-item">
-                            <a class="nav-link active" id="approved-tab" data-bs-toggle="tab" href="#approved-requests"
-                                role="tab">
-
+                            <a class="nav-link active" id="approved-tab" data-bs-toggle="tab" href="#approved-requests" role="tab">
+                
                                 Approved Requests
-
+                
                                 <span class="badge rounded-pill bg-success ms-2">
                                     {{ approved_transport_requests|length }}
                                 </span>
-
+                
                             </a>
                         </li>
-
+                
                     </ul>
-
+                
+                    <button type="button" class="btn btn-primary text-white" data-bs-toggle="modal"
+                        data-bs-target="#transportRequestModal">
+                
+                        <i class="mdi mdi-plus-circle-outline"></i>
+                        New Transport Request
+                    </button>
+                
                 </div>
 
                 <!-- TAB CONTENT -->

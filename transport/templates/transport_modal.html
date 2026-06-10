@@ -27,7 +27,7 @@
             </div>
 
             <!-- BODY -->
-            <div class="modal-body bg-theme-image px-3 px-lg-5 py-4">
+            <div class="modal-body bg-light px-3 px-lg-5 py-4">
 
                 <form id="TransportForm" action="{% url 'transport' %}" method="post" novalidate>
 
@@ -297,7 +297,8 @@
                             <label class="form-label fw-semibold">
                                 Traveling Reason
                             </label>
-
+<textarea class="form-control textarea-control" name="transferReason" rows="5"
+                                placeholder="Enter transfer reason..." required></textarea>
                             <textarea class="form-control textarea-control"
                                 name="travelingReason"
                                 rows="5"
@@ -339,7 +340,7 @@
 
 </div>
 
-<style>
+<!-- <style>
     #transportRequestModal .modal-content {
         background: #f8f9fc;
     }
@@ -402,4 +403,4 @@
             padding: 1.25rem !important;
         }
     }
-</style>
+</style> -->

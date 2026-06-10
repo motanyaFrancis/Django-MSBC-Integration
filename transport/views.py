@@ -1,17 +1,18 @@
 import asyncio
-import aiohttp
-import logging
 import base64
+import logging
+from dataclasses import field
 
-from django.views import View
-from django.shortcuts import redirect, render
+import aiohttp
 from django.contrib import messages
 from django.http import JsonResponse
+from django.shortcuts import redirect, render
+from django.views import View
 
 from core.mixins.auth_mixin import AuthRequiredMixin
-from core.mixins.session_mixin import SessionMixin
 from core.mixins.odata_mixin import ODataMixin
 from core.mixins.ResponseMixin import ResponseMixin
+from core.mixins.session_mixin import SessionMixin
 from core.mixins.soap_mixin import SOAPMixin
 
 
@@ -39,7 +40,7 @@ class TransportRequest(
 
                 self.filter_data(
                     endpoint="/QyTransportRequisitions",
-                    property="Employee_No_",
+                    field="Employee_No_",
                     operator="eq",
                     value=employee_no,
                 ),
@@ -48,7 +49,8 @@ class TransportRequest(
 
                 self.all_data(endpoint="/QyEmployees"),
             )
-
+        
+        print("transport_requests: ", transport_requests)
         open_transport_requests = [
             x for x in transport_requests if x.get("Status") == "Open"]
         pending_transport_requests = [
@@ -109,15 +111,15 @@ class TransportRequest(
 
             if response is True:
                 messages.success(request, "Request sent successfully",)
-                return redirect("TransportDetails", pk=pk,)
+                return redirect("TransportDetails", pk=response,)
 
             messages.error(request, f"{response}",)
-            return redirect("TransportDetails", pk=pk,)
+            return redirect("TransportDetails", pk=response,)
 
         except Exception as e:
             logging.exception(e)
             messages.error(request, "Failed to submit transport request",)
-            return redirect("TransportDetails", pk=pk,)
+            return redirect("TransportDetails", pk=response,)
 
 
 class TransportDetails(
@@ -139,7 +141,7 @@ class TransportDetails(
             # =================================================
             document = await self.fetch_one(
                 endpoint="/QyTransportRequisitions",
-                property="Request_No_",
+                field="Request_No_",
                 value=pk,
             )
             if not document:
@@ -198,7 +200,8 @@ class TransportDetails(
         try:
             session = self.get_session_context(request)
             user_id = session.get("User_ID")
-            employee_no = session.get("Employee_No_")
+            employee_no = request.POST.get("employee_no")
+            print(user_id, employee_no, pk)
             my_action = request.POST.get("myAction")
             response = self.call_soap(
                 soap_method="FnTransportTravellingEmployees",
@@ -240,6 +243,9 @@ class SubmitTransport(
             session = self.get_session_context(request)
             employee_no = session.get("Employee_No_")
             my_action = request.POST.get("myAction")
+
+            print("Submitting transport request with:", pk, employee_no, my_action)
+
             response = self.call_soap(
                 soap_method="FnTransportRequestApproval",
                 params=[
@@ -250,9 +256,7 @@ class SubmitTransport(
             )
 
             if response is True:
-
                 messages.success(request, "Request sent successfully",)
-
                 return redirect("TransportDetails", pk=pk,)
 
             messages.error(request, f"{response}",)
@@ -260,5 +264,6 @@ class SubmitTransport(
 
         except Exception as e:
             logging.exception(e)
+            print("Error submitting transport request:", e)
             messages.error(request, "Failed to submit transport request",)
             return redirect("TransportDetails", pk=pk,)

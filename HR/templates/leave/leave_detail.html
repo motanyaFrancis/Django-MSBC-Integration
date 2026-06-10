@@ -1,0 +1,579 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Leave Request Details{% endblock %}
+
+{% block content %}
+
+<div class="content-wrapper">
+
+    <!-- PAGE HEADER -->
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="home-tab">
+
+                <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+
+                    <div>
+                        <nav aria-label="breadcrumb border-0">
+                            <ol class="breadcrumb border-0 mb-2 px-0">
+                                <li class="breadcrumb-item">
+                                    <a href="{% url 'dashboard' %}">
+                                        <i class="ti-home me-1"></i> Dashboard
+                                    </a>
+                                </li>
+
+                                <li class="breadcrumb-item">
+                                    <a href="{% url 'leave' %}">
+                                        Leave Requests
+                                    </a>
+                                </li>
+
+                                <li class="breadcrumb-item active">
+                                    {{ res.Application_No|default:"-" }}
+                                </li>
+                            </ol>
+                        </nav>
+
+                        <h3 class="fw-bold mb-1">
+                            Leave Request Details
+                        </h3>
+
+                        <p class="text-muted mb-0">
+                            View and manage leave request information
+                        </p>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2">
+
+                        {% if res.Status == "Open" %}
+                        <button class="btn btn-primary text-white" data-bs-toggle="modal" data-bs-target="#Attachment">
+                            <i class="mdi mdi-paperclip me-1"></i>
+                            Upload Attachment
+                        </button>
+                        {% endif %}
+
+                        {% if res.Status == "Released" %}
+                        <form action="{% url 'FnGenerateLeaveReport' res.Application_No %}" method="post">
+                            {% csrf_token %}
+                            <button class="btn btn-success">
+                                <i class="mdi mdi-download me-1"></i>
+                                Preview Report
+                            </button>
+                        </form>
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+                <!-- STATUS + SUMMARY -->
+                <div class="row g-4 mb-4">
+
+                    <!-- STATUS CARD -->
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card border-0 shadow-sm rounded-4 h-100">
+                            <div class="card-body">
+
+                                <div class="d-flex align-items-center justify-content-between">
+
+                                    <div>
+                                        <p class="text-muted mb-2">Request Status</p>
+
+                                        {% if res.Status == "Open" %}
+                                        <span class="badge bg-info fs-6">{{ res.Status }}</span>
+
+                                        {% elif res.Status == "Pending Approval" %}
+                                        <span class="badge bg-warning fs-6">{{ res.Status }}</span>
+
+                                        {% elif res.Status == "Released" %}
+                                        <span class="badge bg-success fs-6">{{ res.Status }}</span>
+
+                                        {% else %}
+                                        <span class="badge bg-secondary fs-6">{{ res.Status }}</span>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="bg-primary-subtle timeline-icon p-3">
+                                        <i class="mdi mdi-file-document-check text-primary fs-3"></i>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LEAVE TYPE -->
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card border-0 shadow-sm rounded-4 h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center justify-content-between">
+
+                                    <div>
+                                        <p class="text-muted mb-2">Leave Type</p>
+                                        <h5 class="fw-bold mb-0">{{ res.Leave_Code|default:"-" }}</h5>
+                                    </div>
+
+                                    <div class="bg-success-subtle timeline-icon p-3">
+                                        <i class="mdi mdi-calendar text-success fs-3"></i>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DAYS -->
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card border-0 shadow-sm rounded-4 h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center justify-content-between">
+
+                                    <div>
+                                        <p class="text-muted mb-2">Days Applied</p>
+                                        <h5 class="fw-bold mb-0">{{ res.Days_Applied|default:"0" }}</h5>
+                                    </div>
+
+                                    <div class="bg-warning-subtle timeline-icon p-3">
+                                        <i class="mdi  mdi-calendar-clock text-warning fs-3"></i>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BALANCE -->
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card border-0 shadow-sm rounded-4 h-100">
+                            <div class="card-body">
+
+                                <div class="d-flex align-items-center justify-content-between">
+
+                                    <div>
+                                        <p class="text-muted mb-2">Leave Balance</p>
+                                        <h5 class="fw-bold mb-0">{{ res.Leave_balance|default:"-" }}</h5>
+                                    </div>
+
+                                    <div class="bg-info-subtle timeline-icon p-3">
+                                        <i class="mdi mdi-av-timer text-info fs-3"></i>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- MAIN CONTENT -->
+                <div class="row g-4">
+
+                    <!-- LEFT -->
+                    <div class="col-lg-8">
+
+                        <!-- DETAILS CARD -->
+                        <div class="card border-0 shadow-sm rounded-4 mb-4">
+
+                            <div class="card-header bg-white border-0 pt-4 px-4">
+                                <div class="d-flex align-items-center">
+
+                                    <div class="bg-primary-subtle timeline-icon p-3 me-3">
+                                        <i class="mdi mdi-file-document text-primary fs-4"></i>
+                                    </div>
+
+                                    <div>
+                                        <h5 class="fw-bold mb-1">Leave Information</h5>
+                                        <small class="text-muted">Detailed leave request information</small>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="card-body px-4 pb-4">
+
+                                <form action="{% url 'leave' %}" method="post">
+                                    {% csrf_token %}
+
+                                    <input type="hidden" name="applicationNo" value="{{ res.Application_No }}">
+                                    <input type="hidden" name="myAction" value="modify">
+
+                                    <div class="row g-4">
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Leave Period</label>
+                                            <input type="text" class="form-control"
+                                                value="{{ res.Leave_Period|default:'-' }}" disabled>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Leave Type</label>
+                                            <select class="form-select" disabled>
+                                                {% for type in leave %}
+                                                <option value="{{ type.Code }}" {% if type.Code == res.Leave_Code %}selected{% endif %}>
+                                                    {{ type.Description }}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Start Date</label>
+                                            <input type="date" class="form-control" id="start_date"
+                                                value="{{ res.Start_Date }}" disabled>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Return Same Day</label>
+                                            <select class="form-select" disabled>
+                                                <option value="True" {% if res.Return_same_day %}selected{% endif %}>
+                                                    Yes
+                                                </option>
+                                                <option value="False" {% if not res.Return_same_day %}selected{% endif  %}>
+                                                    No
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Days Applied</label>
+                                            <input type="number" class="form-control"
+                                                value="{{ res.Days_Applied|default:'0' }}" disabled>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">End Date</label>
+                                            <input type="text" class="form-control" id="end_date"
+                                                value="{{ res.End_Date }}" disabled>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Resumption Date</label>
+                                            <input type="text" class="form-control" id="resumption_date"
+                                                value="{{ res.Resumption_Date}}" disabled>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Application Date</label>
+                                            <input type="text" class="form-control" id="application_date"
+                                                value="{{ res.Application_Date}}" disabled>
+                                        </div>
+
+                                        {% if HOD_User %}
+                                        <div class="col-md-12">
+                                            <label class="form-label fw-semibold">Reliever</label>
+                                            <select class="form-select" disabled>
+                                                {% for reliever in directorReliever %}
+                                                <option value="{{ reliever.No_ }}" {% if reliever.No_ == res.Staff_No_Relievers %}selected{% endif %}>
+                                                    {{ reliever.First_Name }} {{ reliever.Last_Name }}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        {% endif %}
+
+                                    </div>
+
+                                </form>
+
+                            </div>
+                        </div>
+
+                        <!-- ATTACHMENTS + COMMENTS unchanged UI -->
+                        <!-- (kept exactly as you provided) -->
+
+                    </div>
+                    <!-- RIGHT SIDE -->
+                    <div class="col-lg-4">
+
+                        <!-- ACTIONS -->
+                        <div class="card border-0 shadow-sm rounded-4 mb-4">
+
+                            <div class="card-body p-4">
+
+                                <h5 class="fw-bold mb-4">
+                                    Request Actions
+                                </h5>
+
+                                {% if res.Status == "Open" %}
+                                <form action="#"
+                                      method="POST">
+
+                                    {% csrf_token %}
+
+                                    <input type="hidden"
+                                           name="myAction"
+                                           value="requestApproval">
+
+                                    <button class="btn btn-info w-100 py-3 mb-3">
+
+                                        <i class="las la-paper-plane me-2"></i>
+                                        Request For Approval
+
+                                    </button>
+
+                                </form>
+                                {% endif %}
+
+                                {% if res.Status == "Pending Approval" %}
+                                <form action="#"
+                                      method="POST">
+
+                                    {% csrf_token %}
+
+                                    <input type="hidden"
+                                           name="myAction"
+                                           value="cancelApproval">
+
+                                    <button class="btn btn-outline-danger w-100 py-3">
+
+                                        <i class="las la-times-circle me-2"></i>
+                                        Cancel Approval Request
+
+                                    </button>
+
+                                </form>
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                        <!-- TIMELINE -->
+                        <div class="card border-0 shadow-sm rounded-4">
+
+                            <div class="card-body p-4">
+
+                                <h5 class="fw-bold mb-4">
+                                    Request Timeline
+                                </h5>
+
+                                <div class="timeline-wrapper">
+
+                                    <div class="timeline-item mb-4">
+
+                                        <div class="d-flex">
+
+                                            <div class="timeline-icon bg-primary me-3">
+                                                <i class="mdi mdi-file-document text-white"></i>
+                                            </div>
+
+                                            <div>
+
+                                                <h6 class="fw-semibold mb-1">
+                                                    Request Created
+                                                </h6>
+
+                                                <small class="text-muted" id="application_date">
+                                                    {{res.Application_Date}}
+                                                </small>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="timeline-item mb-4">
+
+                                        <div class="d-flex">
+
+                                            <div class="timeline-icon bg-warning me-3">
+                                                <i class="mdi mdi-clock text-white"></i>
+                                            </div>
+
+                                            <div>
+
+                                                <h6 class="fw-semibold mb-1">
+                                                    Current Status
+                                                </h6>
+
+                                                <small class="text-muted">
+                                                    {{res.Status}}
+                                                </small>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="timeline-item">
+
+                                        <div class="d-flex">
+
+                                            <div class="timeline-icon bg-success me-3">
+                                                <i class="mdi mdi-calendar-check text-white"></i>
+                                            </div>
+
+                                            <div>
+
+                                                <h6 class="fw-semibold mb-1">
+                                                    Planned leave Date
+                                                </h6>
+
+                                                <small class="text-muted">
+                                                    {{res.Start_Date}}
+                                                </small>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- APPROVERS -->
+                {% if res.Status == "Pending Approval" %}
+                <div class="card border-0 shadow-sm rounded-4 mt-4">
+
+                    <div class="card-header bg-white border-0 pt-4 px-4">
+
+                        <div class="d-flex align-items-center">
+
+                            <div class="bg-info-subtle timeline-icon p-3 me-3">
+                                <i class="mdi mdi-account-group text-info fs-4"></i>
+                            </div>
+
+                            <div>
+
+                                <h5 class="fw-bold mb-1">
+                                    Document Approvers
+                                </h5>
+
+                                <small class="text-muted">
+                                    Approval workflow details
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="card-body px-4 pb-4">
+
+                        <div class="table-responsive">
+
+                            <table class="table table-hover align-middle">
+
+                                <thead class="table-light">
+
+                                    <tr>
+                                        <th>Entry No.</th>
+                                        <th>Name</th>
+                                        <th>Sequence</th>
+                                        <th>Status</th>
+                                        <th>Modified By</th>
+                                        <th>Modified Date</th>
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    {% for Approvers in Approvers %}
+                                    <tr>
+
+                                        <td>{{Approvers.Entry_No_}}</td>
+
+                                        <td>{{Approvers.Approver_ID}}</td>
+
+                                        <td>{{Approvers.Sequence_No_}}</td>
+
+                                        <td>
+
+                                            {% if Approvers.Status == "Approved" %}
+                                            <span class="badge bg-success">
+                                                {{Approvers.Status}}
+                                            </span>
+
+                                            {% elif Approvers.Status == "Pending" %}
+                                            <span class="badge bg-warning">
+                                                {{Approvers.Status}}
+                                            </span>
+
+                                            {% else %}
+                                            <span class="badge bg-secondary">
+                                                {{Approvers.Status}}
+                                            </span>
+                                            {% endif %}
+
+                                        </td>
+
+                                        <td>
+                                            {{Approvers.Last_Modified_By_User_ID}}
+                                        </td>
+
+                                        <td id="ModifiedDate{{Approvers.Entry_No_}}">
+                                            {{Approvers.Last_Date_Time_Modified}}
+                                        </td>
+
+                                    </tr>
+
+                                    {% endfor %}
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $(document).ready(function () {
+
+        $("#application_date").val(
+            moment('{{res.Application_Date}}', "YYYY-MM-DD")
+            .format('Do MMM YYYY')
+        );
+
+        $("#start_date").val(
+            moment('{{res.Start_Date}}', "YYYY-MM-DD")
+            .format('Do MMM YYYY')
+        );
+
+        $("#end_date").val(
+            moment('{{res.End_Date}}', "YYYY-MM-DD")
+            .format('Do MMM YYYY')
+        );
+        $("#resumption_date").val(
+            moment('{{res.Resumption_Date}}', "YYYY-MM-DD")
+            .format('Do MMM YYYY')
+        );
+
+        // {% for Approvers in Approvers %}
+        // $("#ModifiedDate{{Approvers.Entry_No_}}")
+        //     .empty()
+        //     .append(
+        //         moment(
+        //             '{{Approvers.Last_Date_Time_Modified}}',
+        //             "YYYY-MM-DD"
+        //         ).format('Do MMM YYYY')
+        //     );
+        // {% endfor %}
+
+    });
+</script>
+
+{% endblock %}

@@ -33,10 +33,10 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-$n@$f76ufc=)rbdwtdip+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '172.21.32.1']
 
 ENCRYPT_KEY = config(
-    'ENCRYPT_KEY', default=b'8zUwJvYZKzgecbudNa7zjhsjTDW-79fwwtUHQn8YCos=', cast=bytes)
+    'ENCRYPT_KEY', default=b'kWzhgx8GNNWLZde+3nU5MyqB+JW37blGpvCYi0jogqs=', cast=bytes)
 
 
 
@@ -54,7 +54,8 @@ INSTALLED_APPS = [
     "accounts",
     'base',
     'HR',
-    'transport'
+    'transport',
+    'exit',
 ]
 
 MIDDLEWARE = [
@@ -71,11 +72,15 @@ MIDDLEWARE = [
     
     # custom middleware
     'accounts.middleware.session_auth_middleware',
+    'core.mixins.redirect_home.RedirectHomeMiddleware',
     
 ]
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-SESSION_COOKIE_AGE = 1209600
+
+SESSION_COOKIE_AGE = 600
+SESSION_SAVE_EVERY_REQUEST = True
+
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_COOKIE_HTTPONLY = True
 
@@ -164,8 +169,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTHS = Session()
 
-WEB_SERVICE_UID = "NAVADMIN"
-WEB_SERVICE_PWD = "N@vsetup@123"
+# WEB_SERVICE_UID = "KTL-ADMIN"
+# WEB_SERVICE_PWD = "Dhcks@8384"
 
 
 # O_DATA = "http://192.168.2.12:7053/LBDA/ODataV4/Company('LBDA'){}"
@@ -173,6 +178,9 @@ WEB_SERVICE_PWD = "N@vsetup@123"
 # APPRAISAL_URL = (
 #     "http://192.168.2.12:7052/LBDA/WS/LBDA/Codeunit/CuAppraisalWebPortal"
 # )
+
+WEB_SERVICE_UID = config("WEB_SERVICE_UID")
+WEB_SERVICE_PWD = config("WEB_SERVICE_PWD")
 
 O_DATA = config("O_DATA")
 BASE_URL = config("BASE_URL")

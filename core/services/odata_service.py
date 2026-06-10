@@ -150,7 +150,7 @@ class ODataService:
     async def fetch_one(
         cls,
         endpoint,
-        property,
+        field,
         value,
     ):
 
@@ -158,7 +158,7 @@ class ODataService:
             endpoint=endpoint,
             filters=[
                 {
-                    "field": property,
+                    "field": field,
                     "operator": "eq",
                     "value": value,
                 }
@@ -184,7 +184,20 @@ class ODataService:
         queries = [
             {
                 "endpoint": "/QyApprovalEntries",
-                "filters": [...],
+                "filters": [
+                    {
+                        "field": "ApproverID",
+                        "operator": "eq",
+                        "value": user_id
+                    },
+                    {
+                        "logic": "and",
+                        "field": "Status",
+                        "operator": "eq",
+                        "value": "Open"
+                    },
+                    ...
+                ],
                 "alias": "Approvers"
             }
         ]

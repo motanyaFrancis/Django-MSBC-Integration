@@ -22,5 +22,6 @@ urlpatterns = [
     path("", include("accounts.urls")),
     path("", include("base.urls")),
     path("", include("HR.urls")),
+    path("", include("exit.urls")),
     path("", include("transport.urls")),
 ]

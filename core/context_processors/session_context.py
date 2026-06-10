@@ -25,6 +25,7 @@ def session_user(request):
             "hod_user": session.get("HOD_User"),
             "phone": session.get("Personal_Phone_No_"),
             "employment_type": session.get("Employment_Type"),
+            "leave_balance": session.get("leave_balance"),
         }
     }
 

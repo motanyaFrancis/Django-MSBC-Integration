@@ -19,4 +19,7 @@ class SessionMixin:
             "User_Responsibility_Center": request.session.get("User_Responsibility_Center"),
             "Employment_Type": request.session.get("Employment_Type"),
             "is_authenticated": request.session.get("is_authenticated", False),
+            "Portal_Password": request.session.get("Portal_Password"),
+            "password": request.session.get("password"),
+            "leave_balance": request.session.get("leave_balance"),
         }

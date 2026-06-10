@@ -1,5 +1,6 @@
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.utils.cache import add_never_cache_headers
 
 def session_auth_middleware(get_response):
     """Simple sync middleware - public paths always accessible"""
@@ -30,6 +31,10 @@ def session_auth_middleware(get_response):
             return HttpResponseRedirect(reverse("auth"))
 
         response = get_response(request)
+
+        if not is_public:
+            add_never_cache_headers(response)
+
         return response
 
     return middleware
