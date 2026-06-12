@@ -15,27 +15,21 @@ class SOAPMixin:
             soap_method=soap_method,
             params=params or [],
         )
-    
-    def upload_attachment(
-        self,
-        soap_method,
-        file,
-        *params
-    ):
-        """
-        Generic SOAP attachment uploader.
 
-        - Encodes file to base64
-        - Keeps params fully dynamic for scaling across endpoints
+    def upload_attachment(self, soap_method, doc_no, file, *params):
         """
-
+        - doc_no  : document number, always first in SOAP params
+        - file    : file object, encoded to base64
+        - *params : any extra params (tableID, userID, etc.) passed through in order
+        """
         file_name = file.name
-        file_content = base64.b64encode(file.read())
+        file_content = base64.b64encode(file.read()).decode("utf-8")
 
         final_params = [
-            *params,
-            file_name,
-            file_content,
+            doc_no,        # always first
+            file_name,     # always second
+            file_content,  # always third
+            *params,       # tableID, userID, anything else — in call order
         ]
 
         return SOAPService.call(

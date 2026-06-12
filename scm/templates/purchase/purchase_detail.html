@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-Purchase Request Details
+Purchase Request - {{res.No_}}
 {% endblock %}
 
 {% block content %}
@@ -42,7 +42,7 @@ Purchase Request Details
                         </nav>
 
                         <h3 class="fw-bold mb-1">
-                            Purchase Request Details
+                            Purchase Request
                         </h3>
 
                         <p class="text-muted mb-0">
@@ -575,36 +575,6 @@ Purchase Request Details
         </div>
     </div>
 </div>
-
-<style>
-    .timeline-icon {
-        width: 42px;
-        height: 42px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-    }
-
-    .form-control,
-    .form-select {
-        min-height: 34px;
-        border-radius: 4px;
-    }
-
-    .card {
-        transition: all 0.3s ease;
-    }
-
-    .card:hover {
-        transform: translateY(-2px);
-    }
-
-    .breadcrumb-item a {
-        text-decoration: none;
-    }
-</style>
 
 <script>
 
