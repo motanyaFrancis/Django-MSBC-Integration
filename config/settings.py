@@ -28,7 +28,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-$n@$f76ufc=)rbdwtdip+wv&mw$ey3!&_h%!twxtzz7r73m533')
+SECRET_KEY = config(
+    'SECRET_KEY', default='django-insecure-$n@$f76ufc=)rbdwtdip+wv&mw$ey3!&_h%!twxtzz7r73m533')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
@@ -37,7 +38,6 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', '172.21.32.1']
 
 ENCRYPT_KEY = config(
     'ENCRYPT_KEY', default=b'kWzhgx8GNNWLZde+3nU5MyqB+JW37blGpvCYi0jogqs=', cast=bytes)
-
 
 
 # Application definition
@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'HR',
     'transport',
     'exit',
+    'scm',
 ]
 
 MIDDLEWARE = [
@@ -66,14 +67,14 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    
+
     # 3rd party middleware
     'whitenoise.middleware.WhiteNoiseMiddleware',
-    
+
     # custom middleware
     'accounts.middleware.session_auth_middleware',
     'core.mixins.redirect_home.RedirectHomeMiddleware',
-    
+
 ]
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
@@ -99,6 +100,7 @@ TEMPLATES = [
 
                 # custom context processors
                 "core.context_processors.session_context.session_user",
+                "core.context_processors.session_context.session_assets",
                 "core.context_processors.session_context.session_assets",
                 "core.context_processors.session_context.app_meta",
             ],

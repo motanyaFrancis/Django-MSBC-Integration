@@ -1,0 +1,632 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}
+Store Request Details
+{% endblock %}
+
+{% block content %}
+
+<div class="content-wrapper">
+
+    <!-- PAGE HEADER -->
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="home-tab">
+
+                <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+
+                    <div>
+
+                        <nav aria-label="breadcrumb border-0">
+                            <ol class="breadcrumb border-0 mb-2 px-0">
+
+                                <li class="breadcrumb-item">
+                                    <a href="/dashboard/">
+                                        <i class="ti-home me-1"></i>
+                                        Dashboard
+                                    </a>
+                                </li>
+
+                                <li class="breadcrumb-item">
+                                    <a href="/store/">
+                                        Store Requests
+                                    </a>
+                                </li>
+
+                                <li class="breadcrumb-item active">
+                                    {{res.No_}}
+                                </li>
+
+                            </ol>
+                        </nav>
+
+                        <h3 class="fw-bold mb-1">
+                            Store Request Details
+                        </h3>
+
+                        <p class="text-muted mb-0">
+                            View and manage store request information
+                        </p>
+
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2">
+
+                        {% if res.Status == "Open" %}
+                        <button class="btn btn-primary text-white" data-bs-toggle="modal"
+                            data-bs-target="#employeeModal">
+
+                            <i class="mdi mdi-account-plus me-1"></i>
+                            Add Traveling Employee
+                        </button>
+                        {% endif %}
+
+                        {% if res.Status == "Released" %}
+                        <form action="{% url 'FnGenerateImprestReport' res.No_ %}" method="POST">
+
+                            {% csrf_token %}
+
+                            <button class="btn btn-success">
+
+                                <i class="mdi mdi-download me-1"></i>
+                                Preview Report
+                            </button>
+
+                        </form>
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+                <!-- SUMMARY CARDS -->
+                <div class="row g-4 mb-4">
+
+                    <div class="col-xl-3 col-md-6">
+
+                        <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                            <div class="card-body">
+
+                                <div class="d-flex align-items-center justify-content-between">
+
+                                    <div>
+
+                                        <p class="text-muted mb-2">
+                                            Request Status
+                                        </p>
+
+                                        {% if res.Status == "Open" %}
+                                        <span class="badge bg-info fs-6">
+                                            {{res.Status}}
+                                        </span>
+
+                                        {% elif res.Status == "Pending Approval" %}
+                                        <span class="badge bg-warning fs-6">
+                                            {{res.Status}}
+                                        </span>
+
+                                        {% elif res.Status == "Released" or res.Status == "Approved" %}
+                                        <span class="badge bg-success fs-6">
+                                            {{res.Status}}
+                                        </span>
+
+                                        {% else %}
+                                        <span class="badge bg-secondary fs-6">
+                                            {{res.Status}}
+                                        </span>
+                                        {% endif %}
+
+                                    </div>
+
+                                    <div class="bg-primary-subtle timeline-icon p-3">
+                                        <i class="mdi mdi-file-document-check text-primary fs-3"></i>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-xl-3 col-md-6">
+
+                        <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                            <div class="card-body">
+
+                                <div class="d-flex align-items-center justify-content-between">
+
+                                    <div>
+
+                                        <p class="text-muted mb-2">
+                                            Item Location
+                                        </p>
+
+                                        <h5 class="fw-bold mb-0">
+                                            {{res.Location_Code}}
+                                        </h5>
+
+                                    </div>
+
+                                    <div class="bg-success-subtle timeline-icon p-3">
+                                        <i class="mdi mdi-map-marker text-success fs-3"></i>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-xl-3 col-md-6">
+
+                        <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                            <div class="card-body">
+
+                                <div class="d-flex align-items-center justify-content-between">
+
+                                    <div>
+
+                                        <p class="text-muted mb-2">
+                                            Document Date
+                                        </p>
+
+                                        <h5 class="fw-bold mb-0" id="planned_start_date">
+                                            {{res.Document_Date}}
+                                        </h5>
+
+                                    </div>
+
+                                    <div class="bg-warning-subtle timeline-icon p-3">
+                                        <i class="mdi mdi-calendar text-warning fs-3"></i>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-xl-3 col-md-6">
+
+                        <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                            <div class="card-body">
+
+                                <div class="d-flex align-items-center justify-content-between">
+
+                                    <div>
+
+                                        <p class="text-muted mb-2">
+                                            Expected Receipt Date
+                                        </p>
+
+                                        <h5 class="fw-bold mb-0" id="planned_end_date">
+                                            {{res.Expected_Receipt_Date}}
+                                        </h5>
+
+                                    </div>
+
+                                    <div class="bg-info-subtle timeline-icon p-3">
+                                        <i class="mdi mdi-calendar-check text-info fs-3"></i>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- MAIN CONTENT -->
+                <div class="row g-4">
+
+                    <!-- LEFT SIDE -->
+                    <div class="col-lg-8">
+
+                        <!-- DETAILS -->
+                        <div class="card border-0 shadow-sm rounded-4 mb-4">
+
+                            <div class="card-header bg-white border-0 pt-4 px-4">
+
+                                <div class="d-flex align-items-center">
+
+                                    <div class="bg-primary-subtle timeline-icon p-3 me-3">
+                                        <i class="mdi mdi-file-document text-primary fs-4"></i>
+                                    </div>
+
+                                    <div>
+                                        <h5 class="fw-bold mb-1">
+                                            Store Information
+                                        </h5>
+
+                                        <small class="text-muted">
+                                            Detailed store request information
+                                        </small>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="card-body px-4 pb-4">
+
+                                <div class="row g-4">
+
+                                    <div class="col-md-6">
+
+                                        <label class="form-label fw-semibold">
+                                            Request Date
+                                        </label>
+
+                                        <input type="text" class="form-control" id="request_date"
+                                            value="{{res.Document_Date}}" disabled>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold"> Employee No. </label>
+                                        <input type="text" class="form-control" value="{{res.Employee_No_}}" disabled>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold"> Employee Name </label>
+                                        <input type="text" class="form-control" id="start_date"
+                                            value="{{res.Employee_Name}}" disabled>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Requested By </label>
+                                        <input type="text" class="form-control" value="{{res.Requested_By}}" disabled>
+                                    </div>
+
+
+                                    <div class="col-md-12">
+                                        <label class="form-label fw-semibold">
+                                            Reason for Purchase
+                                        </label>
+                                        <textarea class="form-control" rows="4"
+                                            disabled>{{res.Reason_Description}}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TRAVELING EMPLOYEES -->
+                        <div class="card border-0 shadow-sm rounded-4">
+                            <div class="card-header bg-white border-0 pt-4 px-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-success-subtle timeline-icon p-3 me-3">
+                                        <i class="mdi mdi-account-group text-success fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="fw-bold mb-1"> Request Line Items </h5>
+                                        <small class="text-muted">
+                                            Items included in this store request
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card-body px-4 pb-4">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Item Number</th>
+                                                <th>Description</th>
+                                                <th>Unit of Measure</th>
+                                                <th>Quantity</th>
+                                                {% if res.Status == "Open" %}
+                                                <th class="text-end"> Action </th>
+                                                {% endif %}
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            {% for line in lines %}
+                                            <tr>
+                                               <td>{{line.No_}}</td>
+                                                <td>{{line.Description}}</td>
+                                                <td>{{line.Unit_of_Measure}}</td>
+                                                <td>{{line.Quantity}}</td>
+                                                {% if res.Status == "Open" %}
+                                                <td class="text-end">
+                                                    <form action="{% url 'TransportDetails' res.No_ %}"
+                                                        method="POST">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="employeeNo"
+                                                            value="{{line.Employee_No_}}">
+                                                        <input type="hidden" name="myAction" value="delete">
+                                                        <button class="btn btn-sm btn-danger text-white">
+
+                                                            <i class="mdi  mdi-account-remove-outline"></i> Remove
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                                {% endif %}
+                                            </tr>
+                                            {% empty %}
+                                            <tr>
+                                                <td colspan="3" class="text-center py-4 text-muted">
+                                                    No traveling employees added
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT SIDE -->
+                    <div class="col-lg-4">
+                         <!-- TIMELINE -->
+                        <div class="card border-0 shadow-sm rounded-4  mb-4">
+                            <div class="card-body p-4">
+                                <h5 class="fw-bold mb-4"> Request Timeline </h5>
+                                <div class="timeline-wrapper">
+                                    <div class="timeline-item mb-4">
+
+                                        <div class="d-flex">
+
+                                            <div class="timeline-icon bg-primary me-3">
+                                                <i class="mdi mdi-file-document text-white"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="fw-semibold mb-1"> Request Created </h6>
+                                                <small class="text-muted"> {{res.Document_Date}} </small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="timeline-item mb-4">
+                                        <div class="d-flex">
+                                            <div class="timeline-icon bg-warning me-3">
+                                                <i class="mdi mdi-clock text-white"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="fw-semibold mb-1"> Current Status </h6>
+                                                <small class="text-muted"> {{res.Status}} </small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="timeline-item">
+                                        <div class="d-flex">
+                                            <div class="timeline-icon bg-success me-3">
+                                                <i class="mdi mdi-calendar-check text-white"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="fw-semibold mb-1"> Expected Receipt Date </h6>
+                                                <small class="text-muted"> {{res.Expected_Receipt_Date}} </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- ACTIONS -->
+                        <div class="card border-0 shadow-sm rounded-4 mb-4">
+                            <div class="card-body p-4">
+                                <h5 class="fw-bold mb-4"> Request Actions </h5>
+
+                                {% if res.Status == "Open" %}
+                                <form action="{% url 'store_aproval' res.No_ %}" method="POST">
+                                    {% csrf_token %}
+                                    <!-- <input type="hidden" name="myAction" value="requestApproval"> -->
+
+                                    <button class="btn btn-info w-100 py-3 mb-3">
+                                        <i class="las la-paper-plane me-2"></i>
+                                        Request For Approval
+                                    </button>
+
+                                </form>
+                                {% endif %}
+
+                                {% if res.Status == "Pending Approval" %}
+                                <form action="{% url 'cancel_store_aproval' res.No_ %}" method="POST">
+                                    {% csrf_token %}
+                                    <!-- <input type="hidden" name="myAction" value="cancelApproval"> -->
+
+                                    <button class="btn btn-outline-danger w-100 py-3">
+                                        <i class="las la-times-circle me-2"></i> Cancel Approval Request
+                                    </button>
+
+                                </form>
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                       
+                    </div>
+                </div>
+
+                <!-- APPROVERS -->
+                {% if res.Status == "Pending Approval" %}
+                <div class="card border-0 shadow-sm rounded-4 mt-4">
+                    <div class="card-header bg-white border-0 pt-4 px-4">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-info-subtle timeline-icon p-3 me-3">
+                                <i class="mdi mdi-account-group text-info fs-4"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-1"> Document Approvers </h5>
+                                <small class="text-muted"> Approval workflow details </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body px-4 pb-4">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Entry No.</th>
+                                        <th>Name</th>
+                                        <th>Sequence</th>
+                                        <th>Status</th>
+                                        <th>Modified By</th>
+                                        <th>Modified Date</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+
+                                    {% for Approvers in Approvers %}
+                                    <tr>
+                                        <td>{{Approvers.Entry_No_}}</td>
+                                        <td>{{Approvers.Approver_ID}}</td>
+                                        <td>{{Approvers.Sequence_No_}}</td>
+                                        <td>
+                                            {% if Approvers.Status == "Approved" %}
+                                            <span class="badge bg-success">
+                                                {{Approvers.Status}}
+                                            </span>
+                                            {% elif Approvers.Status == "Pending" %}
+                                            <span class="badge bg-warning">
+                                                {{Approvers.Status}}
+                                            </span>
+                                            {% else %}
+                                            <span class="badge bg-secondary">
+                                                {{Approvers.Status}}
+                                            </span>
+                                            {% endif %}
+                                        </td>
+                                        <td> {{Approvers.Last_Modified_By_User_ID}} </td>
+
+                                        <td id="ModifiedDate{{Approvers.Entry_No_}}">
+                                            {{Approvers.Last_Date_Time_Modified}} </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- EMPLOYEE MODAL -->
+<div class="modal fade" id="employeeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow rounded-4 overflow-hidden">
+            <div class="modal-header bg-primary text-white border-0">
+                <div>
+                    <h5 class="modal-title fw-bold">
+                        <i class="las la-user-plus me-2"></i>
+                        Add Traveling Employee
+                    </h5>
+                    <small class="opacity-75"> Add employee to transport request </small>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"> </button>
+            </div>
+
+            <div class="modal-body p-4">
+                <form action="{% url 'TransportDetails' res.No_ %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="myAction" value="insert">
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold"> Employee </label>
+                        <select class="form-select" name="employee_no" required>
+                            <option value="" disabled selected>-- Select Employee --</option>
+                            {% for employee in employees %}
+                            <option value="{{employee.No_}}">
+                                {{employee.First_Name}} {{employee.Last_Name}}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-3">
+                        <i class="las la-save me-2"></i>
+                        Save Employee
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .timeline-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .form-control,
+    .form-select {
+        min-height: 34px;
+        border-radius: 4px;
+    }
+
+    .card {
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+    }
+
+    .breadcrumb-item a {
+        text-decoration: none;
+    }
+</style>
+
+<script>
+
+    $(document).ready(function () {
+
+        $("#request_date").val(
+            moment('{{res.Request_Date}}', "YYYY-MM-DD")
+                .format('Do MMM YYYY')
+        );
+
+        $("#start_date").val(
+            moment('{{res.Trip_Planned_Start_Date}}', "YYYY-MM-DD")
+                .format('Do MMM YYYY')
+        );
+
+        $("#end_date").val(
+            moment('{{res.Trip_Planned_End_Date}}', "YYYY-MM-DD")
+                .format('Do MMM YYYY')
+        );
+
+        // {% for Approvers in Approvers %}
+        // $("#ModifiedDate{{Approvers.Entry_No_}}")
+        //     .empty()
+        //     .append(
+        //         moment(
+        //             '{{Approvers.Last_Date_Time_Modified}}',
+        //             "YYYY-MM-DD"
+        //         ).format('Do MMM YYYY')
+        //     );
+        // {% endfor %}
+
+    });
+
+</script>
+
+{% endblock %}

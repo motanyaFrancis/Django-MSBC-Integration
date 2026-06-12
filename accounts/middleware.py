@@ -1,4 +1,4 @@
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, request
 from django.urls import reverse
 from django.utils.cache import add_never_cache_headers
 
@@ -6,12 +6,11 @@ def session_auth_middleware(get_response):
     """Simple sync middleware - public paths always accessible"""
 
     def middleware(request):
+
         public_paths = [
             "auth",
-            # "login",
             "forgot-password",
-            "reset-password",
-            # "reset-password-confirm",
+            "reset",
             "static",
             "media",
             "serviceworker.js",
@@ -28,7 +27,9 @@ def session_auth_middleware(get_response):
         # Allow public paths REGARDLESS of session
         # Only check session for protected paths
         if not is_public and not request.session.get("is_authenticated"):
-            return HttpResponseRedirect(reverse("auth"))
+            next_url = request.get_full_path()
+            login_url = reverse("auth")
+            return HttpResponseRedirect(f"{login_url}?next={next_url}")
 
         response = get_response(request)
 

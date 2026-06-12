@@ -15,6 +15,13 @@
                     <h6 class="fw-light">Sign in to continue.</h6>
                     <form class="pt-3" action="{% url 'auth' %}" method="post">
                         {% csrf_token %}
+
+                        <!-- Next URL -->
+                        {% if request.GET.next %}
+                            <input type="hidden" name="next" value="{{ request.GET.next }}">
+                        {% endif %}
+
+                        <!--Username and Password -->
                         <div class="form-group">
                             <input type="text" class="form-control form-control-lg" name="username"
                                 id="exampleInputEmail1" placeholder="Username">

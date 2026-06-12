@@ -24,4 +24,5 @@ urlpatterns = [
     path("", include("HR.urls")),
     path("", include("exit.urls")),
     path("", include("transport.urls")),
+    path("", include("scm.urls")),
 ]

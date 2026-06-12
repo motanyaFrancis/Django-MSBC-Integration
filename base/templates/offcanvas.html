@@ -49,25 +49,23 @@
             <a class="nav-link" data-bs-toggle="collapse" href="#charts" aria-expanded="false"
                 aria-controls="charts">
                 <i class="menu-icon mdi mdi-cart-arrow-down"></i>
-                <span class="menu-title">Procurement</span>
+                <span class="menu-title">Supply Chain</span>
                 <i class="menu-arrow"></i>
             </a>
             <div class="collapse" id="charts">
                 <ul class="nav flex-column sub-menu">
-                    <li class="nav-item"> <a class="nav-link" href="#">Purchase Requests</a></li>
-                    <li class="nav-item"> <a class="nav-link" href="#">Store</a></li>
-                    <li class="nav-item"> <a class="nav-link" href="#">Repair/Maintenance</a></li>
+                    <li class="nav-item"> <a class="nav-link" href="/purchase/">Purchase Requests</a></li>
+                    <li class="nav-item"> <a class="nav-link" href="/store/">Store Requests</a></li>
+                    <!-- <li class="nav-item"> <a class="nav-link" href="#">Repair/Maintenance</a></li> -->
                 </ul>
             </div>
         </li>
-        <!-- <li class="nav-item">
+        <li class="nav-item">
             <a class="nav-link" href="{% url 'transport' %}">
                 <i class="menu-icon mdi mdi-train-car"></i>
-                <span class="menu-title">Transport</span>
-                
-            </a>
-            
-        </li> -->
+                <span class="menu-title">Transport</span>            
+            </a>            
+        </li>
         <li class="nav-item">
             <a class="nav-link" href="{% url 'get_user_report' %}">
                 <i class="menu-icon mdi mdi-file-document-multiple-outline"></i>

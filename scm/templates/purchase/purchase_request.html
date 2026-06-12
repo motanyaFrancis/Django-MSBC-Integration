@@ -1,0 +1,354 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}
+Purchase Requests
+{% endblock %}
+
+{% block content %}
+
+<div class="content-wrapper">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="home-tab">
+                <!-- PAGE HEADER -->
+                <div class="d-flex justify-content-between align-items-center border-bottom py-3">
+                    <div>
+                        <h4 class="font-weight-bold mb-0">
+                            Purchase Requests
+                        </h4>
+                        <p class="text-muted mb-0">
+                            Manage and track your Purchase requests
+                        </p>
+                    </div>
+                    <div>
+                       
+                    </div>
+                </div>
+
+                <!-- TABS -->
+                <div class="d-sm-flex align-items-center justify-content-between border-bottom mb-1">
+                
+                    <ul class="nav nav-tabs" role="tablist">
+                
+                        <!-- OPEN -->
+                        <li class="nav-item">
+                            <a class="nav-link active" id="open-tab" data-bs-toggle="tab" href="#open-requests" role="tab">
+                
+                                Open Requests
+                
+                                <span class="badge rounded-pill bg-info ms-2">
+                                    {{ open_purchase_requests|length }}
+                                </span>
+                
+                            </a>
+                        </li>
+                
+                        <!-- PENDING -->
+                        <li class="nav-item">
+                            <a class="nav-link" id="pending-tab" data-bs-toggle="tab" href="#pending-requests" role="tab">
+                
+                                Pending Approval
+                
+                                <span class="badge rounded-pill bg-warning ms-2">
+                                    {{ pending_purchase_requests|length }}
+                                </span>
+                
+                            </a>
+                        </li>
+                
+                        <!-- APPROVED -->
+                        <li class="nav-item">
+                            <a class="nav-link " id="approved-tab" data-bs-toggle="tab" href="#approved-requests" role="tab">
+                
+                                Approved Requests
+                
+                                <span class="badge rounded-pill bg-success ms-2">
+                                    {{ approved_purchase_requests|length }}
+                                </span>
+                
+                            </a>
+                        </li>
+                
+                    </ul>
+                
+                    <button type="button" class="btn btn-primary text-white" data-bs-toggle="modal"
+                        data-bs-target="#purchaseRequestModal">
+                
+                        <i class="mdi mdi-plus-circle-outline"></i>
+                        New Purchase Request
+                    </button>
+                
+                </div>
+
+                <!-- TAB CONTENT -->
+                <div class="tab-content tab-content-basic">
+
+                    <!-- OPEN REQUESTS -->
+                    <div class="tab-pane fade show active" id="open-requests" role="tabpanel">
+
+                        <div class="col-lg-12 grid-margin stretch-card">
+
+                            <div class="card shadow-sm border-0">
+
+                                <div class="card-body">
+
+                                    <h4 class="card-title mb-3">
+                                        Open Purchase Requests
+                                    </h4>
+
+                                    <div class="table-responsive">
+
+                                        <table class="table table-striped table-hover align-middle">
+
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Purchase No.</th>
+                                                    <th>Order Date</th>
+                                                    <th>Procurement Plan</th>
+                                                    <th>Requested By</th>
+                                                   
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+
+                                            <tbody>
+
+                                                {% for res in open_purchase_requests %}
+                                                <tr>
+                                                    <td> {{ res.No_ }} </td>
+                                                    <td> {{ res.Order_Date }} </td>
+                                                    <td> {{ res.Procurement_Plan }} </td>
+                                                    <td> {{ res.Requested_By }} </td>
+                                                    
+
+                                                    <td>
+
+                                                        <a href="{% url 'purchase_details' res.No_ %}"
+                                                            class="btn btn-primary text-white">
+
+                                                            <i class="mdi mdi-folder-eye"></i>
+                                                            View
+                                                        </a>
+                                                    </td>
+
+                                                </tr>
+                                                {% empty %}
+                                                <tr>
+                                                    <td colspan="6" class="text-center py-4 text-muted">
+
+                                                        No open Purchase requests found
+
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+
+                                            </tbody>
+
+                                        </table>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- PENDING -->
+                    <div class="tab-pane fade" id="pending-requests" role="tabpanel">
+
+                        <div class="col-lg-12 grid-margin stretch-card">
+
+                            <div class="card shadow-sm border-0">
+
+                                <div class="card-body">
+
+                                    <h4 class="card-title mb-3">
+                                        Pending Purchase Requests
+                                    </h4>
+
+                                    <div class="table-responsive">
+
+                                        <table class="table table-striped table-hover align-middle">
+
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Purchase No.</th>
+                                                    <th>Order Date</th>
+                                                    <th>Procurement Plan</th>
+                                                    <th>Requested By</th>
+                                                   
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+
+                                            <tbody>
+
+                                                {% for res in pending_purchase_requests %}
+                                                <tr>
+                                                    <td> {{ res.No_ }} </td>
+                                                    <td> {{ res.Order_Date }} </td>
+                                                    <td> {{ res.Procurement_Plan }} </td>
+                                                    <td> {{ res.Requested_By }} </td>
+                                                    <td>
+                                                        <a href="{% url 'purchase_details' res.No_ %}"
+                                                            class="btn btn-primary text-white">
+
+                                                            <i class="mdi mdi-folder-eye"></i>
+                                                            View
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                                {% empty %}
+                                                <tr>
+                                                    <td colspan="6" class="text-center py-4 text-muted">
+
+                                                        No pending Purchase requests found
+
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+
+                                            </tbody>
+
+                                        </table>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- APPROVED -->
+                    <div class="tab-pane fade" id="approved-requests" role="tabpanel">
+                        <div class="col-lg-12 grid-margin stretch-card">
+                            <div class="card shadow-sm border-0">
+                                <div class="card-body">
+                                    <h4 class="card-title mb-3">
+                                        Approved Purchase Requests
+                                    </h4>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-hover align-middle">
+
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Purchase No.</th>
+                                                    <th>Order Date</th>
+                                                    <th>Procurement Plan</th>
+                                                    <th>Requested By</th>
+                                                   
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+
+                                                {% for res in approved_purchase_requests %}
+                                                <tr>
+                                                    <td> {{ res.No_ }} </td>
+                                                    <td> {{ res.Order_Date }} </td>
+                                                    <td> {{ res.Procurement_Plan }} </td>
+                                                    <td> {{ res.Requested_By }} </td>                                
+                                                    <td>
+                                                        <a href="{% url 'purchase_details' res.No_ %}"
+                                                            class="btn btn-primary text-white">
+                                                            <i class="mdi mdi-folder-eye"></i>
+                                                            View
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                                {% empty %}
+                                                <tr>
+                                                    <td colspan="6" class="text-center py-4 text-muted">
+
+                                                        No approved Purchase requests found
+
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'purchase/Purchase_modal.html' %}
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+    $(document).ready(function () {
+
+        $('#travelType').on('change', function () {
+
+            const travelType = $(this).val();
+
+            if (travelType) {
+
+                $("#PurchaseForm select[name='destination']")
+                    .find('.after')
+                    .nextAll()
+                    .remove();
+
+                $.ajax({
+                    type: 'GET',
+                    url: '{% url "get_destinations" %}',
+                    dataType: 'json',
+                    data: {
+                        travelType: travelType
+                    },
+
+                    success: function (response) {
+
+                        let options = '';
+
+                        if (response.length === 0) {
+
+                            options =
+                                '<option disabled selected>No destinations found</option>';
+
+                        } else {
+
+                            for (let i = 0; i < response.length; i++) {
+
+                                options +=
+                                    '<option value="' +
+                                    response[i].Destination_Code +
+                                    '">' +
+                                    response[i].Destination_Code +
+                                    '</option>';
+                            }
+                        }
+
+                        $("#PurchaseForm select[name='destination']")
+                            .find('.after')
+                            .after(options);
+                    },
+
+                    error: function () {
+                        console.log('Failed to load destinations');
+                    }
+
+                });
+
+            }
+
+        });
+
+    });
+</script>
+
+{% endblock %}

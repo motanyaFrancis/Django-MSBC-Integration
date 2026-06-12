@@ -335,6 +335,48 @@ class TrainingNeeds(
                 status=500,
             )
 
+class UnitOfMeasure(
+    AuthRequiredMixin,
+    SessionMixin,
+    ODataMixin,
+    View,
+):
+
+    async def get(self, request):
+
+        try:
+
+            response = await self.all_data(endpoint="/QyItemUnitsOfMeasure")
+            return JsonResponse(response, safe=False,)
+
+        except Exception as e:
+            logging.exception(e)
+            return JsonResponse(
+                {"success": False, "message": str(e), },
+                status=500,
+            )
+
+class Items(
+    AuthRequiredMixin,
+    SessionMixin,
+    ODataMixin,
+    View,
+):
+
+    async def get(self, request):
+
+        try:
+
+            response = await self.all_data(endpoint="/QyItems")
+            return JsonResponse(response, safe=False,)
+
+        except Exception as e:
+            logging.exception(e)
+            return JsonResponse(
+                {"success": False, "message": str(e), },
+                status=500,
+            )
+
 
 class LeaveBalanceView(
     AuthRequiredMixin,

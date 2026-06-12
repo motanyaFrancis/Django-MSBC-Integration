@@ -1,24 +1,23 @@
-from asgiref.sync import sync_to_async
 import asyncio
-import logging
 import base64
-import filetype
+import logging
 
-from django.views import View
-from django.shortcuts import render, redirect
+import filetype
+from asgiref.sync import sync_to_async
 from django.contrib import messages
 from django.core.cache import cache
-
-
-from core.mixins.odata_mixin import ODataMixin
-from core.mixins.soap_mixin import SOAPMixin
-from core.mixins.session_mixin import SessionMixin
-from core.mixins.auth_mixin import AuthRequiredMixin
-from core.mixins.encryption_mixin import EncryptionMixin
-
-from core.services.session_service import SessionService
+from django.shortcuts import redirect, render
+from django.views import View
 
 from accounts.models import TrackedDevice
+from core.mixins.auth_mixin import AuthRequiredMixin
+from core.mixins.encryption_mixin import EncryptionMixin
+from core.mixins.odata_mixin import ODataMixin
+from core.mixins.session_mixin import SessionMixin
+from core.mixins.soap_mixin import SOAPMixin
+from core.services.session_service import SessionService
+
+from .cache_keys import profile_image_format_key, profile_image_key
 
 logger = logging.getLogger(__name__)
 
@@ -49,12 +48,14 @@ class LoginView(
     def post(self, request):
 
         try:
+            next_url = request.POST.get("next", "")
+
             username = request.POST.get("username", "").upper().strip()
             password = request.POST.get("password", "").strip()
 
             if not username or not password:
                 messages.error(request, "Username and password are required")
-                return redirect("auth")
+                return self._redirect_auth(next_url)
 
             # =====================================================
             # FETCH USER (ODATA - ASYNC WRAPPED)
@@ -70,7 +71,7 @@ class LoginView(
 
             if not users:
                 messages.error(request, "Invalid credentials")
-                return redirect("auth")
+                return self._redirect_auth(next_url)
 
             user = users[0]
 
@@ -78,7 +79,7 @@ class LoginView(
 
             if not encrypted_password:
                 messages.error(request, "Account not configured properly")
-                return redirect("auth")
+                return self._redirect_auth(next_url)
 
             decrypted_password = self.decrypt_password(encrypted_password)
 
@@ -87,7 +88,7 @@ class LoginView(
             # =====================================================
             if decrypted_password != password:
                 messages.error(request, "Invalid credentials")
-                return redirect("auth")
+                return self._redirect_auth(next_url)
 
             # =====================================================
             # DEFAULT PASSWORD FLOW
@@ -100,17 +101,16 @@ class LoginView(
                     password=self.soap_password,
                     params=[username],
                 )
-
+                
                 if response is True:
                     request.session["reset_id"] = username
-                    messages.warning(
-                        request,
-                        "Default password detected. Reset required."
-                    )
-                    return redirect("reset")
+                    next_url = request.POST.get("next", "")
+                    reset_url = f"/reset/?next={next_url}" if next_url else "/reset/"
+                    messages.warning(request, "Default password detected. Reset required.")
+                    return redirect(reset_url)
 
                 messages.error(request, "Password reset failed")
-                return redirect("auth")
+                return self._redirect_auth(next_url)
 
             # =====================================================
             # FETCH EMPLOYEE (ODATA)
@@ -119,7 +119,7 @@ class LoginView(
 
             if not employee_no:
                 messages.error(request, "Employee record missing")
-                return redirect("auth")
+                return self._redirect_auth(next_url)
 
             employees = asyncio.run(
                 self.filter_data(
@@ -132,7 +132,7 @@ class LoginView(
 
             if not employees:
                 messages.error(request, "Employee profile not found")
-                return redirect("auth")
+                return self._redirect_auth(next_url)
 
             employee = employees[0]
 
@@ -168,7 +168,7 @@ class LoginView(
                 }
             )
 
-            print("Session Data:", self.get_session_context(request))
+            # print("Session Data:", self.get_session_context(request))
 
             # =====================================================
             # DEVICE TRACKING (SYNC SAFE)
@@ -178,13 +178,21 @@ class LoginView(
             # =====================================================
             # PROFILE PHOTO (ASYNC WRAPPED)
             # =====================================================
-            # self.load_profile_photo(employee_no)
+            self.load_profile_photo(employee_no)
+
+            print(self.load_profile_photo(employee_no))
 
             messages.success(
                 request,
                 f"Welcome {request.session.get('full_name')}"
             )
 
+            # =====================================================
+            # REDIRECT (CENTRALIZED)
+            # =====================================================
+            next_url = request.GET.get("next") or request.POST.get("next")
+            if next_url and next_url.startswith("/") and not next_url.startswith("//"):
+                return redirect(next_url)
             return redirect("dashboard")
 
         except Exception as e:
@@ -217,17 +225,23 @@ class LoginView(
         except Exception:
             logging.exception("Device tracking failed")
 
+
+    def _redirect_auth(self, next_url="", route="auth"):
+        from django.urls import reverse
+        base = reverse(route)
+        if next_url:
+            return redirect(f"{base}?next={next_url}")
+        return redirect(base)
+
+
     # =========================================================
     # PROFILE PHOTO LOADER
     # =========================================================
     def load_profile_photo(self, employee_no):
-
         try:
             image = self.call_soap(
                 soap_method="FnGetEmployeePicture",
-                username=self.soap_username,
-                password=self.soap_password,
-                params=[employee_no],
+                params=[employee_no],  # remove username/password — SOAPMixin handles auth
             )
 
             if not image:
@@ -236,8 +250,9 @@ class LoginView(
             binary_data = base64.b64decode(image)
             kind = filetype.guess(binary_data)
 
-            cache.set("encoded_string", image)
-            cache.set("image_format", kind.extension if kind else None)
+            # Scoped keys — not global
+            cache.set(profile_image_key(employee_no), image, timeout=60 * 60)
+            cache.set(profile_image_format_key(employee_no), kind.extension if kind else "jpg", timeout=60 * 60)
 
         except Exception:
             logging.exception("Profile photo load failed")
@@ -251,17 +266,14 @@ class LogoutView(View):
 
     def get(self, request, *args, **kwargs):
         try:
-            # 🧹 Clear Django session completely
+            employee_no = request.session.get("Employee_No_")
+
+            # Clear scoped image cache before flushing session
+            if employee_no:
+                cache.delete(profile_image_key(employee_no))
+                cache.delete(profile_image_format_key(employee_no))
+
             request.session.flush()
-
-            # 🧹 Clear cached user-specific assets
-            cache.delete("encoded_string")
-            cache.delete("image_format")
-
-            # Optional: clear other cached session artifacts
-            user_id = request.session.get("User_ID")
-            if user_id:
-                cache.delete(f"user:{user_id}:profile")
 
             messages.success(request, "You have been logged out successfully.")
 
@@ -403,7 +415,7 @@ class ForgotPasswordView(
                     request,
                     "If the username exists, a reset token has been sent to your work email."
                 )
-                return redirect("reset-password")
+                return redirect("reset")
             else:
                 messages.error(request, "Failed to initiate password reset.")
 
@@ -549,4 +561,35 @@ class ChangePortalPasswordView(
             print(str(e))
             messages.error(
                 request, "An error occurred while changing password.")
+            return redirect("profile")
+
+
+
+class LoadProfilePicture(AuthRequiredMixin, SOAPMixin, EncryptionMixin, SessionMixin, View):
+
+    def get(self, request):
+        try:
+            session = self.get_session_context(request)
+            employee_no = session.get("Employee_No_")
+
+            image = self.call_soap(
+                soap_method="FnGetEmployeePicture",
+                params=[employee_no],
+            )
+            if not image:
+                messages.error(request, "Profile picture not found.")
+                return redirect("profile")
+
+            binary_data = base64.b64decode(image)
+            kind = filetype.guess(binary_data)
+
+            # Scoped to this employee — no cross-user bleed
+            cache.set(profile_image_key(employee_no), image, timeout=60 * 60)
+            cache.set(profile_image_format_key(employee_no), kind.extension if kind else "jpg", timeout=60 * 60)
+
+            messages.success(request, "Profile picture loaded successfully.")
+            return redirect("profile")
+        except Exception as e:
+            logging.exception(e)
+            messages.error(request, "Failed to load profile picture.")
             return redirect("profile")

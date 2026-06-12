@@ -17,8 +17,8 @@
             <a class="navbar-brand brand-logo" href="/">
                 <img src="{% static 'assets/images/logo.svg' %}" alt="logo" />
             </a>
-            <a class="navbar-brand brand-logo-mini" href="/" >
-                <img src="{% static 'assets/images/logo-mini.png' %}" alt="logo" style="width: 39px; height: 39px;"/>
+            <a class="navbar-brand brand-logo-mini" href="/">
+                <img src="{% static 'assets/images/logo-mini.png' %}" alt="logo" style="width: 39px; height: 39px;" />
             </a>
         </div>
     </div>
@@ -133,11 +133,18 @@
             </li> -->
             <li class="nav-item dropdown d-none d-lg-block user-dropdown">
                 <a class="nav-link nav-user" id="UserDropdown" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+                    {% if session_assets.profile_image %}
+                    <img src="data:image/{{ session_assets.profile_image_format }};base64,{{ session_assets.profile_image }}"
+                        alt="{{ session_user.full_name }}" class="rounded-full w-9 h-9 object-cover" />
+                    {% else %}
                     <img class="img-sm rounded-circle me-2" src="{% static 'assets/images/user.png' %}"
                         alt="Profile image">
-                        <p class="mb-0 fw-semibold d-none d-sm-block">{{ session_user.first_name }}</p>
-                        <i class="mdi mdi-chevron-down fs-4"></i> </a>
-                <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="UserDropdown" style="width: 300px;">
+                    {% endif %}
+                    <p class="mb-0 fw-semibold d-none d-sm-block">{{ session_user.first_name }}</p>
+                    <i class="mdi mdi-chevron-down fs-4"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="UserDropdown"
+                    style="width: 300px;">
                     <div class="dropdown-header text-center">
                         <img class="img-lg rounded-circle" src="{% static 'assets/images/user.png' %}"
                             alt="Profile image">
@@ -153,7 +160,8 @@
                         Activity</a> -->
                     <a class="dropdown-item"><i
                             class="dropdown-item-icon mdi mdi-help-circle-outline text-primary me-2"></i> FAQ</a>
-                    <a class="dropdown-item" href="/logout/"><i class="dropdown-item-icon mdi mdi-logout text-primary me-2"></i>Sign
+                    <a class="dropdown-item" href="/logout/"><i
+                            class="dropdown-item-icon mdi mdi-logout text-primary me-2"></i>Sign
                         Out</a>
                 </div>
             </li>
