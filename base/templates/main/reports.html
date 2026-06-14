@@ -9,35 +9,31 @@
     <div class="row">
         <div class="col-sm-12">
             <div class="home-tab">
-                
-                <!-- Header Section with Tabs -->
+
+                <!-- Header -->
                 <div class="d-sm-flex align-items-center justify-content-between border-bottom py-3">
                     <div>
-                        <h4 class="card-title card-title-dash mb-0">Reports & Analytics</h4>
+                        <h4 class="card-title card-title-dash mb-0">Reports &amp; Analytics</h4>
                         <p class="text-muted small mt-1">Generate and download reports for selected modules</p>
                     </div>
                     <div class="text-end d-none d-md-block">
-                        <!-- <button class="btn btn-sm btn-outline-secondary" onclick="printCurrentReport()" title="Print Report">
-                            <i class="mdi mdi-printer"></i> Print
-                        </button> -->
                         <button class="btn btn-sm btn-outline-primary" onclick="shareReport()" title="Share Report">
                             <i class="mdi mdi-share"></i> Share
                         </button>
-                        <!-- <button class="btn btn-sm btn-primary text-white" onclick="downloadReport()" title="Download Report">
-                            <i class="mdi mdi-download"></i> Export
-                        </button> -->
                     </div>
                 </div>
 
                 <!-- Navigation Tabs -->
                 <ul class="nav nav-tabs border-bottom mt-4" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link active" id="leave-tab" data-bs-toggle="tab" href="#leave" role="tab" aria-controls="leave" aria-selected="true">
+                        <a class="nav-link active" id="leave-tab" data-bs-toggle="tab" href="#leave" role="tab"
+                            aria-selected="true">
                             <i class="mdi mdi-calendar"></i> Leave Reports
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="payroll-tab" data-bs-toggle="tab" href="#payroll" role="tab" aria-controls="payroll" aria-selected="false">
+                        <a class="nav-link" id="payroll-tab" data-bs-toggle="tab" href="#payroll" role="tab"
+                            aria-selected="false">
                             <i class="mdi mdi-cash-sync fs-6"></i> Payroll Reports
                         </a>
                     </li>
@@ -46,70 +42,96 @@
                 <!-- Tab Content -->
                 <div class="tab-content tab-content-basic mt-4">
 
-                    <!-- LEAVE REPORTS TAB -->
+                    <!-- ═══════════════════════════════════
+                         LEAVE REPORTS TAB
+                    ════════════════════════════════════ -->
                     <div class="tab-pane fade show active" id="leave" role="tabpanel" aria-labelledby="leave-tab">
                         <div class="row">
+
+                            <!-- Form -->
                             <div class="col-lg-8">
                                 <div class="card card-rounded">
                                     <div class="card-body">
                                         <h5 class="card-title card-title-dash mb-4">Leave Report Generator</h5>
-                                        <form class="leave-form" method="post" id="leaveForm" novalidate>
+                                        <form method="post" id="leaveForm" novalidate>
                                             {% csrf_token %}
                                             <input type="hidden" name="report_type" value="leave">
-                                            
+
                                             <div class="row mb-3">
                                                 <div class="col-md-12">
                                                     <label class="form-label">Report Type</label>
-                                                    <select class="form-select" id="leave_document_type" name="document_type" required>
-                                                        <option selected disabled value="">--Select Report Type--</option>
+                                                    <select class="form-select" id="leave_document_type"
+                                                        name="document_type" required>
+                                                        <option selected disabled value="">-- Select Report Type --
+                                                        </option>
                                                         <option value="1">Leave Statement Report</option>
                                                         <option value="2">Leave Normal Report</option>
-                                                        <!-- <option value="3">Leave Balance Report</option> -->
                                                     </select>
                                                 </div>
                                             </div>
 
-                                            <div class="row mb-3" id="leaveDocumentRow" style="display: none;">
+                                            <div class="row mb-3" id="leaveDocumentRow" style="display:none;">
                                                 <div class="col-md-12">
                                                     <label class="form-label">Select Leave Application</label>
-                                                    <select class="form-select" name="documentID" id="leave_documentID" disabled>
-                                                        <option selected disabled value="">--Select Leave Document--</option>
+                                                    <select class="form-select" name="documentID" id="leave_documentID"
+                                                        disabled>
+                                                        <option selected disabled value="">-- Select Leave Document --
+                                                        </option>
                                                         {% if approved_leave %}
-                                                            {% for leave in approved_leave %}
-                                                            <option value="{{ leave.Application_No }}">
-                                                                {{ leave.Application_No }} - ({{ leave.Start_Date }} to {{ leave.Resumption_Date }})
-                                                            </option>
-                                                            {% endfor %}
+                                                        {% for leave in approved_leave %}
+                                                        <option value="{{ leave.Application_No }}">
+                                                            {{ leave.Application_No }} — ({{ leave.Start_Date }} to {{
+                                                            leave.Resumption_Date }})
+                                                        </option>
+                                                        {% endfor %}
                                                         {% else %}
-                                                            <option disabled value="">No approved leave found</option>
+                                                        <option disabled value="">No approved leave found</option>
                                                         {% endif %}
                                                     </select>
                                                 </div>
                                             </div>
 
-                                            <!-- <div class="row mb-3">
-                                                <div class="col-md-6">
-                                                    <label class="form-label">From Date</label>
-                                                    <input type="date" class="form-control" name="from_date">
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label">To Date</label>
-                                                    <input type="date" class="form-control" name="to_date">
-                                                </div>
-                                            </div> -->
-
                                             <div class="row">
                                                 <div class="col-md-12">
-                                                    <button type="submit" class="btn btn-sm btn-primary text-white w-100">
+                                                    <button type="submit"
+                                                        class="btn btn-sm btn-primary text-white w-100">
                                                         <i class="mdi mdi-file-pdf"></i> Generate Report
                                                     </button>
                                                 </div>
                                             </div>
                                         </form>
+
+                                        <!-- Inline PDF preview for leave tab -->
+                                        <div id="leave_preview_area" class="mt-4" style="display:none;">
+                                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                                <small class="text-muted fw-semibold">
+                                                    <i class="mdi mdi-file-pdf text-danger"></i>
+                                                    Last generated: <span id="leave_report_label">—</span>
+                                                </small>
+                                                <div class="d-flex gap-2">
+                                                    <button class="btn btn-sm btn-outline-primary"
+                                                        onclick="downloadTabReport('leave')">
+                                                        <i class="mdi mdi-download"></i> Download
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-secondary"
+                                                        onclick="openFullscreen('leave')">
+                                                        <i class="mdi mdi-fullscreen"></i> Fullscreen
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div id="leave_spinner"
+                                                style="display:none; text-align:center; padding:40px;">
+                                                <div class="spinner-border text-primary" role="status"></div>
+                                                <p class="mt-3 text-muted">Generating report...</p>
+                                            </div>
+                                            <iframe id="leave_iframe" style="width:100%; height:500px; border:1px solid #dee2e6;
+                                                       border-radius:6px; display:none;"></iframe>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
+                            <!-- Summary sidebar -->
                             <div class="col-lg-4">
                                 <div class="card card-rounded bg-white">
                                     <div class="card-body">
@@ -121,13 +143,14 @@
                                             </div>
                                             <div class="list-group-item d-flex justify-content-between ps-0 pe-0 py-2">
                                                 <span class="text-muted">Approved</span>
-                                                <span class="badge bg-success">{{ leaves_stats.Released|default:"0" }}</span>
+                                                <span class="badge bg-success">{{ leaves_stats.Released|default:"0"                                                    }}</span>
                                             </div>
                                             <div class="list-group-item d-flex justify-content-between ps-0 pe-0 py-2">
                                                 <span class="text-muted">Pending Approval</span>
                                                 <span class="badge bg-warning">{{ leaves_stats.Pending_Approval|default:"0" }}</span>
                                             </div>
-                                            <div class="list-group-item d-flex justify-content-between ps-0 pe-0 py-2 border-bottom-0">
+                                            <div
+                                                class="list-group-item d-flex justify-content-between ps-0 pe-0 py-2 border-bottom-0">
                                                 <span class="text-muted">Open</span>
                                                 <span class="badge bg-info">{{ leaves_stats.Open|default:"0" }}</span>
                                             </div>
@@ -138,93 +161,125 @@
                         </div>
                     </div>
 
-                    <!-- PAYROLL REPORTS TAB -->
+                    <!-- ═══════════════════════════════════
+                         PAYROLL REPORTS TAB
+                    ════════════════════════════════════ -->
                     <div class="tab-pane fade" id="payroll" role="tabpanel" aria-labelledby="payroll-tab">
                         <div class="row">
+
+                            <!-- Form -->
                             <div class="col-lg-8">
                                 <div class="card card-rounded">
                                     <div class="card-body">
                                         <h5 class="card-title card-title-dash mb-4">Payroll Report Generator</h5>
-                                        <form class="payroll-form" method="post" id="payrollForm" novalidate>
+                                        <form method="post" id="payrollForm" novalidate>
                                             {% csrf_token %}
                                             <input type="hidden" name="report_type" value="payroll">
-                                            
+
                                             <div class="row mb-3">
                                                 <div class="col-md-12">
                                                     <label class="form-label">Report Type</label>
-                                                    <select class="form-select" id="payroll_report_type" name="document_type" required>
-                                                        <option selected disabled value="">--Select Report Type--</option>
+                                                    <select class="form-select" id="payroll_report_type"
+                                                        name="document_type" required>
+                                                        <option selected disabled value="">-- Select Report Type --
+                                                        </option>
                                                         <option value="1">Payslip</option>
                                                         <option value="2">P9</option>
-                                                        <!-- <option value="3">P9 - Old</option> -->
-                                                        <!-- <option value="4">Deductions Detail</option> -->
                                                     </select>
                                                 </div>
                                             </div>
 
                                             <div class="row mb-3">
-                                                <div class="col-md-12" id="payroll_date" style="display: none;">
+                                                <div class="col-md-12" id="payroll_date" style="display:none;">
                                                     <label class="form-label">Period</label>
-                                                    <!-- <input type="month" class="form-control" name="month"> -->
-                                                    <select class="form-select" name="startDate" id="payroll_date_select" disabled required>
-                                                        <option value="">--Select Period--</option>
+                                                    <select class="form-select" name="startDate"
+                                                        id="payroll_date_select" disabled required>
+                                                        <option value="">-- Select Period --</option>
                                                         {% for period in payroll_periods %}
-                                                            <option value="{{ period.Starting_Date }}">{{ period.Name }} - {{ period.Starting_Date|slice:':4' }}</option>
+                                                        <option value="{{ period.Starting_Date }}">
+                                                            {{ period.Name }} - {{ period.Starting_Date|slice:':4' }}
+                                                        </option>
                                                         {% empty %}
-                                                            <option value="" disabled>No closed periods available</option>
+                                                        <option value="" disabled>No closed periods available</option>
                                                         {% endfor %}
                                                     </select>
                                                 </div>
-                                                <div class="col-md-12" id="p9_date" style="display: none;">
+                                                <div class="col-md-12" id="p9_date" style="display:none;">
                                                     <label class="form-label">Year</label>
-                                                    <!-- <input type="month" class="form-control" name="month"> -->
-                                                    <select class="form-select" name="startDate" id="p9_date_select" disabled required>
-                                                        <option value="">--Select Year--</option>
+                                                    <select class="form-select" name="startDate" id="p9_date_select"
+                                                        disabled required>
+                                                        <option value="">-- Select Year --</option>
                                                         {% for period in period_years %}
-                                                            <option value="{{ period.year }}">{{ period.year }}</option>
+                                                        <option value="{{ period.year }}">{{ period.year }}</option>
                                                         {% empty %}
-                                                            <option value="" disabled>P9 documents not available</option>
+                                                        <option value="" disabled>P9 documents not available</option>
                                                         {% endfor %}
                                                     </select>
                                                 </div>
-                                                <!-- <div class="col-md-6">
-                                                    <label class="form-label">Year</label>
-                                                    <input type="number" class="form-control" name="year" placeholder="2024" min="2000" max="2099">
-                                                </div> -->
                                             </div>
 
                                             <div class="row">
                                                 <div class="col-md-12">
-                                                    <button type="submit" class="btn btn-sm btn-primary text-white w-100">
+                                                    <button type="submit"
+                                                        class="btn btn-sm btn-primary text-white w-100">
                                                         <i class="mdi mdi-file-pdf"></i> Generate Report
                                                     </button>
                                                 </div>
                                             </div>
                                         </form>
+
+                                        <!-- Inline PDF preview for payroll tab -->
+                                        <div id="payroll_preview_area" class="mt-4" style="display:none;">
+                                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                                <small class="text-muted fw-semibold">
+                                                    <i class="mdi mdi-file-pdf text-danger"></i>
+                                                    Last generated: <span id="payroll_report_label">—</span>
+                                                </small>
+                                                <div class="d-flex gap-2">
+                                                    <button class="btn btn-sm btn-outline-primary"
+                                                        onclick="downloadTabReport('payroll')">
+                                                        <i class="mdi mdi-download"></i> Download
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-secondary"
+                                                        onclick="openFullscreen('payroll')">
+                                                        <i class="mdi mdi-fullscreen"></i> Fullscreen
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div id="payroll_spinner"
+                                                style="display:none; text-align:center; padding:40px;">
+                                                <div class="spinner-border text-primary" role="status"></div>
+                                                <p class="mt-3 text-muted">Generating report...</p>
+                                            </div>
+                                            <iframe id="payroll_iframe" style="width:100%; height:500px; border:1px solid #dee2e6;
+                                                       border-radius:6px; display:none;"></iframe>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
+                            <!-- Payroll sidebar -->
                             <div class="col-lg-4">
                                 <div class="card card-rounded bg-white">
                                     <div class="card-body">
                                         <h5 class="card-title mb-3">Payroll Info</h5>
                                         <div class="list-group list-group-flush">
                                             {% if employee %}
-                                                <div class="list-group-item d-flex justify-content-between ps-0 pe-0 py-2">
-                                                    <span class="text-muted">Employee ID</span>
-                                                    <strong>{{ employee.No_ }}</strong>
-                                                </div>
-                                                <div class="list-group-item d-flex justify-content-between ps-0 pe-0 py-2">
-                                                    <span class="text-muted">Company Email</span>
-                                                    <strong>{{ employee.Company_E_Mail }}</strong>
-                                                </div>
-                                                <div class="list-group-item d-flex justify-content-between ps-0 pe-0 py-2 border-bottom-0">
-                                                    <span class="text-muted">Status</span>
-                                                    <span class="badge bg-success">{{ employee.Status}}</span>
-                                                </div>
+                                            <div class="list-group-item d-flex justify-content-between ps-0 pe-0 py-2">
+                                                <span class="text-muted">Employee ID</span>
+                                                <strong>{{ employee.No_ }}</strong>
+                                            </div>
+                                            <div class="list-group-item d-flex justify-content-between ps-0 pe-0 py-2">
+                                                <span class="text-muted">Company Email</span>
+                                                <strong>{{ employee.Company_E_Mail }}</strong>
+                                            </div>
+                                            <div
+                                                class="list-group-item d-flex justify-content-between ps-0 pe-0 py-2 border-bottom-0">
+                                                <span class="text-muted">Status</span>
+                                                <span class="badge bg-success">{{ employee.Status }}</span>
+                                            </div>
                                             {% else %}
-                                                <div class="alert alert-info">Employee data not available</div>
+                                            <div class="alert alert-info">Employee data not available</div>
                                             {% endif %}
                                         </div>
                                     </div>
@@ -234,56 +289,59 @@
                     </div>
 
                 </div>
-
             </div>
         </div>
     </div>
 </div>
 
-<!-- PDF Viewer Modal -->
-<div class="modal fade" id="pdfModal" tabindex="-1" role="dialog" aria-labelledby="pdfModalLabel" aria-hidden="true">
+<!-- Fullscreen PDF Modal (view only, no generation happens here) -->
+<div class="modal fade" id="pdfModal" tabindex="-1" aria-labelledby="pdfModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="pdfModalLabel">Report Preview</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body p-0" style="height: 70vh; overflow: auto;">
-                <div id="loadingSpinner" style="display: none; text-align: center; padding: 50px;">
-                    <div class="spinner-border" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p class="mt-3">Generating report...</p>
-                </div>
-                <iframe id="pdfViewer" style="width: 100%; height: 100%; border: none; display: none;"></iframe>
+            <div class="modal-body p-0" style="height:75vh;">
+                <iframe id="pdfModalViewer" style="width:100%; height:100%; border:none;"></iframe>
             </div>
             <div class="modal-footer gap-2">
-                <button type="button" class="btn btn-sm btn-primary me-2" onclick="downloadReport()">
+                <button type="button" class="btn btn-sm btn-primary" id="modalDownloadBtn">
                     <i class="mdi mdi-download"></i> Download
                 </button>
                 <button type="button" class="btn btn-sm btn-danger" data-bs-dismiss="modal">
-                    <i class="mdi mdi-close"></i>    Close
+                    <i class="mdi mdi-close"></i> Close
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Styles -->
 <style>
     .btn-primary i {
-        color:white !important;
+        color: white !important;
     }
 </style>
 
-<!-- JavaScript -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    $(document).ready(function() {
-        
-        // Leave report form handling
-        $('#leave_document_type').on('change', function() {
-            if (this.value == '2') {
+    $(document).ready(function () {
+
+        /* ─────────────────────────────────────────────
+           PER-TAB REPORT STORE
+           Keeps the last generated PDF for each tab
+           independently so switching never loses data.
+        ───────────────────────────────────────────── */
+        var reportStore = {
+            leave: { pdfBase64: null, filename: null },
+            payroll: { pdfBase64: null, filename: null }
+        };
+
+        /* ─────────────────────────────────────────────
+           LEAVE FORM — conditional fields
+        ───────────────────────────────────────────── */
+        $('#leave_document_type').on('change', function () {
+            if (this.value === '2') {
                 $('#leaveDocumentRow').show(300);
                 $('#leave_documentID').prop('disabled', false);
             } else {
@@ -292,134 +350,152 @@
             }
         });
 
-        $('#payroll_report_type').on('change', function() {
-            const selectedValue = this.value;
-            if (selectedValue == '1') {
+        /* ─────────────────────────────────────────────
+           PAYROLL FORM — conditional period / year
+        ───────────────────────────────────────────── */
+        $('#payroll_report_type').on('change', function () {
+            var v = this.value;
+            if (v === '1') {
                 $('#payroll_date').show(300);
                 $('#p9_date').hide(300);
-                $('#payroll_date_select').prop('disabled', false);
-                $('#p9_date_select').prop('required', false);
-                $('#p9_date_select').prop('disabled', true);
-            } else if (selectedValue == '2' || selectedValue == '3') {
+                $('#payroll_date_select').prop('disabled', false).prop('required', true);
+                $('#p9_date_select').prop('disabled', true).prop('required', false);
+            } else if (v === '2' || v === '3') {
                 $('#p9_date').show(300);
                 $('#payroll_date').hide(300);
-                $('#p9_date_select').prop('disabled', false);
-                $('#payroll_date_select').prop('required', false);
-                $('#payroll_date_select').prop('disabled', true);
+                $('#p9_date_select').prop('disabled', false).prop('required', true);
+                $('#payroll_date_select').prop('disabled', true).prop('required', false);
             } else {
                 $('#payroll_date, #p9_date').hide(300);
-                $('#payroll_date_select, #p9_date_select').prop('disabled', true);
+                $('#payroll_date_select, #p9_date_select').prop('disabled', true).prop('required', false);
             }
         });
 
-        // Form submission handlers
-        $('#leaveForm, #trainingForm, #claimsForm, #requisitionForm, #payrollForm').on('submit', function(e) {
+        /* ─────────────────────────────────────────────
+           FORM SUBMIT HANDLERS
+        ───────────────────────────────────────────── */
+        $('#leaveForm').on('submit', function (e) {
             e.preventDefault();
-            generateReport($(this));
+            generateReport($(this), 'leave');
         });
-    });
 
-    // Generate Report Function
-    function generateReport(form) {
-        const formData = form.serialize();
-        const reportType = form.find('input[name="report_type"]').val();
+        $('#payrollForm').on('submit', function (e) {
+            e.preventDefault();
+            generateReport($(this), 'payroll');
+        });
 
-        // Show loading
-        showLoadingSpinner();
-        $('#pdfModal').modal('show');
+        /* ─────────────────────────────────────────────
+           GENERATE REPORT
+           tab = 'leave' | 'payroll'
+           Each tab has its own spinner, iframe, and
+           preview area — generating on one tab never
+           touches the other tab's stored PDF.
+        ───────────────────────────────────────────── */
+        function generateReport(form, tab) {
+            var formData = form.serialize();
+            var $area = $('#' + tab + '_preview_area');
+            var $spinner = $('#' + tab + '_spinner');
+            var $iframe = $('#' + tab + '_iframe');
+            var $label = $('#' + tab + '_report_label');
 
-        $.ajax({
-            url: '{% url "generate_report" %}',
-            type: 'POST',
-            data: formData,
-            headers: {
-                'X-CSRFToken': $('[name="csrfmiddlewaretoken"]').val()
-            },
-            dataType: 'json',
-            success: function(response) {
-                hideLoadingSpinner();
-                if (response.pdf) {
-                    const pdfData = 'data:application/pdf;base64,' + response.pdf;
-                    $('#pdfViewer').attr('src', pdfData).show();
-                    // Store current PDF for download
-                    window.currentPdfData = response.pdf;
-                    window.currentReportName = response.filename || reportType + '_report.pdf';
-                } else {
-                    showAlert('Error: No PDF generated', 'error');
+            // Show preview area with spinner, hide stale iframe
+            $area.show();
+            $spinner.show();
+            $iframe.hide();
+
+            $.ajax({
+                url: '{% url "generate_report" %}',
+                type: 'POST',
+                data: formData,
+                headers: { 'X-CSRFToken': $('[name="csrfmiddlewaretoken"]').first().val() },
+                dataType: 'json',
+                success: function (response) {
+                    $spinner.hide();
+
+                    if (response.pdf) {
+                        // Save to per-tab store
+                        var filename = response.filename || (tab + '_report.pdf');
+                        reportStore[tab].pdfBase64 = response.pdf;
+                        reportStore[tab].filename = filename;
+
+                        // Render inline
+                        $iframe.attr('src', 'data:application/pdf;base64,' + response.pdf).show();
+                        $label.text(filename);
+                    } else {
+                        showAlert('Error: No PDF was generated.', 'danger');
+                    }
+                },
+                error: function (xhr) {
+                    $spinner.hide();
+                    var msg = (xhr.responseJSON && xhr.responseJSON.error)
+                        ? xhr.responseJSON.error
+                        : 'Error generating report. Please try again.';
+                    showAlert(msg, 'danger');
                 }
-            },
-            error: function(xhr, status, error) {
-                hideLoadingSpinner();
-                let errorMsg = 'Error generating report';
-                if (xhr.responseJSON && xhr.responseJSON.error) {
-                    errorMsg = xhr.responseJSON.error;
-                }
-                showAlert(errorMsg, 'error');
-                console.error('Report generation error:', error);
+            });
+        }
+
+        /* ─────────────────────────────────────────────
+           DOWNLOAD — uses the tab-specific store
+        ───────────────────────────────────────────── */
+        window.downloadTabReport = function (tab) {
+            var store = reportStore[tab];
+            if (!store.pdfBase64) {
+                showAlert('No report generated yet for this tab.', 'warning');
+                return;
             }
-        });
-    }
-
-    // Show/Hide Loading Spinner
-    function showLoadingSpinner() {
-        $('#loadingSpinner').show();
-        $('#pdfViewer').hide();
-    }
-
-    function hideLoadingSpinner() {
-        $('#loadingSpinner').hide();
-        $('#pdfViewer').show();
-    }
-
-    // Download Report
-    function downloadReport() {
-        if (window.currentPdfData) {
-            const link = document.createElement('a');
-            link.href = 'data:application/pdf;base64,' + window.currentPdfData;
-            link.download = window.currentReportName || 'report.pdf';
+            var link = document.createElement('a');
+            link.href = 'data:application/pdf;base64,' + store.pdfBase64;
+            link.download = store.filename || (tab + '_report.pdf');
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-        } else {
-            showAlert('No report to download', 'error');
-        }
-    }
+        };
 
-    // Print Report
-    function printCurrentReport() {
-        if (window.currentPdfData) {
-            const pdfWindow = window.open('data:application/pdf;base64,' + window.currentPdfData);
-            pdfWindow.print();
-        } else {
-            showAlert('Generate a report first', 'warning');
-        }
-    }
+        /* ─────────────────────────────────────────────
+           FULLSCREEN — opens modal with current tab PDF
+           Does NOT regenerate; just shows the stored PDF.
+        ───────────────────────────────────────────── */
+        window.openFullscreen = function (tab) {
+            var store = reportStore[tab];
+            if (!store.pdfBase64) {
+                showAlert('Generate a report first.', 'warning');
+                return;
+            }
+            $('#pdfModalViewer').attr('src', 'data:application/pdf;base64,' + store.pdfBase64);
+            $('#pdfModalLabel').text(store.filename || 'Report Preview');
 
-    // Share Report
-    function shareReport() {
-        showAlert('Share functionality coming soon', 'info');
-    }
-
-    // Show Alert
-    function showAlert(message, type = 'info') {
-        const alertClass = 'alert-' + type;
-        const alertHtml = `
-            <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        `;
-        
-        // Insert at top of page
-        $('.content-wrapper').prepend(alertHtml);
-        
-        // Auto-remove after 5 seconds
-        setTimeout(function() {
-            $('.alert').fadeOut(function() {
-                $(this).remove();
+            // Wire modal download button to the correct tab store
+            $('#modalDownloadBtn').off('click').on('click', function () {
+                downloadTabReport(tab);
             });
-        }, 5000);
-    }
+
+            $('#pdfModal').modal('show');
+        };
+
+        /* ─────────────────────────────────────────────
+           SHARE (placeholder)
+        ───────────────────────────────────────────── */
+        window.shareReport = function () {
+            showAlert('Share functionality coming soon.', 'info');
+        };
+
+        /* ─────────────────────────────────────────────
+           ALERT HELPER
+        ───────────────────────────────────────────── */
+        function showAlert(message, type) {
+            type = type || 'info';
+            var html = '<div class="alert alert-' + type + ' alert-dismissible fade show" role="alert">'
+                + message
+                + '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>'
+                + '</div>';
+            $('.content-wrapper').prepend(html);
+            setTimeout(function () {
+                $('.alert').fadeOut(function () { $(this).remove(); });
+            }, 5000);
+        }
+
+    });
 </script>
 
 {% endblock %}
