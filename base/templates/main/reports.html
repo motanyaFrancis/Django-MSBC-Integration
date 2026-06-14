@@ -230,17 +230,18 @@
 
                                         <!-- Inline PDF preview for payroll tab -->
                                         <div id="payroll_preview_area" class="mt-4" style="display:none;">
-                                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                                <small class="text-muted fw-semibold">
-                                                    <i class="mdi mdi-file-pdf text-danger"></i>
+                                            <div class="d-flex-col  align-items-center justify-content-between mb-2 gap-4">
+                                                <small class="text-muted fw-semibold mb-3">
+                                                    <!-- <i class="mdi mdi-file-pdf-box "></i> -->
+                                                    <i class="fa-regular fa-file-pdf text-danger fs-4"></i>
                                                     Last generated: <span id="payroll_report_label">—</span>
                                                 </small>
-                                                <div class="d-flex gap-2">
+                                                <div class="d-flex gap-4 mt-3">
                                                     <button class="btn btn-sm btn-outline-primary"
                                                         onclick="downloadTabReport('payroll')">
                                                         <i class="mdi mdi-download"></i> Download
                                                     </button>
-                                                    <button class="btn btn-sm btn-outline-secondary"
+                                                    <button class="btn btn-sm btn-primary-secondary"
                                                         onclick="openFullscreen('payroll')">
                                                         <i class="mdi mdi-fullscreen"></i> Fullscreen
                                                     </button>

@@ -6,6 +6,9 @@ urlpatterns = [
     path("purchase/<str:pk>/", views.PurchaseDetails.as_view(), name="purchase_details"),
     path("purchase-approval/<str:pk>/", views.PurchaseApproval.as_view(), name="purchase_aproval"),
     path("cancel-purchase-approval/<str:pk>/", views.CancelPurchaseApproval.as_view(), name="cancel_purchase_aproval"),
+    path("upload-purchase-attachment/<str:pk>/", views.UploadPurchaseAttachment.as_view(), name="upload_purchase_attachment"),
+        path("delete-purchase-attachment/<str:pk>/", views.DeletePurchaseAttachment.as_view(), name="delete_purchase_attachment"),
+
 
     path("store/", views.StoreRequest.as_view(), name="store"),
     path("store/<str:pk>/", views.StoreDetails.as_view(), name="store_details"),

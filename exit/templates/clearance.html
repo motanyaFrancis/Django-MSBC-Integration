@@ -613,6 +613,128 @@
 
     });
 
+    $('#clearanceForm').on('submit', function (e) {
+        e.preventDefault();
+
+        const $form = $(this);
+        const $submitBtn = $('#submitBtn');
+        const originalBtnHtml = $submitBtn.html();
+
+        // Clear previous error states
+        $('.is-invalid').removeClass('is-invalid');
+        $('.invalid-feedback').remove();
+        $('#formAlert').remove();
+
+        $submitBtn.prop('disabled', true)
+            .html('<i class="fas fa-spinner fa-spin"></i> Submitting...');
+
+        $.ajax({
+            url: $form.attr('action') || window.location.href,
+            type: 'POST',
+            data: $form.serialize(),
+            headers: {
+                'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val()
+            },
+            dataType: 'json'
+        })
+            .done(function (response) {
+                if (response.status === 'success') {
+                    $form.prepend(
+                        '<div class="alert alert-success" id="formAlert">' +
+                        (response.message || 'Clearance submitted successfully.') +
+                        '</div>'
+                    );
+
+                    if (response.exitNo) {
+                        $('#exitNo').val(response.exitNo);
+                        $('#myAction').val('update'); // future saves become updates
+                    }
+                    if (response.clearance_id) {
+                        $('#clearance_id').text(response.clearance_id);
+                    }
+                    if (response.clear_status) {
+                        $('#clear_status').text(response.clear_status);
+                    }
+
+                    if (response.redirect_url) {
+                        setTimeout(function () {
+                            window.location.href = response.redirect_url;
+                        }, 1200);
+                    }
+
+                    scrollToFormTop();
+                } else {
+                    showFormErrors(response.errors || {}, response.message);
+                }
+            })
+            .fail(function (xhr) {
+                let message = 'Something went wrong while submitting. Please try again.';
+                let errors = {};
+
+                if (xhr.responseJSON) {
+                    message = xhr.responseJSON.message || message;
+                    errors = xhr.responseJSON.errors || {};
+                } else if (xhr.status === 0) {
+                    message = 'Network error. Please check your connection and try again.';
+                }
+
+                showFormErrors(errors, message);
+            })
+            .always(function () {
+                $submitBtn.prop('disabled', false).html(originalBtnHtml);
+            });
+    });
+
+    function showFormErrors(errors, message) {
+        const $form = $('#clearanceForm');
+
+        $form.prepend(
+            '<div class="alert alert-danger" id="formAlert">' +
+            (message || 'Please correct the errors below and try again.') +
+            '</div>'
+        );
+
+        let firstErrorTabIndex = null;
+
+        $.each(errors, function (fieldName, messages) {
+            const errorText = Array.isArray(messages) ? messages.join(' ') : messages;
+            let $field = $('#' + fieldName);
+            if (!$field.length) {
+                $field = $('[name="' + fieldName + '"]');
+            }
+
+            if ($field.length) {
+                $field.addClass('is-invalid');
+                $field.after('<div class="invalid-feedback d-block">' + errorText + '</div>');
+
+                if (firstErrorTabIndex === null) {
+                    const tabs = document.getElementsByClassName('tab');
+                    const $parentTab = $field.closest('.tab')[0];
+                    for (let i = 0; i < tabs.length; i++) {
+                        if (tabs[i] === $parentTab) {
+                            firstErrorTabIndex = i;
+                            break;
+                        }
+                    }
+                }
+            }
+        });
+
+        if (firstErrorTabIndex !== null) {
+            currentTab = firstErrorTabIndex;
+            showTab(currentTab);
+        }
+
+        scrollToFormTop();
+    }
+
+    function scrollToFormTop() {
+        $('html, body').animate(
+            { scrollTop: $('#clearanceForm').offset().top - 100 },
+            300
+        );
+    }
+
     function showTab(n) {
         let x = document.getElementsByClassName("tab");
         for (let i = 0; i < x.length; i++) { x[i].style.display = "none"; }

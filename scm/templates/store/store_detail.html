@@ -434,12 +434,16 @@ Store Request - {{res.No_}}
                                                     </a> -->
 
                                                     <!-- Delete Button -->
-                                                    <button type="button"
-                                                        class="btn btn-sm btn-outline-danger delete-attachment rounded-0"
-                                                        data-attachment-id="{{ attachment.id }}"
-                                                        data-request-no="{{ res.No_ }}" title="Delete">
-                                                        <i class="mdi mdi-trash-can"></i>
-                                                    </button>
+                                                     <form action="{% url 'delete_store_attachment' attachment.No_  %}" method="POST" id="attachmentDeleteForm" novalidate>        
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="docID" value="{{attachment.AuxiliaryIndex2}}">
+                                                        <input type="hidden" name="tableID" value="{{attachment.Table_ID}}">
+                                                         <button type="submit"
+                                                             class="btn btn-sm btn-outline-danger delete-attachment rounded-1"            
+                                                              title="Delete">
+                                                             <i class="mdi mdi-trash-can"></i>
+                                                         </button>
+                                                     </form>
                                                 </td>
                                                 {% endif %}
                                             </tr>
@@ -863,9 +867,51 @@ Store Request - {{res.No_}}
         // DELETE ATTACHMENT
         // ====================================================================
 
+        $('#attachmentDeleteForm').on('submit', function (e) {
+            e.preventDefault();
+
+            const $form = $(this);
+            const $submitBtn = $('#submitBtn');
+            const originalBtnHtml = $submitBtn.html();
+
+            $('.is-invalid').removeClass('is-invalid');
+            $('.invalid-feedback').remove();
+            $('#formAlert').remove();
+
+            $submitBtn.prop('disabled', true)
+                .html('<i class="fas fa-spinner fa-spin"></i> Submitting...');
+            
+
+            $.ajax({
+                url: $form.attr('action') || window.location.href,
+                type: 'POST',
+                data: $form.serialize(),
+                headers: {
+                    'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val()
+                },
+                dataType: 'json',
+                
+                success: function (response) {
+                    if (response.success) {
+                        showAlert('Attachment deleted successfully', 'success');
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        showAlert(response.message || 'Deletion failed', 'error');
+                    }
+                },
+                error: function () {
+                    showAlert('An error occurred', 'error');
+                }
+            });
+
+        })
+
         $(document).on('click', '.delete-attachment', function () {
             if (confirm('Are you sure you want to delete this attachment?')) {
                 const attachmentId = $(this).data('attachment-id');
+                const attachmentTableId = $(this).data('attachment-table-id');
                 const requestNo = $(this).data('request-no');
 
                 $.ajax({
@@ -873,7 +919,9 @@ Store Request - {{res.No_}}
                     type: 'POST',
                     data: {
                         'csrfmiddlewaretoken': $('[name="csrfmiddlewaretoken"]').val(),
-                        'request_no': requestNo
+                        'docID': requestNo,
+                        'docID': attachmentTableId,
+
                     },
                     success: function (response) {
                         if (response.success) {

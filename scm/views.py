@@ -200,12 +200,12 @@ class PurchaseDetails(
                         "endpoint": "/QyDocumentAttachments",
                         "filters": [
                             {
-                                "field": "Document_No_",
+                                "field": "No_",
                                 "operator": "eq",
                                 "value": pk,
                             }
                         ],
-                        "alias": "DocumentAttachments",
+                        "alias": "attachments",
                     },
                     {
                         "endpoint": "/QyEmployees",
@@ -278,7 +278,7 @@ class UploadPurchaseAttachment(
 
     async def post(self, request, pk):
         try:
-            attachments = request.FILES.getlist("attachment")
+            attachments = request.FILES.getlist("file_upload")
 
             table_id = 52177432
             user_id = request.session["User_ID"]
@@ -295,19 +295,62 @@ class UploadPurchaseAttachment(
                 )
                 responses.append(response)
 
+            print(responses)
+            print(attachments)
+
             if all(responses):
                 messages.success(
                     request,
                     f"Uploaded {len(attachments)} attachments successfully"
                 )
-                return redirect("training_details", pk=pk)
+                return redirect("purchase_details", pk=pk)
 
             messages.error(request, "Some attachments failed to upload.")
-            return redirect("training_details", pk=pk)
+            return redirect("purchase_details", pk=pk)
 
         except Exception as e:
-            messages.error(request, str(e))
-            return redirect("training_details", pk=pk)
+            logging.exception(e)
+            messages.error(request, f"An error Occured: {e}")
+            return redirect("purchase_details", pk=pk)
+
+
+class DeletePurchaseAttachment(
+     AuthRequiredMixin,
+        SessionMixin,
+        ODataMixin,
+        SOAPMixin,
+        ResponseMixin,
+        View,
+):
+    
+    async def post(self, request, pk):
+        try:
+            session = self.get_session_context(request)
+            user_id = session.get("User_ID")
+            docID = int(request.POST.get("docID"))
+            tableID = int(request.POST.get("tableID"))
+
+            response = self.call_soap(
+                soap_method="FnDeleteDocumentAttachment",
+                params=[                    
+                    pk,
+                    docID,
+                    tableID,
+                ],
+            )
+
+            if response is True:
+                messages.success(request, "Action completed successfully",)
+                return redirect("purchase_details", pk=pk,)
+
+            messages.error(request, f"{response}",)
+            return redirect("purchase_details", pk=pk,)
+
+        except Exception as e:
+            logging.exception(e)
+            messages.error(request, f"Failed to deletethe line: {e}",)
+            return redirect("purchase_details", pk=pk,)
+
 
 
 
@@ -379,6 +422,10 @@ class CancelPurchaseApproval(
                 request, f"Failed to cancel process approval action: {e}",)
             return redirect("purchase_details", pk=pk,)
 
+
+"""
+
+"""
 
 class StoreRequest(
     AuthRequiredMixin,
@@ -680,18 +727,15 @@ class DeleteStoreAttachment(
         try:
             session = self.get_session_context(request)
             user_id = session.get("User_ID")
-            lineNo = int(request.POST.get("lineNo"))
-
-            if not lineNo:
-                lineNo = ""
-                messages.error("Failed to complete the action")
-                return redirect("store_details", pk=pk,)
+            docID = int(request.POST.get("docID"))
+            tableID = int(request.POST.get("tableID"))
 
             response = self.call_soap(
-                soap_method="FnDeleteStoreRequisitionLine",
+                soap_method="FnDeleteDocumentAttachment",
                 params=[                    
                     pk,
-                    lineNo,
+                    docID,
+                    tableID,
                 ],
             )
 
