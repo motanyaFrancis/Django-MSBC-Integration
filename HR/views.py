@@ -87,6 +87,79 @@ class LeaveRequest(
             messages.error(request, "Failed to load leave requests")
             return redirect("auth")
 
+    async def post(self, request):
+            try:
+                session = self.get_session_context(request)
+                # requisitionNo = pk
+                applicationNo = request.POST.get("applicationNo")
+                usersId =session.get("User_ID")
+                employeeNo =session.get("Employee_No_")
+                dimension3 = request.POST.get("dimension3")
+                leaveType = request.POST.get("leaveType")
+                # plannerStartDate = datetime.strptime(request.POST.get("plannerStartDate"), "%Y-%m-%d").date()
+                date_obj = datetime.strptime('2026-06-22',  "%Y-%m-%d").date()
+                # plannerStartDate = date_obj.strftime("%Y-%m-%dT00:00:00Z")
+                plannerStartDate = request.POST.get("plannerStartDate")
+                daysApplied = request.POST.get("daysApplied")
+                isReturnSameDay = eval(request.POST.get("isReturnSameDay"))
+                myAction = request.POST.get("myAction")
+                directorReliever = request.POST.get("directorReliever")
+
+                if not daysApplied or isReturnSameDay == True:
+                    daysApplied = 1
+
+                if not directorReliever:
+                    directorReliever = ""
+
+
+                print("applicationNo", applicationNo )
+                print("usersId", usersId )
+                print("employeeNo", employeeNo )
+                print("dimension3", dimension3 )
+                print("leaveType", leaveType )
+                print("plannerStartDate", plannerStartDate )
+                print("daysApplied", daysApplied )
+                print("isReturnSameDay", isReturnSameDay )
+                print("myAction", myAction )
+                print("directorReliever", directorReliever )
+                
+
+                response = self.call_soap(
+                    soap_method="FnLeaveApplication",
+                    params=[
+                        applicationNo,
+                        employeeNo,
+                        usersId,
+                        dimension3,
+                        leaveType,
+                        plannerStartDate,
+                        int(daysApplied),
+                        isReturnSameDay,
+                        myAction,
+                        directorReliever,
+                    ],
+                )
+                print("SOAP Response:", response)
+                if request.META.get("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest":
+                    if response != "0" and response != None and response != "":
+                        return JsonResponse({"response": str(response)}, safe=False)
+                    return JsonResponse({"error": str(response)}, safe=False)
+                else:
+                    if response != "0" and response != None and response != "":
+                        messages.success(request, "Success")
+                        return redirect("leave_detail", pk=response)
+                    else:
+                        messages.error(request, f"{response}")
+                        return redirect("leave_detail", pk=applicationNo)
+    
+            except Exception as e:
+                logging.exception(e)
+                if request.META.get("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest":
+                    return JsonResponse({"error": str(e)}, safe=False)
+                else:
+                    messages.error(request, f"{e}")
+                    return redirect("leave")
+
 
 class Leave_Data(
     AuthRequiredMixin,
@@ -373,6 +446,7 @@ class TrainingRequest(
     SessionMixin,
     ODataMixin,
     ResponseMixin,
+    SOAPMixin,
     View,
 ):
 
@@ -428,6 +502,14 @@ class TrainingRequest(
 
             if not training_need:
                 training_need = "none"
+
+            print(
+                employee_no,
+                request_no,
+                is_adhoc,
+                training_need,
+                my_action,
+            )
 
             response = self.call_soap(
                 soap_method="FnTrainingRequest",
@@ -762,37 +844,99 @@ capturing requested amount, repayment period, reason, and application date.
 Supports workflow-based review and approval processing.
 """
 
+
 class SalaryAdvance(
     AuthRequiredMixin,
     ODataMixin,
     SessionMixin,
+    SOAPMixin,
     View,
 ):
     async def get(self, request):
         try:
-            session = await self.get_session_context(request)
-            employee_no = await request.session['Employee_No_']
+            session = self.get_session_context(request)
+            employee_no = session.get('Employee_No_')
 
-            response = await self.filter_data(
-                endpoint="/QySalaryAdvances",
-                field="Employee_No",
-                operator="eq",
-                value=employee_no
-            )
+            async with aiohttp.ClientSession() as client:
+                (
+                    salary_advance,
+                    salary_products,
+                    employees,
 
-            salary_products = await self.all_data(
-                 endpoint="/QyLoanProductTypes",
-            )
+                ) = await asyncio.gather(
+
+                    self.filter_data(
+                        endpoint="/QySalaryAdvances",
+                        field="Employee_No",
+                        operator="eq",
+                        value=employee_no,
+                    ),
+
+                    self.all_data(endpoint="/QyLoanProductTypes"),
+
+                    self.all_data(endpoint="/QyEmployees"),
+                )
+
+                open_requests = [
+                    x for x in salary_advance if x.get("Status") == "Open"]
+                pending_requests = [x for x in salary_advance if x.get(
+                    "Status") == "Pending Approval"]
+                approved_requests = [
+                    x for x in salary_advance if x.get("Status") == "Released"]
 
             ctx = {
                 **session,
-
+                'open_requests': open_requests,
+                'pending_requests': pending_requests,
+                'approved_requests': approved_requests,
+                'salary_products': salary_products,
             }
 
             return render(request, 'advance/advance.html', ctx)
         except Exception as e:
             logging.exception(e)
             return JsonResponse({"error": str(e)}, safe=False)
+
+    async def post(self, request):
+
+        try:
+            session = self.get_session_context(request)
+            user_id = session.get("User_ID")
+            employee_no = session.get("Employee_No_")
+            loanNo = request.POST.get('loanNo')
+            productType = request.POST.get('productType')
+            amountRequested = float(request.POST.get('amountRequested'))
+            installments = int(request.POST.get('installments'))
+            myAction = request.POST.get('myAction')
+
+            if installments <= 0 or installments > 12:
+                messages.info(
+                    request, "Installments cannot be less than 1 or more than 12")
+                return redirect('advance')
+
+            response = self.call_soap(
+                soap_method='FnSalaryAdvanceApplication',
+                params=[
+                    loanNo,
+                    employee_no,
+                    productType,
+                    amountRequested,
+                    user_id, 
+                    installments,
+                    myAction
+                ],
+            )
+
+            if response != "0" and response != '' and response != True:
+                messages.success(request, "Success")
+                return redirect('advanceDetail', pk=response)
+            messages.error(request, f'{response}')
+            return redirect('advance')
+        except Exception as e:
+            messages.error(request, 'Failed, 201 denied')
+            logging.exception(e)
+        return redirect('salary-advance')
+
 
 """
 Employee Transfer Process:

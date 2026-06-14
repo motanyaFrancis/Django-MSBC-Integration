@@ -8,8 +8,8 @@ urlpatterns = [
     # Leave URLs
     path("leave/", views.LeaveRequest.as_view(), name="leave"),
     path('Leave_Data/', views.Leave_Data.as_view(), name='Leave_Data'),
-    path("leave/<str:pk>/", views.LeaveDetail.as_view(), name="LeaveDetail"),
-    path("LeaveAttachments/", views.LeaveAttachments.as_view(), name="LeaveAttachments"),
+    path("leave/<str:pk>/", views.LeaveDetail.as_view(), name="leave_detail"),
+    path("LeaveAttachments/", views.LeaveAttachments.as_view(), name="Leave_Attachments"),
     path("Leave_Approvers_Data/", views.Leave_Approvers_Data.as_view(), name="Leave_Approvers_Data"),
 
     # Training URLs
@@ -18,9 +18,15 @@ urlpatterns = [
     path("training/<str:pk>", views.TrainingDetailsView.as_view(), name="training_details"),
     path("training-lines/<str:pk>/", views.TrainingLines.as_view(), name="training-lines"
     ),
-    
+
     # Salary Advance
 
+    path("salary-advance/", views.SalaryAdvance.as_view(), name="salary_advance"),
+    # path("advance/<str:pk>", views.TrainingDetailsView.as_view(), name="advance_details"),
+    # path("advance-data/", views.TrainingDataView.as_view(), name="advance_Data"),
+    # path("advance-lines/<str:pk>/", views.TrainingLines.as_view(), name="advance_lines"
+    # ),
+    
     
     # Employee transfers
     path('transfer/', views.TransferRequestView.as_view(), name="transfer"),

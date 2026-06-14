@@ -1,54 +1,49 @@
-<!-- NEW LEAVE REQUEST MODAL -->
+<!-- ============================================================
+     COMPLETE LEAVE REQUEST MODAL
+     Merges new UI (Doc 1) with full functionality (Doc 2)
+     ============================================================ -->
 
-<div class="modal fade" id="raise_leave" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-    aria-hidden="true">
+<div class="modal fade" id="raise_leave" data-bs-backdrop="static" data-bs-keyboard="false"
+    tabindex="-1" aria-hidden="true">
 
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
 
-            <!-- HEADER -->
+            <!-- ───────────── HEADER ───────────── -->
             <div class="modal-header bg-primary text-white border-0 px-4 py-3">
                 <div>
                     <h4 class="modal-title fw-bold mb-1">
-                        <i class="las la-calendar-plus me-2"></i>
-                        New Leave Request
+                        <i class="las la-calendar-plus me-2"></i>New Leave Request
                     </h4>
-                    <small class="opacity-75">
-                        Complete the steps below to submit your leave request
-                    </small>
+                    <small class="opacity-75">Complete the steps below to submit your leave request</small>
                 </div>
-
-                <button type="button" class="btn-close btn-close-white" id="leave_close-modal" data-bs-dismiss="modal"
-                    aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" id="leave_close-modal"
+                    data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <!-- BODY -->
+            <!-- ───────────── BODY ───────────── -->
             <div class="modal-body bg-light p-0">
 
-                <!-- STEPPER -->
+                <!-- STEPPER BAR -->
                 <div class="bg-white border-bottom px-4 py-4">
-
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
 
                         <div class="step-item active" id="stage-1-step">
                             <div class="step-circle">1</div>
                             <div class="step-title">Leave Details</div>
                         </div>
-
                         <div class="step-line"></div>
 
                         <div class="step-item" id="stage-2-step">
                             <div class="step-circle">2</div>
                             <div class="step-title">Attachments</div>
                         </div>
-
                         <div class="step-line"></div>
 
                         <div class="step-item" id="stage-3-step">
                             <div class="step-circle">3</div>
                             <div class="step-title">Approval</div>
                         </div>
-
                         <div class="step-line"></div>
 
                         <div class="step-item" id="stage-4-step">
@@ -59,186 +54,140 @@
                     </div>
                 </div>
 
-                <!-- STAGES -->
+                <!-- STAGE CONTENT -->
                 <div class="p-4">
 
-                    <!-- ================================================= -->
-                    <!-- STAGE 1 -->
-                    <!-- ================================================= -->
+                    <!-- ═══════════════════════════════════════ -->
+                    <!-- STAGE 1 — Leave Details                -->
+                    <!-- ═══════════════════════════════════════ -->
                     <div id="stage1" class="s-stepper-stage active">
-
                         <div class="card border-0 shadow-sm rounded-4">
                             <div class="card-body p-4">
 
                                 <div class="d-flex align-items-center mb-4">
-                                    <div class="bg-primary-subtle rounded-circle px-2 py-2 me-3">
+                                    <div class="bg-primary-subtle rounded-circle p-2 me-3">
                                         <i class="mdi mdi-file-document text-primary fs-5"></i>
                                     </div>
-
                                     <div>
-                                        <h5 class="mb-1 fw-bold">
-                                            Leave Information
-                                        </h5>
-                                        <small class="text-muted">
-                                            Fill in your leave request details
-                                        </small>
+                                        <h5 class="mb-1 fw-bold">Leave Information</h5>
+                                        <small class="text-muted">Fill in your leave request details</small>
                                     </div>
                                 </div>
 
-                                <!-- LOADER -->
+                                <!-- SPINNER -->
                                 <div class="text-center py-5" id="leave-spinner" style="display:none;">
-
-                                    <div class="spinner-border text-primary" style="width:4rem;height:4rem;"></div>
-
-                                    <p class="mt-3 text-muted">
-                                        Saving leave request...
-                                    </p>
+                                    <div class="spinner-border text-primary" style="width:3.5rem;height:3.5rem;"></div>
+                                    <p class="mt-3 text-muted">Saving leave request...</p>
                                 </div>
 
                                 <!-- FORM -->
                                 <form id="leave_form" method="post" novalidate>
                                     {% csrf_token %}
 
+                                    <!-- Hidden fields -->
                                     <input type="hidden" name="applicationNo" id="applicationNo">
-                                    <input type="hidden" name="dimension3" id="dimension3">
-                                    <input type="hidden" name="myAction" id="myAction" value="insert">
+                                    <input type="hidden" name="dimension3"    id="dimension3">
+                                    <input type="hidden" name="myAction"      id="myAction" value="insert">
 
-                                    <div class="row g-4">
+                                    <div class="row g-3">
 
-                                        <!-- LEAVE TYPE -->
+                                        <!-- Leave Type -->
                                         <div class="col-md-6">
                                             <label class="form-label fw-semibold">
-                                                Leave Type {{ session_user.leave_balance }}
-                                                <span class="text-danger">*</span>
+                                                Leave Type <span class="text-danger">*</span>
                                             </label>
-
-                                            <select class="form-select form-select-md" name="leaveType" id="leaveType"
-                                                required>
-
-                                                <option value="0" disabled selected>
-                                                    Select Leave Type
-                                                </option>
-
+                                            <select class="form-select" name="leaveType" id="leaveType" required>
+                                                <option value="0" disabled selected>— Select Leave Type —</option>
                                                 {% for res in leave %}
-                                                <option value="{{res.Code}}">
-                                                    {{res.Description}}
-                                                </option>
+                                                <option value="{{ res.Code }}">{{ res.Description }}</option>
                                                 {% endfor %}
                                             </select>
                                         </div>
 
-                                        <!-- START DATE -->
+                                        <!-- Start Date -->
                                         <div class="col-md-6">
                                             <label class="form-label fw-semibold">
-                                                Start Date
-                                                <span class="text-danger">*</span>
+                                                Start Date <span class="text-danger">*</span>
                                             </label>
-
-                                            <input type="date" class="form-control form-control-md"
-                                                name="plannerStartDate" id="start-date" required>
+                                            <input type="date" class="form-control" name="plannerStartDate"
+                                                id="start-date" required>
                                         </div>
 
-                                        <!-- BALANCE -->
-                                        <div class="col-md-12" id="leaveBalanceRow" style="display:none;">
-
-                                            <div class="alert alert-info border-0 rounded-3 mb-0">
-                                                <div class="d-flex align-items-center">
-                                                    <i class="las la-wallet fs-3 me-2"></i>
-
-                                                    <div class="w-100">
-                                                        <small class="fw-semibold d-block">
-                                                            Leave Balance
-                                                        </small>
-
-                                                        <input type="text" class="form-control mt-2" id="leaveBalance" value="{{ session_user.leave_balance }}"
-                                                            disabled>
+                                        <!-- Leave Balance (revealed after type selected) -->
+                                        <div class="col-12" id="leaveBalanceRow" style="display:none;">
+                                            <div class="alert alert-info border-0 rounded-3 mb-0 py-2">
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <i class="las la-wallet fs-3 text-info"></i>
+                                                    <div class="flex-grow-1">
+                                                        <small class="fw-semibold d-block text-info">Leave Balance</small>
+                                                        <input type="text" class="form-control form-control-sm mt-1"
+                                                            id="leaveBalance" disabled>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <!-- RETURN SAME DAY -->
+                                        <!-- Return Same Day -->
                                         <div class="col-md-6">
                                             <label class="form-label fw-semibold">
-                                                Return Same Day
+                                                Return Same Day <span class="text-danger">*</span>
                                             </label>
-
-                                            <select class="form-select form-select-md" id="isReturnSameDay"
-                                                name="isReturnSameDay">
-
-                                                <option value="0" disabled selected>
-                                                    Select Option
-                                                </option>
-
+                                            <select class="form-select" id="isReturnSameDay"
+                                                name="isReturnSameDay" required>
+                                                <option value="0" disabled selected>— Select —</option>
                                                 <option value="True">Yes</option>
                                                 <option value="False">No</option>
                                             </select>
                                         </div>
 
-                                        <!-- DAYS APPLIED -->
+                                        <!-- Days Applied (revealed when Return Same Day = No) -->
                                         <div class="col-md-6" id="daysAppliedRow" style="display:none;">
-
-                                            <label class="form-label fw-semibold">
-                                                Days Applied
-                                            </label>
-
-                                            <input type="number" class="form-control form-control-md" id="daysApplied"
-                                                name="daysApplied" disabled>
+                                            <label class="form-label fw-semibold">Days Applied</label>
+                                            <input type="number" class="form-control" id="daysApplied"
+                                                name="daysApplied" min="0" step="0.5" disabled>
                                         </div>
 
-                                        <!-- RELIEVER -->
-                                        <div class="col-md-12" id="directorRelieverRow" style="display:none;">
-
+                                        <!-- Director Reliever (revealed for directors via API) -->
+                                        <div class="col-12" id="directorRelieverRow" style="display:none;">
                                             <label class="form-label fw-semibold">
-                                                Reliever
-                                                <span class="text-danger">*</span>
+                                                Reliever <span class="text-danger">*</span>
                                             </label>
-
-                                            <select class="form-select form-select-md" name="directorReliever"
+                                            <select class="form-select" name="directorReliever"
                                                 id="directorReliever" disabled>
-
-                                                <option value="0" disabled selected>
-                                                    Select Reliever
-                                                </option>
-
+                                                <option value="0" disabled selected>— Select Reliever —</option>
                                                 {% for reliever in directorReliever %}
-                                                <option value="{{reliever.No_}}">
-                                                    {{reliever.First_Name}}
-                                                    {{reliever.Last_Name}}
+                                                <option value="{{ reliever.No_ }}">
+                                                    {{ reliever.First_Name }} {{ reliever.Last_Name }}
                                                 </option>
                                                 {% endfor %}
                                             </select>
+                                            <small class="text-muted">Required for directors / senior staff</small>
                                         </div>
 
-                                    </div>
+                                    </div><!-- /row -->
 
-                                    <!-- BUTTONS -->
-                                    <div class="d-flex justify-content-end mt-5 gap-3">
-
-                                        <button type="submit" class="btn btn-primary  px-5 ">
-
-                                            Save & Continue
-                                            <i class="las la-arrow-right ms-2"></i>
+                                    <!-- Action buttons -->
+                                    <div class="d-flex justify-content-end mt-4 gap-2">
+                                        <!-- shown after filter_list populates form for edit -->
+                                        <button id="next1" type="button" hidden
+                                            class="btn btn-outline-primary px-4">
+                                            Next <i class="las la-arrow-right ms-1"></i>
                                         </button>
-
-                                        <button id="next1" type="button" hidden class="btn btn-outline-primary px-4 ">
-
-                                            Next
+                                        <button type="submit" class="btn btn-primary px-5">
+                                            Save &amp; Continue
+                                            <i class="las la-arrow-right ms-1"></i>
                                         </button>
-
                                     </div>
 
                                 </form>
-
                             </div>
                         </div>
-                    </div>
+                    </div><!-- /stage1 -->
 
-                    <!-- ================================================= -->
-                    <!-- STAGE 2 -->
-                    <!-- ================================================= -->
+                    <!-- ═══════════════════════════════════════ -->
+                    <!-- STAGE 2 — Attachments                  -->
+                    <!-- ═══════════════════════════════════════ -->
                     <div id="stage2" class="s-stepper-stage">
-
                         <div class="card border-0 shadow-sm rounded-4">
                             <div class="card-body p-4">
 
@@ -246,182 +195,145 @@
                                     <div class="bg-success-subtle rounded-circle p-3 me-3">
                                         <i class="las la-paperclip text-success fs-3"></i>
                                     </div>
-
                                     <div>
                                         <h5 class="fw-bold mb-1">
                                             Attach Supporting Documents
+                                            <span class="leaveId badge bg-success ms-2 fs-6"></span>
                                         </h5>
-
-                                        <small class="text-muted">
-                                            Upload any supporting files if needed
-                                        </small>
+                                        <small class="text-muted">Upload any supporting files if needed</small>
                                     </div>
                                 </div>
 
                                 <!-- SPINNER -->
                                 <div class="text-center py-5" id="attachment-spinner" style="display:none;">
-
-                                    <div class="spinner-border text-success" style="width:4rem;height:4rem;"></div>
-
-                                    <p class="mt-3 text-muted">
-                                        Uploading attachments...
-                                    </p>
+                                    <div class="spinner-border text-success" style="width:3.5rem;height:3.5rem;"></div>
+                                    <p class="mt-3 text-muted">Uploading attachments...</p>
                                 </div>
 
-                                <!-- FORM -->
+                                <!-- UPLOAD FORM -->
                                 <form method="post" id="leave_attachment_form" enctype="multipart/form-data">
-
                                     {% csrf_token %}
 
                                     <div class="border rounded-4 p-4 bg-light">
-
-                                        <label class="form-label fw-semibold">
-                                            Upload Files
-                                        </label>
-
-                                        <input class="form-control form-control-md" name="attachments" id="attachments"
+                                        <label class="form-label fw-semibold">Upload Files</label>
+                                        <input class="form-control" name="attachments" id="attachments"
                                             type="file" multiple>
-
                                         <small class="text-muted mt-2 d-block">
-                                            Accepted multiple file uploads
+                                            Multiple files accepted (PDF, Word, images, etc.)
                                         </small>
-
+                                        <!-- upload error output -->
+                                        <p id="attachmentOutput" class="mt-2 mb-0 text-danger fw-semibold"
+                                            style="display:none;"></p>
                                     </div>
 
-                                    <div class="d-flex justify-content-between mt-4">
-
+                                    <div class="d-flex justify-content-between align-items-center mt-4 gap-2 flex-wrap">
                                         <button id="prev-btn" type="button"
-                                            class="btn btn-outline-secondary rounded-pill px-4">
-
-                                            <i class="las la-arrow-left me-2"></i>
-                                            Previous
+                                            class="btn btn-outline-secondary px-4">
+                                            <i class="las la-arrow-left me-1"></i>Previous
                                         </button>
-
-                                        <div class="d-flex gap-3">
-
-                                            <button type="submit" class="btn btn-success rounded-pill px-4">
-
-                                                Upload Files
+                                        <div class="d-flex gap-2">
+                                            <button type="submit" class="btn btn-success px-4">
+                                                <i class="las la-upload me-1"></i>Upload Files
                                             </button>
-
                                             <button id="next-btn" type="button"
-                                                class="btn btn-primary rounded-pill px-4">
-
-                                                Continue
-                                                <i class="las la-arrow-right ms-2"></i>
+                                                class="btn btn-primary px-4">
+                                                Continue <i class="las la-arrow-right ms-1"></i>
                                             </button>
-
                                         </div>
-
                                     </div>
-
                                 </form>
 
-                                <!-- ATTACHMENTS -->
-                                <div id="leave_attachments_row" style="display:none;" class="mt-5">
-
+                                <!-- UPLOADED ATTACHMENTS LIST -->
+                                <div id="leave_attachments_row" style="display:none;" class="mt-4">
                                     <h6 class="fw-bold mb-3">
+                                        <i class="las la-folder-open text-success me-1"></i>
                                         Uploaded Attachments
                                     </h6>
-
-                                    <div class="row g-3" id="attachments-container">
-                                    </div>
-
+                                    <div class="row g-3" id="attachments-container"></div>
                                 </div>
 
                             </div>
                         </div>
-                    </div>
+                    </div><!-- /stage2 -->
 
-                    <!-- ================================================= -->
-                    <!-- STAGE 3 -->
-                    <!-- ================================================= -->
+                    <!-- ═══════════════════════════════════════ -->
+                    <!-- STAGE 3 — Submit for Approval          -->
+                    <!-- ═══════════════════════════════════════ -->
                     <div id="stage3" class="s-stepper-stage">
-
                         <div class="card border-0 shadow-sm rounded-4">
                             <div class="card-body text-center p-5">
 
                                 <div class="bg-info-subtle rounded-circle d-inline-flex p-4 mb-4">
                                     <i class="las la-paper-plane text-info fs-1"></i>
                                 </div>
-
-                                <h4 class="fw-bold">
-                                    Ready To Submit
-                                </h4>
-
-                                <p class="text-muted mb-5">
+                                <h4 class="fw-bold">Ready To Submit</h4>
+                                <p class="text-muted mb-4">
                                     Your leave request has been prepared successfully.
                                     Send it for approval.
                                 </p>
 
-                                <!-- LOADER -->
+                                <!-- SPINNER -->
                                 <div id="approve-spinner" style="display:none;" class="mb-4">
-
                                     <div class="spinner-border text-info"></div>
-
-                                    <p class="mt-3 text-muted">
-                                        Sending approval request...
-                                    </p>
+                                    <p class="mt-2 text-muted">Sending approval request...</p>
                                 </div>
 
-                                <!-- APPROVAL FORM -->
+                                <!-- Cancel-approval success animation (shown from stage 4) -->
+                                <div class="text-center mx-auto mb-4" id="cancelAnimation" style="display:none;">
+                                    <i class="las la-check-circle text-success"
+                                        style="font-size:4rem;"></i>
+                                    <h5 class="mt-2 text-success">Approval Request Cancelled</h5>
+                                </div>
+
                                 <form method="POST" id="approvalForm">
-
                                     {% csrf_token %}
-
                                     <div class="d-flex justify-content-center gap-3 flex-wrap">
-
-                                        <button class="btn btn-info  px-5" type="submit">
-
+                                        <button class="btn btn-info px-5" type="submit">
                                             <i class="las la-check-circle me-2"></i>
-                                            Send For Approval
+                                            Send <span class="leaveId fw-bold mx-1"></span> For Approval
                                         </button>
-
-                                        <button id="prev3-btn" type="button" class="btn btn-outline-secondary px-4">
-
-                                            Previous
+                                        <button id="prev3-btn" type="button"
+                                            class="btn btn-outline-secondary px-4">
+                                            <i class="las la-arrow-left me-1"></i>Previous
                                         </button>
-
                                     </div>
-
                                 </form>
 
                             </div>
                         </div>
-                    </div>
+                    </div><!-- /stage3 -->
 
-                    <!-- ================================================= -->
-                    <!-- STAGE 4 -->
-                    <!-- ================================================= -->
+                    <!-- ═══════════════════════════════════════ -->
+                    <!-- STAGE 4 — Completed                    -->
+                    <!-- ═══════════════════════════════════════ -->
                     <div id="stage4" class="s-stepper-stage">
-
                         <div class="card border-0 shadow-sm rounded-4">
+                            <div class="card-body p-4">
 
-                            <div class="card-body p-5">
-
-                                <!-- SUCCESS -->
-                                <div class="text-center mb-5">
-
-                                    <div class="bg-success-subtle rounded-circle d-inline-flex p-4 mb-4">
-                                        <i class="las la-check-circle text-success fs-1"></i>
-                                    </div>
-
-                                    <h3 class="fw-bold text-success">
-                                        Leave Request Submitted
-                                    </h3>
-
-                                    <p class="text-muted">
-                                        Your request has been sent successfully
-                                        for approval.
-                                    </p>
-
+                                <!-- Approval-sent success animation -->
+                                <div class="text-center mb-3" id="approvalAnimation" style="display:none;">
+                                    <i class="las la-check-circle text-success"
+                                        style="font-size:4rem;"></i>
+                                    <h5 class="mt-2 text-success">Approval Request Sent</h5>
                                 </div>
 
-                                <!-- APPROVERS -->
+                                <!-- Static success header -->
+                                <div class="text-center mb-4">
+                                    <div class="bg-success-subtle rounded-circle d-inline-flex p-4 mb-3">
+                                        <i class="las la-check-circle text-success fs-1"></i>
+                                    </div>
+                                    <h3 class="fw-bold text-success">Leave Request Submitted</h3>
+                                    <p class="text-muted">
+                                        Your request has been sent for approval.
+                                        &nbsp;Leave No:&nbsp;
+                                        <strong class="leaveId text-success"></strong>
+                                    </p>
+                                </div>
+
+                                <!-- Approvers table -->
                                 <div class="table-responsive">
-
-                                    <table id="leave_approvers_table" class="table align-middle table-hover">
-
+                                    <table id="leave_approvers_table"
+                                        class="table table-hover align-middle">
                                         <thead class="table-light">
                                             <tr>
                                                 <th>Entry No.</th>
@@ -432,47 +344,642 @@
                                                 <th>Date Modified</th>
                                             </tr>
                                         </thead>
-
                                         <tbody>
                                             <tr>
                                                 <td colspan="6" class="text-center py-4 text-muted">
-
                                                     Loading approvers...
                                                 </td>
                                             </tr>
                                         </tbody>
-
                                     </table>
                                 </div>
 
-                                <!-- ACTIONS -->
-                                <div class="d-flex justify-content-center gap-3 mt-5 flex-wrap">
-
+                                <!-- Stage-4 actions -->
+                                <div class="d-flex justify-content-center gap-3 mt-4 flex-wrap">
                                     <form method="POST" id="CancelApprovalForm">
-
                                         {% csrf_token %}
-
-                                        <button class="btn btn-outline-danger rounded-pill px-4" type="submit">
-
-                                            Cancel Approval
+                                        <button class="btn btn-outline-danger px-4" type="submit">
+                                            <i class="las la-times-circle me-1"></i>Cancel Approval
                                         </button>
                                     </form>
-
-                                    <a href="" id="detailsBtn" class="btn btn-primary  px-4">
-
-                                        View Leave Details
+                                    <a href="#" id="detailsBtn" class="btn btn-primary px-4">
+                                        <i class="las la-eye me-1"></i>View Leave Details
                                     </a>
-
                                 </div>
 
                             </div>
                         </div>
-                    </div>
+                    </div><!-- /stage4 -->
 
-                </div>
-
-            </div>
-
+                </div><!-- /stage content -->
+            </div><!-- /modal-body -->
         </div>
     </div>
 </div>
+
+
+<!-- ============================================================
+     JAVASCRIPT — full functionality
+     ============================================================ -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+$(document).ready(function () {
+
+    /* ─────────────────────────────────────────────
+       STATE
+    ───────────────────────────────────────────── */
+    var leaveCode = '0';
+
+    /* ─────────────────────────────────────────────
+       INIT
+    ───────────────────────────────────────────── */
+    Leave_Data();
+    get_director();
+
+    // Prevent past dates on start-date
+    $('#start-date').prop('min', new Date().toISOString().split('T')[0]);
+
+    /* ─────────────────────────────────────────────
+       CLOSE MODAL → refresh table
+    ───────────────────────────────────────────── */
+    $('#leave_close-modal').on('click', function () {
+        Leave_Data();
+    });
+
+    /* ─────────────────────────────────────────────
+       STEPPER HELPERS
+    ───────────────────────────────────────────── */
+    function hideStage(n) {
+        $('#stage' + n).removeClass('active');
+        $('#stage-' + n + '-step').removeClass('active').addClass('done');
+    }
+
+    function showStage(n) {
+        $('#stage' + n).addClass('active');
+        $('#stage-' + n + '-step').addClass('active');
+    }
+
+    /* ─────────────────────────────────────────────
+       LEAVE BALANCE
+    ───────────────────────────────────────────── */
+    function get_leave_balance(leave_type) {
+        $.ajax({
+            url: '/FnLeaveBalances/',
+            type: 'POST',
+            data: {
+                leave_type: leave_type,
+                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+            },
+            success: function (data) {
+                $('#leaveBalance').val(data + ' days');
+            },
+            error: function (xhr) {
+                console.log(xhr.responseText);
+            }
+        });
+    }
+
+    $('#leaveType').on('change', function () {
+        var val = $(this).val();
+        if (val && val !== '0') {
+            $('#leaveBalanceRow').show();
+            get_leave_balance(val);
+        }
+    });
+
+    /* ─────────────────────────────────────────────
+       RETURN SAME DAY TOGGLE
+    ───────────────────────────────────────────── */
+    $('#isReturnSameDay').on('change', function () {
+        if (this.value === 'False') {
+            $('#daysAppliedRow').show(400);
+            $('#daysApplied').prop('disabled', false);
+        } else {
+            $('#daysApplied').prop('disabled', true).val('');
+            $('#daysAppliedRow').hide(400);
+        }
+    });
+
+    /* ─────────────────────────────────────────────
+       STAGE 1 — SUBMIT LEAVE FORM
+    ───────────────────────────────────────────── */
+    $('#leave_form').on('submit', function (e) {
+        e.preventDefault();
+
+        // Basic front-end validation
+        if (!$('#leaveType').val() || $('#leaveType').val() === '0') {
+            iziToast.show({ theme:'dark', icon:'las la-exclamation', title:'Validation',
+                message:'Please select a leave type.', position:'topCenter', progressBarColor:'#ff0800' });
+            return;
+        }
+        if (!$('#start-date').val()) {
+            iziToast.show({ theme:'dark', icon:'las la-exclamation', title:'Validation',
+                message:'Please select a start date.', position:'topCenter', progressBarColor:'#ff0800' });
+            return;
+        }
+        if (!$('#isReturnSameDay').val() || $('#isReturnSameDay').val() === '0') {
+            iziToast.show({ theme:'dark', icon:'las la-exclamation', title:'Validation',
+                message:'Please indicate if you return the same day.', position:'topCenter', progressBarColor:'#ff0800' });
+            return;
+        }
+        // Reliever required if row is visible
+        if ($('#directorRelieverRow').is(':visible') &&
+            (!$('#directorReliever').val() || $('#directorReliever').val() === '0')) {
+            iziToast.show({ theme:'dark', icon:'las la-exclamation', title:'Validation',
+                message:'Please select a reliever.', position:'topCenter', progressBarColor:'#ff0800' });
+            return;
+        }
+
+        $('#leave_form').hide();
+        $('#leave-spinner').show(200);
+
+        $.ajax({
+            type: 'POST',
+            url: '{% url "leave" %}',
+            data: {
+                applicationNo:    $('#applicationNo').val(),
+                dimension3:       $('#dimension3').val(),
+                leaveType:        $('#leaveType').val(),
+                plannerStartDate: $('#start-date').val(),
+                daysApplied:      $('#daysApplied').val(),
+                isReturnSameDay:  $('#isReturnSameDay').val(),
+                myAction:         $('#myAction').val(),
+                directorReliever: $('#directorReliever').val(),
+                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+            },
+            success: function (response) {
+                $('#leave-spinner').hide();
+                $('#leave_form').show(200);
+
+                if (response['response']) {
+                    leaveCode = response['response'];
+                    $('.leaveId').text(leaveCode);
+                    Leave_Data();
+                    filter_list(leaveCode);
+                    hideStage(1);
+                    showStage(2);
+
+                    iziToast.show({
+                        theme: 'dark', backgroundColor: '#239B56',
+                        icon: 'las la-check-circle', title: 'Done',
+                        message: 'Leave ' + leaveCode + ' created successfully',
+                        position: 'topCenter', progressBarColor: '#F4F6F7'
+                    });
+
+                } else if (response['error']) {
+                    iziToast.show({
+                        theme: 'dark', icon: 'las la-exclamation', title: 'Error',
+                        message: response['error'],
+                        position: 'topCenter', progressBarColor: '#ff0800'
+                    });
+                }
+            },
+            error: function (err) {
+                console.log(err);
+                $('#leave-spinner').hide();
+                $('#leave_form').show(200);
+                iziToast.show({
+                    theme: 'dark', icon: 'las la-exclamation', title: 'Error',
+                    message: 'An unexpected error occurred. Please try again.',
+                    position: 'topCenter', progressBarColor: '#ff0800'
+                });
+            }
+        });
+    });
+
+    /* ─────────────────────────────────────────────
+       NEXT1 — skip re-save, jump to stage 2
+    ───────────────────────────────────────────── */
+    $('#next1').on('click', function () {
+        hideStage(1);
+        showStage(2);
+        $('.leaveId').text(leaveCode);
+    });
+
+    /* ─────────────────────────────────────────────
+       STAGE 2 — UPLOAD ATTACHMENTS
+    ───────────────────────────────────────────── */
+    $('#leave_attachment_form').on('submit', function (e) {
+        e.preventDefault();
+
+        var files = $('#attachments')[0].files;
+        if (!files.length) {
+            $('#attachmentOutput').text('Please select at least one file.').show();
+            return;
+        }
+        $('#attachmentOutput').hide();
+        $('#leave_attachment_form').hide();
+        $('#attachment-spinner').show();
+
+        var formData = new FormData(this);
+        for (var i = 0; i < files.length; i++) {
+            formData.append('attachment', files[i]);
+        }
+
+        $.ajax({
+            url: '/LeaveAttachments/' + leaveCode + '/',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: { 'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val() },
+            success: function (data) {
+                $('#attachment-spinner').hide();
+                $('#leave_attachment_form').show();
+                $('#attachments').val('');
+
+                Load_Leave_Attachments(leaveCode);
+
+                if (data['success'] === true) {
+                    iziToast.show({
+                        theme: 'dark', backgroundColor: '#239B56',
+                        icon: 'las la-check-circle', title: 'Done',
+                        message: 'Files uploaded successfully',
+                        position: 'topCenter', progressBarColor: '#F4F6F7'
+                    });
+                } else {
+                    var msg = typeof data === 'string' ? data : (data['error'] || 'Upload failed');
+                    $('#attachmentOutput').text(msg).show();
+                    iziToast.show({
+                        theme: 'dark', icon: 'las la-exclamation', title: 'Error',
+                        message: msg, position: 'topCenter', progressBarColor: '#ff0800'
+                    });
+                }
+            },
+            error: function (xhr) {
+                console.log(xhr.responseText);
+                $('#attachment-spinner').hide();
+                $('#leave_attachment_form').show();
+                $('#attachmentOutput').text('Upload failed. Please try again.').show();
+            }
+        });
+    });
+
+    /* Stage 2 navigation */
+    $('#prev-btn').on('click', function () {
+        hideStage(2);
+        showStage(1);
+    });
+
+    $('#next-btn').on('click', function () {
+        hideStage(2);
+        showStage(3);
+        $('.leaveId').text(leaveCode);
+    });
+
+    /* ─────────────────────────────────────────────
+       STAGE 3 — SEND FOR APPROVAL
+    ───────────────────────────────────────────── */
+    $('#prev3-btn').on('click', function () {
+        hideStage(3);
+        showStage(2);
+    });
+
+    $('#approvalForm').on('submit', function (e) {
+        e.preventDefault();
+        $('#approvalForm').hide();
+        $('#approve-spinner').show(200);
+
+        $.ajax({
+            type: 'POST',
+            url: '/LeaveApprovalRequest/',
+            data: {
+                leaveCode: leaveCode,
+                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+            },
+            success: function (data) {
+                $('#approve-spinner').hide();
+                $('#approvalForm').show(200);
+
+                if (data['success'] === true) {
+                    Leave_Approvers_Data(leaveCode);
+                    $('#detailsBtn').attr('href', '/leave/detail/' + leaveCode);
+                    $('.leaveId').text(leaveCode);
+                    hideStage(3);
+                    showStage(4);
+
+                    $('#approvalAnimation')
+                        .fadeIn(1000)
+                        .delay(4000)
+                        .fadeOut(1000);
+
+                    iziToast.show({
+                        theme: 'dark', backgroundColor: '#239B56',
+                        icon: 'las la-check-circle', title: 'Done',
+                        message: data['message'],
+                        position: 'topCenter', progressBarColor: '#F4F6F7'
+                    });
+
+                } else {
+                    iziToast.show({
+                        theme: 'dark', icon: 'las la-exclamation', title: 'Error',
+                        message: data['error'],
+                        position: 'topCenter', progressBarColor: '#ff0800'
+                    });
+                }
+            },
+            error: function (err) {
+                console.log(err);
+                $('#approve-spinner').hide();
+                $('#approvalForm').show(200);
+            }
+        });
+    });
+
+    /* ─────────────────────────────────────────────
+       STAGE 4 — CANCEL APPROVAL
+    ───────────────────────────────────────────── */
+    $('#CancelApprovalForm').on('submit', function (e) {
+        e.preventDefault();
+
+        $.ajax({
+            type: 'POST',
+            url: '/CancelApprovalForm/',
+            data: {
+                leaveCode: leaveCode,
+                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+            },
+            success: function (data) {
+                Leave_Approvers_Data(leaveCode);
+
+                if (data['success'] === true) {
+                    $('.leaveId').text(leaveCode);
+                    hideStage(4);
+                    showStage(3);
+
+                    $('#cancelAnimation')
+                        .fadeIn(1000)
+                        .delay(4000)
+                        .fadeOut(1000);
+
+                    iziToast.show({
+                        theme: 'dark', backgroundColor: '#239B56',
+                        icon: 'las la-check-circle', title: 'Done',
+                        message: data['message'],
+                        position: 'topCenter', progressBarColor: '#F4F6F7'
+                    });
+
+                } else {
+                    iziToast.show({
+                        theme: 'dark', icon: 'las la-exclamation', title: 'Error',
+                        message: data['error'],
+                        position: 'topCenter', progressBarColor: '#ff0800'
+                    });
+                }
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        });
+    });
+
+    /* ─────────────────────────────────────────────
+       LEAVE DATA — populate all three tables
+    ───────────────────────────────────────────── */
+    function Leave_Data() {
+        $.ajax({
+            url: '{% url "Leave_Data" %}',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var openBody     = $('#open_leave_table tbody');
+                var pendingBody  = $('#pending_leave_table tbody');
+                var approvedBody = $('#approved_leave_table tbody');
+                openBody.empty(); pendingBody.empty(); approvedBody.empty();
+
+                data.forEach(function (item) {
+                    var row = $('<tr>');
+                    row.append($('<td>').text(item.Application_No));
+                    row.append($('<td>').text(item.Leave_Code));
+                    row.append($('<td>').text(
+                        moment(item.Start_Date, 'YYYY-MM-DD').format('Do MMM YYYY')));
+                    row.append($('<td>').text(
+                        moment(item.Resumption_Date, 'YYYY-MM-DD').format('Do MMM YYYY')));
+                    row.append($('<td>').text(item.Status));
+
+                    if (item.Status === 'Open' && item.Rejected_By_Approver) {
+                        row.addClass('rejected');
+                    }
+
+                    var viewBtn = $('<a>', {
+                        href: '/leave/detail/' + item.Application_No,
+                        class: 'btn btn-primary btn-sm'
+                    }).html('<i class="mdi mdi-folder-eye me-1"></i>View');
+
+                    row.append($('<td>').append(viewBtn));
+
+                    if      (item.Status === 'Open')             openBody.append(row);
+                    else if (item.Status === 'Pending Approval') pendingBody.append(row);
+                    else if (item.Status === 'Released')         approvedBody.append(row);
+                });
+
+                // Highlight rejected rows
+                $('#open_leave_table tbody tr.rejected')
+                    .css('background-color', '#566573')
+                    .css('color', '#fff');
+
+                // Init or refresh DataTables
+                ['open_leave_table', 'pending_leave_table', 'approved_leave_table']
+                    .forEach(function (id) {
+                        if (!$.fn.DataTable.isDataTable('#' + id)) {
+                            $('#' + id).DataTable({
+                                pageLength: 5,
+                                order: [[0, 'desc']]
+                            });
+                        }
+                    });
+
+                $('.open_leave_count').text(
+                    $('#open_leave_table').DataTable().page.info().recordsDisplay);
+                $('.pending_leave_count').text(
+                    $('#pending_leave_table').DataTable().page.info().recordsDisplay);
+                $('.approved_leave_count').text(
+                    $('#approved_leave_table').DataTable().page.info().recordsDisplay);
+            },
+            error: function (xhr, status, err) {
+                console.log('Error:', err);
+            }
+        });
+    }
+
+    /* ─────────────────────────────────────────────
+       FILTER LIST — re-populate stage-1 form for edits
+    ───────────────────────────────────────────── */
+    function filter_list(pk) {
+        $.ajax({
+            url: '/filter_list/' + pk,
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                query:           '/QyLeaveApplications',
+                filter_one:      'Application_No',
+                filter_two:      'User_ID',
+                filter_two_type: 'user'
+            },
+            success: function (data) {
+                if (data['success'] === true) {
+                    var d = data['data'];
+
+                    $('#applicationNo').val(d.Application_No);
+                    $('#dimension3').val(d.Dimension3 || '');
+                    $('#myAction').val(d.modify);
+                    $('#leaveType').val(d.Leave_Code);
+
+                    get_leave_balance(d.Leave_Code);
+                    $('#leaveBalanceRow').show();
+
+                    $('#start-date').val(d.Start_Date);
+
+                    if (d.Return_same_day === true || d.Return_same_day === 'True') {
+                        $('#isReturnSameDay').val('True');
+                        $('#daysAppliedRow').hide().find('input').prop('disabled', true);
+                    } else {
+                        $('#isReturnSameDay').val('False');
+                        $('#daysAppliedRow').show();
+                        $('#daysApplied').prop('disabled', false).val(d.Days_Applied);
+                    }
+
+                    // Reliever
+                    if (d.Director_Reliever) {
+                        $('#directorReliever').val(d.Director_Reliever);
+                    }
+
+                    // Reveal "Next" so they can skip re-saving
+                    $('#next1').removeAttr('hidden');
+                }
+            },
+            error: function (xhr, status, err) {
+                console.log('Error:', err);
+            }
+        });
+    }
+
+    /* ─────────────────────────────────────────────
+       LOAD LEAVE ATTACHMENTS
+    ───────────────────────────────────────────── */
+    function Load_Leave_Attachments(pk) {
+        $.ajax({
+            url: '/LeaveAttachments/' + pk + '/',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var container = $('#attachments-container').empty();
+                $('#leave_attachments_row').toggle(data.length > 0);
+
+                data.forEach(function (file) {
+                    var docID   = file.AuxiliaryIndex2;
+                    var tableID = file.Table_ID;
+                    var fname   = file.File_Name + '.' + file.File_Extension;
+
+                    var deleteBtn = $('<button>', {
+                        type: 'button',
+                        class: 'btn btn-sm btn-outline-danger',
+                        title: 'Remove'
+                    }).html('<i class="las la-times"></i>');
+
+                    deleteBtn.on('click', function () {
+                        $.ajax({
+                            type: 'POST',
+                            url: '/RemoveAttachment/',
+                            data: {
+                                docID: docID,
+                                tableID: tableID,
+                                leaveCode: pk,
+                                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+                            },
+                            success: function (res) {
+                                if (res['success'] === true) {
+                                    Load_Leave_Attachments(pk);
+                                    iziToast.show({
+                                        theme: 'dark', backgroundColor: '#239B56',
+                                        icon: 'las la-check-circle', title: 'Done',
+                                        message: res['message'],
+                                        position: 'topCenter', progressBarColor: '#F4F6F7'
+                                    });
+                                } else {
+                                    iziToast.show({
+                                        theme: 'dark', icon: 'las la-exclamation', title: 'Error',
+                                        message: res['error'],
+                                        position: 'topCenter', progressBarColor: '#ff0800'
+                                    });
+                                }
+                            },
+                            error: function (err) { console.log(err); }
+                        });
+                    });
+
+                    var card = $('<div>', { class: 'col-md-3' }).append(
+                        $('<div>', {
+                            class: 'card p-2 d-flex flex-row align-items-center gap-2 border-0 shadow-sm rounded-3'
+                        }).append(
+                            $('<i>', { class: 'las la-file-alt fs-4 text-muted' }),
+                            $('<span>', { class: 'small flex-grow-1 text-truncate', title: fname }).text(fname),
+                            deleteBtn
+                        )
+                    );
+                    container.append(card);
+                });
+            },
+            error: function (xhr, status, err) {
+                console.log('Error:', err);
+            }
+        });
+    }
+
+    /* ─────────────────────────────────────────────
+       LEAVE APPROVERS TABLE
+    ───────────────────────────────────────────── */
+    function Leave_Approvers_Data(pk) {
+        $.ajax({
+            url: '/LeaveApproversData/' + pk + '/',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var body = $('#leave_approvers_table tbody').empty();
+                if (!data.length) {
+                    body.append('<tr><td colspan="6" class="text-center text-muted py-3">No approvers found.</td></tr>');
+                    return;
+                }
+                data.forEach(function (a) {
+                    var row = $('<tr>');
+                    row.append($('<td>').text(a.Entry_No_));
+                    row.append($('<td>').text(a.Approver_ID));
+                    row.append($('<td>').text(a.Sequence_No_));
+                    row.append($('<td>').text(a.Status));
+                    row.append($('<td>').text(a.Last_Modified_By_User_ID));
+                    row.append($('<td>').text(
+                        moment(a.Last_Date_Time_Modified, 'YYYY-MM-DD').format('Do MMM YYYY')));
+                    body.append(row);
+                });
+            },
+            error: function (xhr, status, err) {
+                console.log('Error:', err);
+            }
+        });
+    }
+
+    /* ─────────────────────────────────────────────
+       DIRECTOR CHECK — show/hide reliever field
+    ───────────────────────────────────────────── */
+    function get_director() {
+        $.ajax({
+            url: '/get_director/',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                if (data === true) {
+                    $('#directorReliever').prop('disabled', false);
+                    $('#directorRelieverRow').show();
+                } else {
+                    $('#directorReliever').prop('disabled', true);
+                    $('#directorRelieverRow').hide();
+                }
+            },
+            error: function (xhr, status, err) {
+                console.log('Error:', err);
+            }
+        });
+    }
+
+});
+</script>

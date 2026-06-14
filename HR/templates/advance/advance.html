@@ -22,63 +22,65 @@ Transfer Requests
                         </p>
                     </div>
                     <div>
-                       
+
                     </div>
                 </div>
 
                 <!-- TABS -->
                 <div class="d-sm-flex align-items-center justify-content-between border-bottom mb-1">
-                
+
                     <ul class="nav nav-tabs" role="tablist">
-                
+
                         <!-- OPEN -->
                         <li class="nav-item">
                             <a class="nav-link" id="open-tab" data-bs-toggle="tab" href="#open-requests" role="tab">
-                
+
                                 New Requests
-                
+
                                 <span class="badge rounded-pill bg-info ms-2">
-                                    {{ new_advance|length }}
+                                    {{ open_requests|length }}
                                 </span>
-                
+
                             </a>
                         </li>
-                
+
                         <!-- PENDING -->
                         <li class="nav-item">
-                            <a class="nav-link" id="pending-tab" data-bs-toggle="tab" href="#pending-requests" role="tab">
-                
+                            <a class="nav-link" id="pending-tab" data-bs-toggle="tab" href="#pending-requests"
+                                role="tab">
+
                                 Pending Approval
-                
+
                                 <span class="badge rounded-pill bg-warning ms-2">
-                                    {{ pending_advance|length }}
+                                    {{ pending_requests|length }}
                                 </span>
-                
+
                             </a>
                         </li>
-                
+
                         <!-- APPROVED -->
                         <li class="nav-item">
-                            <a class="nav-link active" id="approved-tab" data-bs-toggle="tab" href="#approved-requests" role="tab">
-                
+                            <a class="nav-link active" id="approved-tab" data-bs-toggle="tab" href="#approved-requests"
+                                role="tab">
+
                                 Approved Requests
-                
+
                                 <span class="badge rounded-pill bg-success ms-2">
-                                    {{ released_advance|length }}
+                                    {{ approved_requests|length }}
                                 </span>
-                
+
                             </a>
                         </li>
-                
+
                     </ul>
-                
+
                     <button type="button" class="btn btn-primary text-white" data-bs-toggle="modal"
                         data-bs-target="#transportRequestModal">
-                
+
                         <i class="mdi mdi-plus-circle-outline"></i>
                         New Transfer Request
                     </button>
-                
+
                 </div>
 
                 <!-- TAB CONTENT -->
@@ -103,10 +105,11 @@ Transfer Requests
 
                                             <thead class="table-light">
                                                 <tr>
-                                                    <th>Request No</th>
-                                                    <th>Request Date</th>
+                                                    <th>Loan No</th>
+                                                    <th>Application Date</th>
+                                                    <th>Loan Product</th>
                                                     <th>Status</th>
-                                                    <th>Transfer Type</th>
+                                                    <th>Amount Requested</th>
                                                     <!-- <th>End Date</th> -->
                                                     <th>Action</th>
                                                 </tr>
@@ -114,17 +117,14 @@ Transfer Requests
 
                                             <tbody>
 
-                                                {% for res in new_advance %}
+                                                {% for res in open_requests %}
                                                 <tr>
-                                                    <td> {{ res.TransferNo }} </td>
-                                                    <td> {{ res.Date }} </td>
-                                                    <td> <span class="badge bg-info">
-                                                            {{ res.Status }}
-                                                        </span>
-                                                    </td>
-                                                    <td> {{ res.TransferType }} </td>
+                                                    <td>{{res.Loan_No}}</td>
+                                                    <td>{{res.Application_Date}}</td>
+                                                    <td>{{res.Loan_Product_Name}}</td>
+                                                    <td><span class="badge bg-info">{{res.Loan_Status}}</span></td>
+                                                    <td id="open_amount{{res.Loan_No}}">{{res.Amount_Requested}}</td>
                                                     <!-- <td> {{ res.Trip_Planned_End_Date }} </td> -->
-
                                                     <td>
 
                                                         <a href="{% url 'advance_details' res.TransferNo %}"
@@ -179,10 +179,11 @@ Transfer Requests
 
                                             <thead class="table-light">
                                                 <tr>
-                                                    <th>Request No</th>
-                                                    <th>Request Date</th>
+                                                     <th>Loan No</th>
+                                                    <th>Application Date</th>
+                                                    <th>Loan Product</th>
                                                     <th>Status</th>
-                                                    <th>Transfer Type</th>
+                                                    <th>Amount Requested</th>
                                                     <!-- <th>End Date</th> -->
                                                     <th>Action</th>>
                                                 </tr>
@@ -190,23 +191,21 @@ Transfer Requests
 
                                             <tbody>
 
-                                                {% for res in pending_advance %}
+                                                {% for res in pending_requests %}
                                                 <tr>
-                                                    <td> {{ res.TransferNo }} </td>
-                                                    <td> {{ res.Date }} </td>
-                                                    <td> <span class="badge bg-info">
-                                                            {{ res.Status }}
-                                                        </span>
-                                                    </td>
-                                                    <td> {{ res.TransferType }} </td>
+                                                    <td>{{res.Loan_No}}</td>
+                                                    <td>{{res.Application_Date}}</td>
+                                                    <td>{{res.Loan_Product_Name}}</td>
+                                                    <td><span class="badge bg-info">{{res.Loan_Status}}</span></td>
+                                                    <td id="open_amount{{res.Loan_No}}">{{res.Amount_Requested}}</td>
                                                     <!-- <td> {{ res.Trip_Planned_End_Date }} </td> -->
 
-                                                        <a href="{% url 'advance_details' res.TransferNo %}"
-                                                            class="btn btn-primary text-white">
+                                                    <a href="{% url 'advance_details' res.TransferNo %}"
+                                                        class="btn btn-primary text-white">
 
-                                                            <i class="mdi mdi-folder-eye"></i>
-                                                            View
-                                                        </a>
+                                                        <i class="mdi mdi-folder-eye"></i>
+                                                        View
+                                                    </a>
                                                     </td>
                                                 </tr>
                                                 {% empty %}
@@ -246,25 +245,24 @@ Transfer Requests
 
                                             <thead class="table-light">
                                                 <tr>
-                                                   <th>Request No</th>
-                                                    <th>Request Date</th>
+                                                     <th>Loan No</th>
+                                                    <th>Application Date</th>
+                                                    <th>Loan Product</th>
                                                     <th>Status</th>
-                                                    <th>Transfer Type</th>
+                                                    <th>Amount Requested</th>
                                                     <!-- <th>End Date</th> -->
                                                     <th>Action</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
 
-                                                {% for res in released_advance %}
+                                                {% for res in approved_requests %}
                                                 <tr>
-                                                    <td> {{ res.TransferNo }} </td>
-                                                    <td> {{ res.Date }} </td>
-                                                    <td> <span class="badge bg-info">
-                                                            {{ res.Status }}
-                                                        </span>
-                                                    </td>
-                                                    <td> {{ res.TransferType }} </td>
+                                                    <td>{{res.Loan_No}}</td>
+                                                    <td>{{res.Application_Date}}</td>
+                                                    <td>{{res.Loan_Product_Name}}</td>
+                                                    <td><span class="badge bg-info">{{res.Loan_Status}}</span></td>
+                                                    <td id="open_amount{{res.Loan_No}}">{{res.Amount_Requested}}</td>
                                                     <!-- <td> {{ res.Trip_Planned_End_Date }} </td> -->
 
                                                     <td>

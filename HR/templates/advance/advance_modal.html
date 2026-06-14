@@ -1,9 +1,7 @@
 <!-- TRANSPORT REQUEST MODAL -->
 <div class="modal fade" id="transportRequestModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
     aria-hidden="true">
-
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
 
             <!-- HEADER -->
@@ -11,23 +9,19 @@
 
                 <div>
                     <h4 class="modal-title fw-bold mb-1 d-flex align-items-center">
-                        <i class="las la-bus me-2 fs-3"></i>
-                        New Transfer Request
+                        <i class="las la-bus me-2 fs-3"></i> New Salary Advance Request
                     </h4>
-
                     <small class="opacity-75">
-                        Complete the form below to submit your transfer request
+                        Complete the form below to submit your Advance request
                     </small>
                 </div>
 
                 <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal">
                 </button>
-
             </div>
 
             <!-- BODY -->
-            <div class="modal-body bg-light px-3 px-lg-5 py-4">
-
+            <div class="modal-body bg-light px-3 px-lg-4 py-4">
                 <form id="TransportForm" action="{% url 'transfer' %}" method="post" novalidate>
 
                     {% csrf_token %}
@@ -37,177 +31,61 @@
 
                     <!-- TRANSFER INFO -->
                     <div class="card border-0 shadow-sm rounded-4 mb-4">
-
                         <div class="card-header bg-white border-0 pt-4 px-4">
-
                             <div class="d-flex align-items-center">
-
                                 <div class="icon-wrapper bg-primary-subtle text-primary me-3">
                                     <i class="las la-route"></i>
                                 </div>
 
                                 <div>
-                                    <h5 class="fw-bold mb-1">
-                                        Transfer Information
-                                    </h5>
-
-                                    <small class="text-muted">
-                                        Provide your transfer details
-                                    </small>
+                                    <h5 class="fw-bold mb-1"> Advance Information </h5>
+                                    <small class="text-muted"> Provide your Advance details </small>
                                 </div>
-
                             </div>
-
                         </div>
 
                         <div class="card-body px-4 pb-4">
-
                             <div class="row g-4">
-
                                 <!-- TRANSFER TYPE -->
                                 <div class="col-lg-4 col-md-6">
-
-                                    <label class="form-label fw-semibold">
-                                        Transfer Type
-                                        <span class="text-danger">*</span>
+                                    <label class="form-label fw-semibold"> Loan Type <span class="text-danger">*</span>
                                     </label>
-
                                     <select class="form-select" name="transferType" id="transferType" required>
-
-                                        <option value="" selected disabled>
-                                            Select Transfer Type
-                                        </option>
-
-                                        <option value="1">
-                                            Internal
-                                        </option>
-
-                                        <option value="2">
-                                            External
-                                        </option>
-
+                                        <option value="" selected disabled> Select advance Type </option>
+                                        {% for prod in salary_products %}
+                                        <option value="{{res.Code}}">{{res.Description}}</option>
+                                        {% endfor %}
                                     </select>
-
                                 </div>
 
-                                <!-- REGION -->
-                                <div class="col-lg-4 col-md-6" id="TransferToRegionRow" style="display:none;">
-
-                                    <label class="form-label fw-semibold">
-                                        Transfer To Region
-                                        <span class="text-danger">*</span>
-                                    </label>
-
-                                    <select class="form-select" name="region" id="region" disabled>
-
-                                        <option value="" selected disabled>
-                                            Select Region
-                                        </option>
-
-                                    </select>
-
-                                </div>
-
-                                <!-- DIVISION -->
                                 <div class="col-lg-4 col-md-6">
-
-                                    <label class="form-label fw-semibold">
-                                        Transfer To Division
-                                        <span class="text-danger">*</span>
+                                    <label class="form-label fw-semibold"> Amount <span class="text-danger">*</span>
                                     </label>
-
-                                    <select class="form-select" name="division" id="division" disabled>
-
-                                        <option value="" selected disabled>
-                                            Select Division
-                                        </option>
-
-                                    </select>
-
+                                    <input type="number" class="form-control" name="transferDate" required>
                                 </div>
 
                                 <!-- DATE -->
                                 <div class="col-lg-4 col-md-6">
-
-                                    <label class="form-label fw-semibold">
-                                        Transfer Date
-                                        <span class="text-danger">*</span>
-                                    </label>
-
-                                    <input type="date" class="form-control" name="transferDate" required>
-
+                                    <label class="form-label fw-semibold"> Repayment Installments(Months) <span
+                                            class="text-danger">*</span> </label>
+                                    <input type="number" class="form-control" name="transferDate" required>
                                 </div>
-
                             </div>
-
                         </div>
-
-                    </div>
-
-                    <!-- REASON -->
-                    <div class="card border-0 shadow-sm rounded-4">
-
-                        <div class="card-header bg-white border-0 pt-4 px-4">
-
-                            <div class="d-flex align-items-center">
-
-                                <div class="icon-wrapper bg-warning-subtle text-warning me-3">
-                                    <i class="las la-comment-dots"></i>
-                                </div>
-
-                                <div>
-                                    <h5 class="fw-bold mb-1">
-                                        Transfer Reason
-                                    </h5>
-
-                                    <small class="text-muted">
-                                        Explain the purpose of the transfer
-                                    </small>
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                        <div class="card-body px-4 pb-4">
-
-                            <label class="form-label fw-semibold">
-                                Reason
-                            </label>
-
-                            <textarea class="form-control textarea-control" name="transferReason" rows="5"
-                                placeholder="Enter transfer reason..." required></textarea>
-
-                        </div>
-
                     </div>
 
                     <!-- ACTIONS -->
                     <div class="d-flex flex-column flex-md-row justify-content-end gap-3 mt-5">
-
-                        <button type="button" class="btn btn-light border px-4 py-2" data-bs-dismiss="modal">
-
-                            Cancel
-
+                        <button type="button" class="btn btn-light border px-4 py-2" data-bs-dismiss="modal"> Cancel
                         </button>
-
-                        <button type="submit" class="btn btn-primary px-5 py-2 shadow-sm">
-
-                            Submit Request
-                            <i class="las la-arrow-right ms-2"></i>
-
+                        <button type="submit" class="btn btn-primary px-5 py-2 shadow-sm"> Submit Request <i
+                                class="las la-arrow-right ms-2"></i>
                         </button>
-
                     </div>
-
                 </form>
-
             </div>
-
         </div>
-
     </div>
-
 </div>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
