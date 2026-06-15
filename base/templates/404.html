@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% block title %}NOT FOUND{% endblock %}
+
 {% block body %}
 <div class="container-fluid page-body-wrapper full-page-wrapper">
     <div class="content-wrapper d-flex align-items-center text-center error-page bg-primary">
@@ -16,12 +18,17 @@
                 </div>
                 <div class="row mt-5">
                     <div class="col-12 text-center mt-xl-2">
-                        <a class="text-white fw-medium" href="/dashboard">Back to home</a>
+                        <a class="text-white fw-medium" href="/">Back to home</a>
                     </div>
                 </div>
-                <div class="row mt-5">
-                    <div class="col-12 mt-xl-2">
-                        <p class="text-white fw-medium text-center">Copyright &copy; 2021 All rights reserved.</p>
+                <div class=" row mt-5">
+                    <hr class="">
+                    <div class="d-sm-flex justify-content-center justify-content-sm-between fs-6">
+                        <span class=" text-small float-none  float-sm-end d-block mt-1 mt-sm-0 text-center">Copyright ©
+                            <script>document.write(new Date().getFullYear())</script>. Kenya Shipyards Limited
+                        </span>
+                        <span class=" text-center  text-small text-sm-left d-block d-sm-inline-block">Powered by <a
+                                href="https://www.kobby.co.ke/" class="text-danger" target="_blank">Kobby Technologies Ltd.</a></span>
                     </div>
                 </div>
             </div>
