@@ -202,23 +202,18 @@ class Leave_Data(
             return JsonResponse({"error": str(e)}, safe=False)
 
 
-class Leave_Approvers_Data(View):
-
+class Leave_Approvers_Data(AuthRequiredMixin, SessionMixin, ODataMixin, View):
     async def get(self, request, pk):
         try:
             async with aiohttp.ClientSession() as client:
-
                 response = await self.filter_data(
                     endpoint="/QyApprovalEntries",
                     field="Document_No_",
                     operator="eq",
                     value=pk
                 )
-
             approvers = [x for x in response if x.get("Status") == "Open"]
-
             return JsonResponse(approvers, safe=False)
-
         except Exception as e:
             logging.exception(e)
             return JsonResponse({"error": str(e)}, safe=False)
@@ -385,7 +380,6 @@ class LeaveAttachments(
                     operator="eq",
                     value=pk
                 )
-
             return JsonResponse(data, safe=False)
 
         except Exception as e:
@@ -394,7 +388,11 @@ class LeaveAttachments(
 
     async def post(self, request, pk):
         try:
-            attachments = request.FILES.getlist("file_upload")
+            attachments = request.FILES.getlist("attachments")
+
+            if not attachments:
+                return JsonResponse({"success": False, "error": "No files were received"})
+
             table_id = 52177494
             user_id = request.session["User_ID"]
             results = []
@@ -409,84 +407,86 @@ class LeaveAttachments(
                 )
                 results.append(response)
 
-            return JsonResponse(
-                {"success": True, "uploaded": len(attachments)},
-                safe=False,
-            )
+            return JsonResponse({
+                "success": True,
+                "message": f"{len(attachments)} file(s) uploaded successfully",
+            })
 
         except Exception as e:
             logging.exception(e)
             return JsonResponse({"success": False, "error": str(e)})
 
 
-class LeaveApproval( 
+class DeleteLeaveAttachments(
     AuthRequiredMixin,
     SessionMixin,
     ODataMixin,
     SOAPMixin,
     ResponseMixin,
     View,
-    ):
+):
+    async def post(self, request, pk):
+        try:
+            session = self.get_session_context(request)
+            docID = int(request.POST.get("docID"))
+            tableID = int(request.POST.get("tableID"))
 
+            response = self.call_soap(
+                soap_method="FnDeleteDocumentAttachment",
+                params=[pk, docID, tableID],
+            )
+
+            if response is True:
+                return JsonResponse({
+                    "success": True,
+                    "message": "Attachment deleted successfully",
+                })
+
+            return JsonResponse({
+                "success": False,
+                "error": str(response),
+            })
+
+        except Exception as e:
+            logging.exception(e)
+            return JsonResponse({
+                "success": False,
+                "error": f"Failed to delete attachment: {e}",
+            })
+
+
+class LeaveApproval(AuthRequiredMixin, SessionMixin, ODataMixin, SOAPMixin, ResponseMixin, View):
     def post(self, request, pk):
         try:
             session = self.get_session_context(request)
             Employee_No_ = session.get("Employee_No_")
-
             response = self.call_soap(
-                soap_method =    "FnRequestLeaveApproval",
-                params = [
-
-                    Employee_No_,
-                    pk
-                ]
+                soap_method="FnRequestLeaveApproval",
+                params=[Employee_No_, pk]
             )
-
             if response is True:
-                messages.success(request, "Approval Requested successfully",)
-                return redirect("leave_detail", pk=pk,)
-
-            messages.error(request, f"{response}",)
-            return redirect("leave_detail", pk=pk,)
-
+                return JsonResponse({"success": True, "message": "Approval requested successfully"})
+            return JsonResponse({"success": False, "error": str(response)})
         except Exception as e:
             logging.exception(e)
-            messages.error(request, f"Failed to process approval action: {e}",)
-            return redirect("leave_detail", pk=pk,)
+            return JsonResponse({"success": False, "error": str(e)})
 
-class CancelLeaveApproval( 
-    AuthRequiredMixin,
-    SessionMixin,
-    ODataMixin,
-    SOAPMixin,
-    ResponseMixin,
-    View,
-    ):
 
+class CancelLeaveApproval(AuthRequiredMixin, SessionMixin, ODataMixin, SOAPMixin, ResponseMixin, View):
     def post(self, request, pk):
         try:
             session = self.get_session_context(request)
             Employee_No_ = session.get("Employee_No_")
-
             response = self.call_soap(
-                soap_method =    "FnCancelLeaveApproval",
-                params = [
-                    Employee_No_,
-                    pk
-                ]
+                soap_method="FnCancelLeaveApproval",
+                params=[Employee_No_, pk]
             )
-
             if response is True:
-                messages.success(request, "Approval Requested successfully",)
-                return redirect("leave_detail", pk=pk,)
-
-            messages.error(request, f"{response}",)
-            return redirect("leave_detail", pk=pk,)
-
+                return JsonResponse({"success": True, "message": "Approval cancelled successfully"})
+            return JsonResponse({"success": False, "error": str(response)})
         except Exception as e:
             logging.exception(e)
-            messages.error(request, f"Failed to process approval action: {e}",)
-            return redirect("leave_detail", pk=pk,)
+            return JsonResponse({"success": False, "error": str(e)})
 
 
 """

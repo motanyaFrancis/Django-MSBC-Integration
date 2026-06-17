@@ -13,7 +13,7 @@
             <div class="modal-header bg-primary text-white border-0 px-4 py-3">
                 <div>
                     <h4 class="modal-title fw-bold mb-1">
-                        <i class="las la-calendar-plus me-2"></i>New Leave Request
+                        <i class="mdi mdi-calendar-plus me-2"></i>New Leave Request
                     </h4>
                     <small class="opacity-75">Complete the steps below to submit your leave request</small>
                 </div>
@@ -117,7 +117,7 @@
                                         <div class="col-12" id="leaveBalanceRow" style="display:none;">
                                             <div class="alert alert-info border-0 rounded-3 mb-0 py-2">
                                                 <div class="d-flex align-items-center gap-3">
-                                                    <i class="las la-wallet fs-3 text-info"></i>
+                                                    <i class="mdi mdi-wallet fs-3 text-info"></i>
                                                     <div class="flex-grow-1">
                                                         <small class="fw-semibold d-block text-info">Leave
                                                             Balance</small>
@@ -172,11 +172,11 @@
                                     <div class="d-flex justify-content-end mt-4 gap-2">
                                         <!-- shown after filter_list populates form for edit -->
                                         <button id="next1" type="button" hidden class="btn btn-outline-primary px-4">
-                                            Next <i class="las la-arrow-right ms-1"></i>
+                                            Next <i class="mdi mdi-arrow-right ms-1"></i>
                                         </button>
                                         <button type="submit" class="btn btn-primary px-5">
                                             Save &amp; Continue
-                                            <i class="las la-arrow-right ms-1"></i>
+                                            <i class="mdi mdi-arrow-right ms-1"></i>
                                         </button>
                                     </div>
 
@@ -194,7 +194,7 @@
 
                                 <div class="d-flex align-items-center mb-4">
                                     <div class="bg-success-subtle rounded-circle p-3 me-3">
-                                        <i class="las la-paperclip text-success fs-3"></i>
+                                        <i class="mdi mdi-paperclip text-success fs-3"></i>
                                     </div>
                                     <div>
                                         <h5 class="fw-bold mb-1">
@@ -229,14 +229,14 @@
 
                                     <div class="d-flex justify-content-between align-items-center mt-4 gap-2 flex-wrap">
                                         <button id="prev-btn" type="button" class="btn btn-outline-secondary px-4">
-                                            <i class="las la-arrow-left me-1"></i>Previous
+                                            <i class="mdi mdi-arrow-left me-1"></i>Previous
                                         </button>
                                         <div class="d-flex gap-2">
                                             <button type="submit" class="btn btn-success px-4">
-                                                <i class="las la-upload me-1"></i>Upload Files
+                                                <i class="mdi mdi-upload me-1"></i>Upload Files
                                             </button>
                                             <button id="next-btn" type="button" class="btn btn-primary px-4">
-                                                Continue <i class="las la-arrow-right ms-1"></i>
+                                                Continue <i class="mdi mdi-arrow-right ms-1"></i>
                                             </button>
                                         </div>
                                     </div>
@@ -245,7 +245,7 @@
                                 <!-- UPLOADED ATTACHMENTS LIST -->
                                 <div id="leave_attachments_row" style="display:none;" class="mt-4">
                                     <h6 class="fw-bold mb-3">
-                                        <i class="las la-folder-open text-success me-1"></i>
+                                        <i class="mdi mdi-folder-open text-success me-1"></i>
                                         Uploaded Attachments
                                     </h6>
                                     <div class="row g-3" id="attachments-container"></div>
@@ -263,7 +263,7 @@
                             <div class="card-body text-center p-5">
 
                                 <div class="bg-info-subtle rounded-circle d-inline-flex p-4 mb-4">
-                                    <i class="las la-paper-plane text-info fs-1"></i>
+                                    <i class="mdi mdi-send-outline text-info fs-1"></i>
                                 </div>
                                 <h4 class="fw-bold">Ready To Submit</h4>
                                 <p class="text-muted mb-4">
@@ -279,7 +279,7 @@
 
                                 <!-- Cancel-approval success animation (shown from stage 4) -->
                                 <div class="text-center mx-auto mb-4" id="cancelAnimation" style="display:none;">
-                                    <i class="las la-check-circle text-success" style="font-size:4rem;"></i>
+                                    <i class="mdi mdi-check-decagram-outline text-success" style="font-size:4rem;"></i>
                                     <h5 class="mt-2 text-success">Approval Request Cancelled</h5>
                                 </div>
 
@@ -287,11 +287,11 @@
                                     {% csrf_token %}
                                     <div class="d-flex justify-content-center gap-3 flex-wrap">
                                         <button class="btn btn-info px-5" type="submit">
-                                            <i class="las la-check-circle me-2"></i>
+                                            <i class="mdi mdi-check-decagram-outline me-2"></i>
                                             Send <span class="leaveId fw-bold mx-1"></span> For Approval
                                         </button>
                                         <button id="prev3-btn" type="button" class="btn btn-outline-secondary px-4">
-                                            <i class="las la-arrow-left me-1"></i>Previous
+                                            <i class="mdi mdi-arrow-left me-1"></i>Previous
                                         </button>
                                     </div>
                                 </form>
@@ -309,14 +309,14 @@
 
                                 <!-- Approval-sent success animation -->
                                 <div class="text-center mb-3" id="approvalAnimation" style="display:none;">
-                                    <i class="las la-check-circle text-success" style="font-size:4rem;"></i>
+                                    <i class="mdi mdi-check-circle text-success" style="font-size:4rem;"></i>
                                     <h5 class="mt-2 text-success">Approval Request Sent</h5>
                                 </div>
 
                                 <!-- Static success header -->
                                 <div class="text-center mb-4">
                                     <div class="bg-success-subtle rounded-circle d-inline-flex p-4 mb-3">
-                                        <i class="las la-check-circle text-success fs-1"></i>
+                                        <i class="mdi mdi-check-circle text-success fs-1"></i>
                                     </div>
                                     <h3 class="fw-bold text-success">Leave Request Submitted</h3>
                                     <p class="text-muted">
@@ -350,16 +350,26 @@
                                 </div>
 
                                 <!-- Stage-4 actions -->
-                                <div class="d-flex justify-content-center gap-3 mt-4 flex-wrap">
-                                    <form method="POST" id="CancelApprovalForm">
-                                        {% csrf_token %}
-                                        <button class="btn btn-outline-danger px-4" type="submit">
-                                            <i class="las la-times-circle me-1"></i>Cancel Approval
+                                <div id="stage4-footer" style="display:none;">
+                                    <div class="alert alert-success border-0 rounded-3 text-center mb-3">
+                                        <i class="mdi mdi-check-circle me-2"></i>
+                                        Leave <strong class="leaveId"></strong> is now <strong>Pending Approval</strong>
+                                    </div>
+                                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                                        <form method="POST" id="CancelApprovalForm">
+                                            {% csrf_token %}
+                                            <button class="btn btn-outline-danger px-4" type="submit">
+                                                <i class="mdi mdi-times-circle me-1"></i>Cancel Approval
+                                            </button>
+                                        </form>
+                                        <a href="#" id="detailsBtn" class="btn btn-primary px-4">
+                                            <i class="mdi mdi-eye me-1"></i>View Leave Details
+                                        </a>
+                                        <button type="button" class="btn btn-outline-secondary px-4"
+                                            data-bs-dismiss="modal">
+                                            <i class="mdi mdi-close me-1"></i>Close
                                         </button>
-                                    </form>
-                                    <a href="#" id="detailsBtn" class="btn btn-primary px-4">
-                                        <i class="las la-eye me-1"></i>View Leave Details
-                                    </a>
+                                    </div>
                                 </div>
 
                             </div>
@@ -380,60 +390,79 @@
 <script>
     $(document).ready(function () {
 
-        /* ─────────────────────────────────────────────
-           STATE
-        ───────────────────────────────────────────── */
-        var leaveCode = '0';
+        var leaveCode = null;
 
-        /* ─────────────────────────────────────────────
-           INIT
-        ───────────────────────────────────────────── */
         Leave_Data();
         get_director();
-
-        // Prevent past dates on start-date
         $('#start-date').prop('min', new Date().toISOString().split('T')[0]);
 
-        /* ─────────────────────────────────────────────
-           CLOSE MODAL → refresh table
-        ───────────────────────────────────────────── */
-        $('#leave_close-modal').on('click', function () {
-            Leave_Data();
-        });
+        // ── Leave table loader ──────────────────────────────────────────
+        function Leave_Data() {
+            $.ajax({
+                url: "{% url 'Leave_Data' %}",
+                type: "GET",
+                success: function (data) {
+                    let open = 0, pending = 0, approved = 0;
+                    const openBody = $("#open_leave_table tbody");
+                    const pendingBody = $("#pending_leave_table tbody");
+                    const approvedBody = $("#approved_leave_table tbody");
+                    openBody.empty(); pendingBody.empty(); approvedBody.empty();
 
-        /* ─────────────────────────────────────────────
-           STEPPER HELPERS
-        ───────────────────────────────────────────── */
+                    data.forEach(row => {
+                        let status = row.Status;
+                        let tr = `
+                        <tr>
+                            <td>${row.Application_No}</td>
+                            <td>${row.Leave_Code}</td>
+                            <td>${row.Start_Date}</td>
+                            <td>${row.Resumption_Date || '-'}</td>
+                            <td>${status}</td>
+                            <td>
+                                <a class="btn btn-primary text-white btn-sm"
+                                   href="/leave/${row.Application_No}">
+                                    <i class="mdi mdi-folder-eye"></i> View
+                                </a>
+                            </td>
+                        </tr>`;
+                        if (status === "Open") { openBody.append(tr); open++; }
+                        else if (status === "Pending Approval") { pendingBody.append(tr); pending++; }
+                        else if (status === "Released") { approvedBody.append(tr); approved++; }
+                    });
+
+                    const emptyRow = (msg) => `
+                    <tr><td colspan="6" class="text-center py-4 text-muted">
+                        <i class="mdi mdi-inbox-outline fs-4 d-block mb-1"></i>${msg}
+                    </td></tr>`;
+                    if (!open) openBody.html(emptyRow("No open leave requests"));
+                    if (!pending) pendingBody.html(emptyRow("No pending leave requests"));
+                    if (!approved) approvedBody.html(emptyRow("No approved leave requests"));
+
+                    $(".open_leave_count").text(open);
+                    $(".pending_leave_count").text(pending);
+                    $(".approved_leave_count").text(approved);
+                },
+                error: function () {
+                    const errRow = `<tr><td colspan="6" class="text-center text-danger py-4">
+                    Failed to load leave data.</td></tr>`;
+                    $("#open_leave_table tbody, #pending_leave_table tbody, #approved_leave_table tbody")
+                        .html(errRow);
+                }
+            });
+        }
+
+        $('#leave_close-modal').on('click', function () { Leave_Data(); });
+
+        // ── Stepper helpers ─────────────────────────────────────────────
         function hideStage(n) {
             $('#stage' + n).removeClass('active');
             $('#stage-' + n + '-step').removeClass('active').addClass('done');
         }
-
         function showStage(n) {
             $('#stage' + n).addClass('active');
             $('#stage-' + n + '-step').addClass('active');
         }
 
-        /* ─────────────────────────────────────────────
-           LEAVE BALANCE
-        ───────────────────────────────────────────── */
-        function get_leave_balance(leave_type) {
-            $.ajax({
-                url: '/FnLeaveBalances/',
-                type: 'POST',
-                data: {
-                    leave_type: leave_type,
-                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
-                },
-                success: function (data) {
-                    $('#leaveBalance').val(data + ' days');
-                },
-                error: function (xhr) {
-                    console.log(xhr.responseText);
-                }
-            });
-        }
-
+        // ── Leave type → balance ─────────────────────────────────────────
         $('#leaveType').on('change', function () {
             var val = $(this).val();
             if (val && val !== '0') {
@@ -442,9 +471,7 @@
             }
         });
 
-        /* ─────────────────────────────────────────────
-           RETURN SAME DAY TOGGLE
-        ───────────────────────────────────────────── */
+        // ── Return same day toggle ───────────────────────────────────────
         $('#isReturnSameDay').on('change', function () {
             if (this.value === 'False') {
                 $('#daysAppliedRow').show(400);
@@ -455,42 +482,34 @@
             }
         });
 
-        /* ─────────────────────────────────────────────
-           STAGE 1 — SUBMIT LEAVE FORM
-        ───────────────────────────────────────────── */
+        // ── STAGE 1 — submit leave ───────────────────────────────────────
         $('#leave_form').on('submit', function (e) {
             e.preventDefault();
 
-            // Basic front-end validation
             if (!$('#leaveType').val() || $('#leaveType').val() === '0') {
-                iziToast.show({
-                    theme: 'dark', icon: 'las la-exclamation', title: 'Validation',
+                return iziToast.show({
+                    theme: 'dark', icon: 'mdi mdi-exclamation', title: 'Validation',
                     message: 'Please select a leave type.', position: 'topCenter', progressBarColor: '#ff0800'
                 });
-                return;
             }
             if (!$('#start-date').val()) {
-                iziToast.show({
-                    theme: 'dark', icon: 'las la-exclamation', title: 'Validation',
+                return iziToast.show({
+                    theme: 'dark', icon: 'mdi mdi-exclamation', title: 'Validation',
                     message: 'Please select a start date.', position: 'topCenter', progressBarColor: '#ff0800'
                 });
-                return;
             }
             if (!$('#isReturnSameDay').val() || $('#isReturnSameDay').val() === '0') {
-                iziToast.show({
-                    theme: 'dark', icon: 'las la-exclamation', title: 'Validation',
+                return iziToast.show({
+                    theme: 'dark', icon: 'mdi mdi-exclamation', title: 'Validation',
                     message: 'Please indicate if you return the same day.', position: 'topCenter', progressBarColor: '#ff0800'
                 });
-                return;
             }
-            // Reliever required if row is visible
             if ($('#directorRelieverRow').is(':visible') &&
                 (!$('#directorReliever').val() || $('#directorReliever').val() === '0')) {
-                iziToast.show({
-                    theme: 'dark', icon: 'las la-exclamation', title: 'Validation',
+                return iziToast.show({
+                    theme: 'dark', icon: 'mdi mdi-exclamation', title: 'Validation',
                     message: 'Please select a reliever.', position: 'topCenter', progressBarColor: '#ff0800'
                 });
-                return;
             }
 
             $('#leave_form').hide();
@@ -508,7 +527,7 @@
                     isReturnSameDay: $('#isReturnSameDay').val(),
                     myAction: $('#myAction').val(),
                     directorReliever: $('#directorReliever').val(),
-                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').first().val()
                 },
                 success: function (response) {
                     $('#leave-spinner').hide();
@@ -521,50 +540,40 @@
                         filter_list(leaveCode);
                         hideStage(1);
                         showStage(2);
-
                         iziToast.show({
                             theme: 'dark', backgroundColor: '#239B56',
-                            icon: 'las la-check-circle', title: 'Done',
+                            icon: 'mdi mdi-check-circle', title: 'Done',
                             message: 'Leave ' + leaveCode + ' created successfully',
                             position: 'topCenter', progressBarColor: '#F4F6F7'
                         });
-
-                    } else if (response['error']) {
+                    } else {
                         iziToast.show({
-                            theme: 'dark', icon: 'las la-exclamation', title: 'Error',
-                            message: response['error'],
+                            theme: 'dark', icon: 'mdi mdi-exclamation', title: 'Error',
+                            message: response['error'] || 'Unexpected error',
                             position: 'topCenter', progressBarColor: '#ff0800'
                         });
                     }
                 },
-                error: function (err) {
-                    console.log(err);
+                error: function () {
                     $('#leave-spinner').hide();
                     $('#leave_form').show(200);
                     iziToast.show({
-                        theme: 'dark', icon: 'las la-exclamation', title: 'Error',
-                        message: 'An unexpected error occurred. Please try again.',
+                        theme: 'dark', icon: 'mdi mdi-exclamation', title: 'Error',
+                        message: 'An unexpected error occurred.',
                         position: 'topCenter', progressBarColor: '#ff0800'
                     });
                 }
             });
         });
 
-        /* ─────────────────────────────────────────────
-           NEXT1 — skip re-save, jump to stage 2
-        ───────────────────────────────────────────── */
         $('#next1').on('click', function () {
-            hideStage(1);
-            showStage(2);
+            hideStage(1); showStage(2);
             $('.leaveId').text(leaveCode);
         });
 
-        /* ─────────────────────────────────────────────
-           STAGE 2 — UPLOAD ATTACHMENTS
-        ───────────────────────────────────────────── */
+        // ── STAGE 2 — upload attachments ─────────────────────────────────
         $('#leave_attachment_form').on('submit', function (e) {
             e.preventDefault();
-
             var files = $('#attachments')[0].files;
             if (!files.length) {
                 $('#attachmentOutput').text('Please select at least one file.').show();
@@ -574,10 +583,12 @@
             $('#leave_attachment_form').hide();
             $('#attachment-spinner').show();
 
-            var formData = new FormData(this);
+            var formData = new FormData();
             for (var i = 0; i < files.length; i++) {
-                formData.append('attachment', files[i]);
+                formData.append('attachments', files[i]);   // ← matches view's getlist("attachments")
             }
+            formData.append('csrfmiddlewaretoken',
+                $('input[name=csrfmiddlewaretoken]').first().val());
 
             $.ajax({
                 url: '/leave-attachments/' + leaveCode + '/',
@@ -585,32 +596,28 @@
                 data: formData,
                 processData: false,
                 contentType: false,
-                headers: { 'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val() },
                 success: function (data) {
                     $('#attachment-spinner').hide();
                     $('#leave_attachment_form').show();
                     $('#attachments').val('');
-
                     Load_Leave_Attachments(leaveCode);
-
                     if (data['success'] === true) {
                         iziToast.show({
                             theme: 'dark', backgroundColor: '#239B56',
-                            icon: 'las la-check-circle', title: 'Done',
+                            icon: 'mdi mdi-check-circle', title: 'Done',
                             message: 'Files uploaded successfully',
                             position: 'topCenter', progressBarColor: '#F4F6F7'
                         });
                     } else {
-                        var msg = typeof data === 'string' ? data : (data['error'] || 'Upload failed');
+                        var msg = data['error'] || 'Upload failed';
                         $('#attachmentOutput').text(msg).show();
                         iziToast.show({
-                            theme: 'dark', icon: 'las la-exclamation', title: 'Error',
+                            theme: 'dark', icon: 'mdi mdi-exclamation', title: 'Error',
                             message: msg, position: 'topCenter', progressBarColor: '#ff0800'
                         });
                     }
                 },
-                error: function (xhr) {
-                    console.log(xhr.responseText);
+                error: function () {
                     $('#attachment-spinner').hide();
                     $('#leave_attachment_form').show();
                     $('#attachmentOutput').text('Upload failed. Please try again.').show();
@@ -618,25 +625,14 @@
             });
         });
 
-        /* Stage 2 navigation */
-        $('#prev-btn').on('click', function () {
-            hideStage(2);
-            showStage(1);
-        });
-
+        $('#prev-btn').on('click', function () { hideStage(2); showStage(1); });
         $('#next-btn').on('click', function () {
-            hideStage(2);
-            showStage(3);
+            hideStage(2); showStage(3);
             $('.leaveId').text(leaveCode);
         });
 
-        /* ─────────────────────────────────────────────
-           STAGE 3 — SEND FOR APPROVAL
-        ───────────────────────────────────────────── */
-        $('#prev3-btn').on('click', function () {
-            hideStage(3);
-            showStage(2);
-        });
+        // ── STAGE 3 — send for approval ──────────────────────────────────
+        $('#prev3-btn').on('click', function () { hideStage(3); showStage(2); });
 
         $('#approvalForm').on('submit', function (e) {
             e.preventDefault();
@@ -645,10 +641,9 @@
 
             $.ajax({
                 type: 'POST',
-                url: '/leave-approval/' + leaveCode + '/',
+                url: '/leave-approval/' + leaveCode + '/',     // ← pk in URL, no body param needed
                 data: {
-                    leaveCode: leaveCode,
-                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').first().val()
                 },
                 success: function (data) {
                     $('#approve-spinner').hide();
@@ -658,156 +653,72 @@
                         Leave_Approvers_Data(leaveCode);
                         $('#detailsBtn').attr('href', '/leave/' + leaveCode);
                         $('.leaveId').text(leaveCode);
+                        // Show completed footer
+                        $('#stage4-footer').show();
                         hideStage(3);
                         showStage(4);
-
-                        $('#approvalAnimation')
-                            .fadeIn(1000)
-                            .delay(4000)
-                            .fadeOut(1000);
-
+                        $('#approvalAnimation').fadeIn(1000).delay(4000).fadeOut(1000);
                         iziToast.show({
                             theme: 'dark', backgroundColor: '#239B56',
-                            icon: 'las la-check-circle', title: 'Done',
+                            icon: 'mdi mdi-check-circle', title: 'Done',
                             message: data['message'],
                             position: 'topCenter', progressBarColor: '#F4F6F7'
                         });
-
                     } else {
                         iziToast.show({
-                            theme: 'dark', icon: 'las la-exclamation', title: 'Error',
-                            message: data['error'],
+                            theme: 'dark', icon: 'mdi mdi-exclamation', title: 'Error',
+                            message: data['error'] || 'Failed to send approval',
                             position: 'topCenter', progressBarColor: '#ff0800'
                         });
                     }
                 },
-                error: function (err) {
-                    console.log(err);
+                error: function () {
                     $('#approve-spinner').hide();
                     $('#approvalForm').show(200);
+                    iziToast.show({
+                        theme: 'dark', icon: 'mdi mdi-exclamation', title: 'Error',
+                        message: 'An unexpected error occurred.',
+                        position: 'topCenter', progressBarColor: '#ff0800'
+                    });
                 }
             });
         });
 
-        /* ─────────────────────────────────────────────
-           STAGE 4 — CANCEL APPROVAL
-        ───────────────────────────────────────────── */
+        // ── STAGE 4 — cancel approval ────────────────────────────────────
         $('#CancelApprovalForm').on('submit', function (e) {
             e.preventDefault();
-
             $.ajax({
                 type: 'POST',
-                url: '/CancelApprovalForm/',
+                url: '/leave-cancel-approval/' + leaveCode + '/',  // ← correct URL with pk
                 data: {
-                    leaveCode: leaveCode,
-                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').first().val()
                 },
                 success: function (data) {
                     Leave_Approvers_Data(leaveCode);
-
                     if (data['success'] === true) {
                         $('.leaveId').text(leaveCode);
                         hideStage(4);
                         showStage(3);
-
-                        $('#cancelAnimation')
-                            .fadeIn(1000)
-                            .delay(4000)
-                            .fadeOut(1000);
-
+                        $('#cancelAnimation').fadeIn(1000).delay(4000).fadeOut(1000);
                         iziToast.show({
                             theme: 'dark', backgroundColor: '#239B56',
-                            icon: 'las la-check-circle', title: 'Done',
+                            icon: 'mdi mdi-check-circle', title: 'Done',
                             message: data['message'],
                             position: 'topCenter', progressBarColor: '#F4F6F7'
                         });
-
                     } else {
                         iziToast.show({
-                            theme: 'dark', icon: 'las la-exclamation', title: 'Error',
+                            theme: 'dark', icon: 'mdi mdi-exclamation', title: 'Error',
                             message: data['error'],
                             position: 'topCenter', progressBarColor: '#ff0800'
                         });
                     }
                 },
-                error: function (err) {
-                    console.log(err);
-                }
+                error: function () { console.log('Cancel approval request failed'); }
             });
         });
 
-        /* ─────────────────────────────────────────────
-            LEAVE DATA — populate all three tables
-        ───────────────────────────────────────────── */
-        function Leave_Data() {
-            $.ajax({
-                url: '{% url "Leave_Data" %}',
-                type: 'GET',
-                dataType: 'json',
-                success: function (data) {
-                    var openBody = $('#open_leave_table tbody');
-                    var pendingBody = $('#pending_leave_table tbody');
-                    var approvedBody = $('#approved_leave_table tbody');
-                    openBody.empty(); pendingBody.empty(); approvedBody.empty();
-
-                    data.forEach(function (item) {
-                        var row = $('<tr>');
-                        row.append($('<td>').text(item.Application_No));
-                        row.append($('<td>').text(item.Leave_Code));
-                        row.append($('<td>').text(
-                            moment(item.Start_Date, 'YYYY-MM-DD').format('Do MMM YYYY')));
-                        row.append($('<td>').text(
-                            moment(item.Resumption_Date, 'YYYY-MM-DD').format('Do MMM YYYY')));
-                        row.append($('<td>').text(item.Status));
-
-                        if (item.Status === 'Open' && item.Rejected_By_Approver) {
-                            row.addClass('rejected');
-                        }
-
-                        var viewBtn = $('<a>', {
-                            href: '/leave/detail/' + item.Application_No,
-                            class: 'btn btn-primary btn-sm'
-                        }).html('<i class="mdi mdi-folder-eye me-1"></i>View');
-
-                        row.append($('<td>').append(viewBtn));
-
-                        if (item.Status === 'Open') openBody.append(row);
-                        else if (item.Status === 'Pending Approval') pendingBody.append(row);
-                        else if (item.Status === 'Released') approvedBody.append(row);
-                    });
-
-                    // Highlight rejected rows
-                    $('#open_leave_table tbody tr.rejected')
-                        .css('background-color', '#566573')
-                        .css('color', '#fff');
-
-                    // Init or refresh DataTables
-                    ['open_leave_table', 'pending_leave_table', 'approved_leave_table']
-                        .forEach(function (id) {
-                            if (!$.fn.DataTable.isDataTable('#' + id)) {
-                                $('#' + id).DataTable({
-                                    pageLength: 5,
-                                    order: [[0, 'desc']]
-                                });
-                            }
-                        });
-
-                    $('.open_leave_count').text(
-                        $('#open_leave_table').DataTable().page.info().recordsDisplay);
-                    $('.pending_leave_count').text(
-                        $('#pending_leave_table').DataTable().page.info().recordsDisplay);
-                    $('.approved_leave_count').text(
-                        $('#approved_leave_table').DataTable().page.info().recordsDisplay);
-                },
-                error: function (xhr, status, err) {
-                    console.log('Error:', err);
-                }
-            });
-        }
-
-        /* ─────────────────────────────────────────────
-           FILTER LIST — re-populate stage-1 form for edits
-        ───────────────────────────────────────────── */
+        // ── Helpers ──────────────────────────────────────────────────────
         function filter_list(pk) {
             $.ajax({
                 url: '/filter_list/' + pk,
@@ -822,17 +733,13 @@
                 success: function (data) {
                     if (data['success'] === true) {
                         var d = data['data'];
-
                         $('#applicationNo').val(d.Application_No);
                         $('#dimension3').val(d.Dimension3 || '');
                         $('#myAction').val(d.modify);
                         $('#leaveType').val(d.Leave_Code);
-
                         get_leave_balance(d.Leave_Code);
                         $('#leaveBalanceRow').show();
-
                         $('#start-date').val(d.Start_Date);
-
                         if (d.Return_same_day === true || d.Return_same_day === 'True') {
                             $('#isReturnSameDay').val('True');
                             $('#daysAppliedRow').hide().find('input').prop('disabled', true);
@@ -841,25 +748,13 @@
                             $('#daysAppliedRow').show();
                             $('#daysApplied').prop('disabled', false).val(d.Days_Applied);
                         }
-
-                        // Reliever
-                        if (d.Director_Reliever) {
-                            $('#directorReliever').val(d.Director_Reliever);
-                        }
-
-                        // Reveal "Next" so they can skip re-saving
+                        if (d.Director_Reliever) $('#directorReliever').val(d.Director_Reliever);
                         $('#next1').removeAttr('hidden');
                     }
-                },
-                error: function (xhr, status, err) {
-                    console.log('Error:', err);
                 }
             });
         }
 
-        /* ─────────────────────────────────────────────
-           LOAD LEAVE ATTACHMENTS
-        ───────────────────────────────────────────── */
         function Load_Leave_Attachments(pk) {
             $.ajax({
                 url: '/LeaveAttachments/' + pk + '/',
@@ -868,70 +763,51 @@
                 success: function (data) {
                     var container = $('#attachments-container').empty();
                     $('#leave_attachments_row').toggle(data.length > 0);
-
                     data.forEach(function (file) {
                         var docID = file.AuxiliaryIndex2;
                         var tableID = file.Table_ID;
                         var fname = file.File_Name + '.' + file.File_Extension;
-
                         var deleteBtn = $('<button>', {
                             type: 'button',
-                            class: 'btn btn-sm btn-outline-danger',
-                            title: 'Remove'
-                        }).html('<i class="las la-times"></i>');
-
+                            class: 'btn btn-sm btn-outline-danger', title: 'Remove'
+                        })
+                            .html('<i class="mdi mdi-times"></i>');
                         deleteBtn.on('click', function () {
                             $.ajax({
                                 type: 'POST',
                                 url: '/RemoveAttachment/',
                                 data: {
-                                    docID: docID,
-                                    tableID: tableID,
-                                    leaveCode: pk,
-                                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+                                    docID: docID, tableID: tableID, leaveCode: pk,
+                                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').first().val()
                                 },
                                 success: function (res) {
-                                    if (res['success'] === true) {
-                                        Load_Leave_Attachments(pk);
-                                        iziToast.show({
-                                            theme: 'dark', backgroundColor: '#239B56',
-                                            icon: 'las la-check-circle', title: 'Done',
-                                            message: res['message'],
-                                            position: 'topCenter', progressBarColor: '#F4F6F7'
-                                        });
-                                    } else {
-                                        iziToast.show({
-                                            theme: 'dark', icon: 'las la-exclamation', title: 'Error',
-                                            message: res['error'],
-                                            position: 'topCenter', progressBarColor: '#ff0800'
-                                        });
-                                    }
-                                },
-                                error: function (err) { console.log(err); }
+                                    Load_Leave_Attachments(pk);
+                                    var method = res['success'] ? 'success' : 'error';
+                                    iziToast.show({
+                                        theme: 'dark',
+                                        backgroundColor: res['success'] ? '#239B56' : undefined,
+                                        icon: res['success'] ? 'mdi mdi-check-circle' : 'mdi mdi-exclamation',
+                                        title: res['success'] ? 'Done' : 'Error',
+                                        message: res['message'] || res['error'],
+                                        position: 'topCenter', progressBarColor: '#F4F6F7'
+                                    });
+                                }
                             });
                         });
-
                         var card = $('<div>', { class: 'col-md-3' }).append(
-                            $('<div>', {
-                                class: 'card p-2 d-flex flex-row align-items-center gap-2 border-0 shadow-sm rounded-3'
-                            }).append(
-                                $('<i>', { class: 'las la-file-alt fs-4 text-muted' }),
-                                $('<span>', { class: 'small flex-grow-1 text-truncate', title: fname }).text(fname),
-                                deleteBtn
-                            )
+                            $('<div>', { class: 'card p-2 d-flex flex-row align-items-center gap-2 border-0 shadow-sm rounded-3' })
+                                .append(
+                                    $('<i>', { class: 'mdi mdi-file-alt fs-4 text-muted' }),
+                                    $('<span>', { class: 'small flex-grow-1 text-truncate', title: fname }).text(fname),
+                                    deleteBtn
+                                )
                         );
                         container.append(card);
                     });
-                },
-                error: function (xhr, status, err) {
-                    console.log('Error:', err);
                 }
             });
         }
 
-        /* ─────────────────────────────────────────────
-           LEAVE APPROVERS TABLE
-        ───────────────────────────────────────────── */
         function Leave_Approvers_Data(pk) {
             $.ajax({
                 url: '/LeaveApproversData/' + pk + '/',
@@ -954,35 +830,22 @@
                             moment(a.Last_Date_Time_Modified, 'YYYY-MM-DD').format('Do MMM YYYY')));
                         body.append(row);
                     });
-                },
-                error: function (xhr, status, err) {
-                    console.log('Error:', err);
                 }
             });
         }
 
-        /* ─────────────────────────────────────────────
-           DIRECTOR CHECK — show/hide reliever field
-        ───────────────────────────────────────────── */
         function get_director() {
             $.ajax({
                 url: '/get-director/',
                 type: 'GET',
                 dataType: 'json',
                 success: function (data) {
-                    if (data === true) {
-                        $('#directorReliever').prop('disabled', false);
-                        $('#directorRelieverRow').show(400);
-                    } else {
-                        $('#directorReliever').prop('disabled', true);
-                        $('#directorRelieverRow').hide(400);
-                    }
-                },
-                error: function (xhr, status, err) {
-                    console.log('Error:', err);
+                    var isDirector = data === true;
+                    $('#directorReliever').prop('disabled', !isDirector);
+                    if (isDirector) $('#directorRelieverRow').show(400);
+                    else $('#directorRelieverRow').hide(400);
                 }
             });
         }
-
     });
 </script>

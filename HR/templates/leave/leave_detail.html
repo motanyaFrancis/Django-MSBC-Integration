@@ -344,16 +344,12 @@
                                                     </a> -->
 
                                                     <!-- Delete Button -->
-                                                    <form action=""
-                                                        method="POST" id="attachmentDeleteForm" novalidate>
+                                                    <form action="{% url 'delete_leave_attachments' res.Application_No %}" method="POST" class="attachmentDeleteForm"
+                                                        novalidate>
                                                         {% csrf_token %}
-                                                        <input type="hidden" name="docID"
-                                                            value="{{attachment.AuxiliaryIndex2}}">
-                                                        <input type="hidden" name="tableID"
-                                                            value="{{attachment.Table_ID}}">
-                                                        <button type="submit"
-                                                            class="btn btn-sm btn-outline-danger delete-attachment rounded-1"
-                                                            title="Delete">
+                                                        <input type="hidden" name="docID" value="{{attachment.AuxiliaryIndex2}}">
+                                                        <input type="hidden" name="tableID" value="{{attachment.Table_ID}}">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger delete-attachment rounded-1" title="Delete">
                                                             <i class="mdi mdi-trash-can"></i>
                                                         </button>
                                                     </form>
@@ -386,174 +382,103 @@
 
                         <!-- ACTIONS -->
                         <div class="card border-0 shadow-sm rounded-4 mb-4">
-
                             <div class="card-body p-4">
-
-                                <h5 class="fw-bold mb-4">
-                                    Request Actions
-                                </h5>
-
+                                <h5 class="fw-bold mb-4"> Request Actions </h5>
                                 {% if res.Status == "Open" %}
-                                <form action="{% url 'leave_approval' res.Application_No %}"   method="POST" novalidate>
-
-                                    {% csrf_token %}
-
-                                    <button class="btn btn-info w-100 py-3 mb-3">
-
-                                        <i class="las la-paper-plane me-2"></i>
-                                        Request For Approval
-
-                                    </button>
-
-                                </form>
+                                <button id="requestApprovalBtn" class="btn btn-primary w-100 py-3 mb-3"
+                                    data-url="{% url 'leave_approval' res.Application_No %}">
+                                    <i class="mdi mdi-send me-2"></i>
+                                    Request For Approval
+                                </button>
                                 {% endif %}
-
+                        
                                 {% if res.Status == "Pending Approval" %}
-                                <form action="{% url 'cancel_leave_approval' res.Application_No %}"
-                                      method="POST" novalidate>
-                                    {% csrf_token %}
-                                    <button class="btn btn-outline-danger w-100 py-3">
-
-                                        <i class="las la-times-circle me-2"></i>
-                                        Cancel Approval Request
-
-                                    </button>
-
-                                </form>
+                                <button id="cancelApprovalBtn" class="btn btn-outline-danger w-100 py-3"
+                                    data-url="{% url 'cancel_leave_approval' res.Application_No %}">
+                                    <i class="mdi-close-circle-outline me-2"></i>
+                                    Cancel Approval Request
+                                </button>
                                 {% endif %}
-
                             </div>
-
                         </div>
 
                         <!-- TIMELINE -->
                         <div class="card border-0 shadow-sm rounded-4">
-
                             <div class="card-body p-4">
-
                                 <h5 class="fw-bold mb-4">
                                     Request Timeline
                                 </h5>
 
                                 <div class="timeline-wrapper">
-
                                     <div class="timeline-item mb-4">
-
                                         <div class="d-flex">
-
                                             <div class="timeline-icon bg-primary me-3">
                                                 <i class="mdi mdi-file-document text-white"></i>
                                             </div>
 
                                             <div>
-
                                                 <h6 class="fw-semibold mb-1">
                                                     Request Created
                                                 </h6>
-
                                                 <small class="text-muted" id="application_date">
                                                     {{res.Application_Date}}
                                                 </small>
-
                                             </div>
-
                                         </div>
-
                                     </div>
 
                                     <div class="timeline-item mb-4">
-
                                         <div class="d-flex">
-
                                             <div class="timeline-icon bg-warning me-3">
                                                 <i class="mdi mdi-clock text-white"></i>
                                             </div>
 
                                             <div>
-
-                                                <h6 class="fw-semibold mb-1">
-                                                    Current Status
-                                                </h6>
-
-                                                <small class="text-muted">
-                                                    {{res.Status}}
-                                                </small>
-
+                                                <h6 class="fw-semibold mb-1"> Current Status </h6>
+                                                <small class="text-muted"> {{res.Status}} </small>
                                             </div>
-
                                         </div>
-
                                     </div>
 
                                     <div class="timeline-item">
-
                                         <div class="d-flex">
-
                                             <div class="timeline-icon bg-success me-3">
                                                 <i class="mdi mdi-calendar-check text-white"></i>
                                             </div>
-
                                             <div>
-
-                                                <h6 class="fw-semibold mb-1">
-                                                    Planned leave Date
-                                                </h6>
-
+                                                <h6 class="fw-semibold mb-1"> Planned leave Date </h6>
                                                 <small class="text-muted">
                                                     {{res.Start_Date}}
                                                 </small>
-
                                             </div>
-
                                         </div>
-
                                     </div>
-
                                 </div>
-
                             </div>
-
                         </div>
-
                     </div>
                 </div>
 
                 <!-- APPROVERS -->
                 {% if res.Status == "Pending Approval" %}
                 <div class="card border-0 shadow-sm rounded-4 mt-4">
-
                     <div class="card-header bg-white border-0 pt-4 px-4">
-
                         <div class="d-flex align-items-center">
-
                             <div class="bg-info-subtle timeline-icon p-3 me-3">
                                 <i class="mdi mdi-account-group text-info fs-4"></i>
                             </div>
-
                             <div>
-
-                                <h5 class="fw-bold mb-1">
-                                    Document Approvers
-                                </h5>
-
+                                <h5 class="fw-bold mb-1"> Document Approvers </h5>
                                 <small class="text-muted">
                                     Approval workflow details
                                 </small>
-
                             </div>
-
                         </div>
-
                     </div>
-
                     <div class="card-body px-4 pb-4">
-
                         <div class="table-responsive">
-
                             <table class="table table-hover align-middle">
-
                                 <thead class="table-light">
-
                                     <tr>
                                         <th>Entry No.</th>
                                         <th>Name</th>
@@ -562,63 +487,44 @@
                                         <th>Modified By</th>
                                         <th>Modified Date</th>
                                     </tr>
-
                                 </thead>
 
                                 <tbody>
 
                                     {% for Approvers in Approvers %}
                                     <tr>
-
                                         <td>{{Approvers.Entry_No_}}</td>
-
                                         <td>{{Approvers.Approver_ID}}</td>
-
                                         <td>{{Approvers.Sequence_No_}}</td>
-
                                         <td>
-
                                             {% if Approvers.Status == "Approved" %}
                                             <span class="badge bg-success">
                                                 {{Approvers.Status}}
                                             </span>
-
                                             {% elif Approvers.Status == "Pending" %}
                                             <span class="badge bg-warning">
                                                 {{Approvers.Status}}
                                             </span>
-
                                             {% else %}
                                             <span class="badge bg-secondary">
                                                 {{Approvers.Status}}
                                             </span>
                                             {% endif %}
-
                                         </td>
-
                                         <td>
                                             {{Approvers.Last_Modified_By_User_ID}}
                                         </td>
-
                                         <td id="ModifiedDate{{Approvers.Entry_No_}}">
                                             {{Approvers.Last_Date_Time_Modified}}
                                         </td>
-
                                     </tr>
-
                                     {% endfor %}
-
                                 </tbody>
-
                             </table>
-
                         </div>
-
                     </div>
-
                 </div>
                 {% endif %}
-
             </div>
         </div>
     </div>
@@ -643,7 +549,7 @@
                     <input type="hidden" name="request_no" value="{{ res.Application_No }}">
                     <div class="mb-3">
                         <label class="form-label">Select File</label>
-                        <input type="file" class="form-control" name="file_upload" id="fileInput"
+                        <input type="file" class="form-control" name="attachments" id="fileInput"
                             accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.txt,.ppt,.pptx" required>
                     </div>
                     <div id="uploadProgress" class="d-none mb-3">
@@ -662,41 +568,251 @@
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
 <script>
-
     $(document).ready(function () {
+        /* ── CSRF token from cookie ───────────────────────────────────── */
+        function csrf() {
+            var match = document.cookie.match(/csrftoken=([^;]+)/);
+            return match ? match[1] : '';
+        }
 
-        $("#application_date").val(
-            moment('{{res.Application_Date}}', "YYYY-MM-DD")
-            .format('Do MMM YYYY')
-        );
+        /* ── Toast helpers matching your message templates ────────────── */
+        function toastOk(msg) {
+            iziToast.success({
+                title: 'Success',
+                message: msg,
+                position: 'topCenter',
+                timeout: 4000,
+                theme: 'dark',
+                progressBarColor: '#ffffff',
+                backgroundColor: '#198754',
+                titleColor: '#fff',
+                messageColor: '#fff',
+                maxWidth: '400px',
+                transitionIn: 'fadeInDown',
+                transitionOut: 'fadeOutUp'
+            });
+        }
 
-        $("#start_date").val(
-            moment('{{res.Start_Date}}', "YYYY-MM-DD")
-            .format('Do MMM YYYY')
-        );
+        function toastErr(msg) {
+            iziToast.error({
+                title: 'Error',
+                message: msg,
+                position: 'topCenter',
+                timeout: 5000,
+                theme: 'dark',
+                progressBarColor: '#ffffff',
+                backgroundColor: '#dc3545',
+                titleColor: '#fff',
+                messageColor: '#fff',
+                maxWidth: '400px',
+                transitionIn: 'fadeInDown',
+                transitionOut: 'fadeOutUp'
+            });
+        }
 
-        $("#end_date").val(
-            moment('{{res.End_Date}}', "YYYY-MM-DD")
-            .format('Do MMM YYYY')
-        );
-        $("#resumption_date").val(
-            moment('{{res.Resumption_Date}}', "YYYY-MM-DD")
-            .format('Do MMM YYYY')
-        );
+        function toastInfo(msg) {
+            iziToast.info({
+                title: 'Info',
+                message: msg,
+                position: 'topCenter',
+                timeout: 4000,
+                theme: 'dark',
+                progressBarColor: '#ffffff',
+                backgroundColor: '#0dcaf0',
+                titleColor: '#fff',
+                messageColor: '#fff',
+                maxWidth: '400px',
+                transitionIn: 'fadeInDown',
+                transitionOut: 'fadeOutUp'
+            });
+        }
 
-        // {% for Approvers in Approvers %}
-        // $("#ModifiedDate{{Approvers.Entry_No_}}")
-        //     .empty()
-        //     .append(
-        //         moment(
-        //             '{{Approvers.Last_Date_Time_Modified}}',
-        //             "YYYY-MM-DD"
-        //         ).format('Do MMM YYYY')
-        //     );
-        // {% endfor %}
+        /* ── Reload after delay ───────────────────────────────────────── */
+        function reloadAfter(ms) {
+            setTimeout(function () { location.reload(); }, ms || 1500);
+        }
 
+        /* ── REQUEST FOR APPROVAL ─────────────────────────────────────── */
+        $(document).on('click', '#requestApprovalBtn', function () {
+            var url = $(this).data('url');
+            var $btn = $(this);
+            
+            console.log('URL:', url); // Debug: Check if URL is populated
+
+            if (!url) {
+                console.error('data-url is empty!');
+                return;
+            }
+
+            $btn.prop('disabled', true)
+                .html('<span class="spinner-border spinner-border-sm me-2"></span>Sending...');
+
+            $.ajax({
+                type: 'POST',
+                url: url,
+                headers: { 'X-CSRFToken': csrf() },
+                data: {},
+
+                success: function (data) {
+                    if (data.success === true) {
+                        toastOk(data.message);
+                        reloadAfter(1600);
+                    } else {
+                        toastErr(data.error);
+                        $btn.prop('disabled', false)
+                            .html('<i class="mdi mdi-send me-2"></i>Request For Approval');
+                    }
+                },
+                error: function (xhr) {
+                    var msg = 'An unexpected error occurred';
+                    try { msg = xhr.responseJSON.error || msg; } catch (e) { }
+                    toastErr(msg);
+                    $btn.prop('disabled', false)
+                        .html('<i class="mdi mdi-send me-2"></i>Request For Approval');
+                }
+            });
+        });
+
+        /* ── CANCEL APPROVAL ──────────────────────────────────────────── */
+        $(document).on('click', '#cancelApprovalBtn', function () {
+            var url = $(this).data('url');
+            var $btn = $(this);
+
+            if (!confirm('Are you sure you want to cancel this approval request?')) return;
+
+            $btn.prop('disabled', true)
+                .html('<span class="spinner-border spinner-border-sm me-2"></span>Cancelling...');
+
+            $.ajax({
+                type: 'POST',
+                url: url,
+                headers: { 'X-CSRFToken': csrf() },
+                data: {},
+                success: function (data) {
+                    if (data.success === true) {
+                        toastOk(data.message);
+                        reloadAfter(1600);
+                    } else {
+                        toastErr(data.error);
+                        $btn.prop('disabled', false)
+                            .html('<i class="mdi-close-circle-outline me-2"></i>Cancel Approval Request');
+                    }
+                },
+                error: function (xhr) {
+                    var msg = 'An unexpected error occurred';
+                    try { msg = xhr.responseJSON.error || msg; } catch (e) { }
+                    toastErr(msg);
+                    $btn.prop('disabled', false)
+                        .html('<i class="mdi-close-circle-outline me-2"></i>Cancel Approval Request');
+                }
+            });
+        });
+
+        /* ── ATTACHMENT UPLOAD ────────────────────────────────────────── */
+        $(document).on('submit', '#Attachment form', function (e) {
+            e.preventDefault();
+
+            var files = $('#fileInput')[0].files;
+            if (!files.length) {
+                toastErr('Please select at least one file');
+                return;
+            }
+
+            var $form = $(this);
+            var $btn = $('#uploadBtn');
+            var $progress = $('#uploadProgress');
+            var $bar = $('#progressBar');
+            var $text = $('#progressText');
+
+            $btn.prop('disabled', true).text('Uploading...');
+            $progress.removeClass('d-none');
+            $bar.css('width', '0%');
+            $text.text('Uploading...');
+
+            var formData = new FormData();
+            for (var i = 0; i < files.length; i++) {
+                formData.append('attachments', files[i]);
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: $form.attr('action'),
+                headers: { 'X-CSRFToken': csrf() },
+                data: formData,
+                processData: false,
+                contentType: false,
+                xhr: function () {
+                    var xhr = new window.XMLHttpRequest();
+                    xhr.upload.addEventListener('progress', function (e) {
+                        if (e.lengthComputable) {
+                            var pct = Math.round((e.loaded / e.total) * 100);
+                            $bar.css('width', pct + '%');
+                            $text.text(pct + '%');
+                        }
+                    }, false);
+                    return xhr;
+                },
+                success: function (data) {
+                    $btn.prop('disabled', false).text('Upload');
+                    $progress.addClass('d-none');
+                    $('#fileInput').val('');
+
+                    if (data.success === true) {
+                        toastOk(data.message);
+                        $('#Attachment').modal('hide');
+                        reloadAfter(1200);
+                    } else {
+                        toastErr(data.error);
+                    }
+                },
+                error: function (xhr) {
+                    $btn.prop('disabled', false).text('Upload');
+                    $progress.addClass('d-none');
+                    var msg = 'Upload failed. Please try again.';
+                    try { msg = xhr.responseJSON.error || msg; } catch (e) { }
+                    toastErr(msg);
+                }
+            });
+        });
+
+        /* ── ATTACHMENT DELETE ────────────────────────────────────────── */
+        $(document).on('submit', '.attachmentDeleteForm', function (e) {
+            e.preventDefault();
+
+            if (!confirm('Delete this attachment?')) return;
+
+            var $form = $(this);
+            var $btn = $form.find('button[type=submit]');
+            $btn.prop('disabled', true);
+
+            $.ajax({
+                type: 'POST',
+                url: $form.attr('action'),
+                headers: { 'X-CSRFToken': csrf() },
+                data: {
+                    docID: $form.find('[name=docID]').val(),
+                    tableID: $form.find('[name=tableID]').val(),
+                },
+                success: function (data) {
+                    if (data.success === true) {
+                        toastOk(data.message);
+                        reloadAfter(1200);
+                    } else {
+                        toastErr(data.error);
+                        $btn.prop('disabled', false);
+                    }
+                },
+                error: function (xhr) {
+                    var msg = 'Delete failed. Please try again.';
+                    try { msg = xhr.responseJSON.error || msg; } catch (e) { }
+                    toastErr(msg);
+                    $btn.prop('disabled', false);
+                }
+            });
+        });
     });
 </script>
-
 {% endblock %}
