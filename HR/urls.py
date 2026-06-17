@@ -9,8 +9,12 @@ urlpatterns = [
     path("leave/", views.LeaveRequest.as_view(), name="leave"),
     path('Leave_Data/', views.Leave_Data.as_view(), name='Leave_Data'),
     path("leave/<str:pk>/", views.LeaveDetail.as_view(), name="leave_detail"),
-    path("LeaveAttachments/", views.LeaveAttachments.as_view(), name="Leave_Attachments"),
+    path("leave-attachments/<str:pk>/", views.LeaveAttachments.as_view(), name="Leave_Attachments"),
     path("Leave_Approvers_Data/", views.Leave_Approvers_Data.as_view(), name="Leave_Approvers_Data"),
+    path("Leave_Approvers_Data/", views.Leave_Approvers_Data.as_view(), name="Leave_Approvers_Data"),
+    path("leave-approval/<str:pk>/", views.LeaveApproval.as_view(), name="leave_approval"),
+    path("cancel-leave-approval/<str:pk>/", views.CancelLeaveApproval.as_view(), name="cancel_leave_approval"),
+    path("get-director/", views.GetDirector.as_view(), name="get_director"),
 
     # Training URLs
     path("training/", views.TrainingRequest.as_view(), name="training"),

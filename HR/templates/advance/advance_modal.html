@@ -1,5 +1,5 @@
 <!-- TRANSPORT REQUEST MODAL -->
-<div class="modal fade" id="transportRequestModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+<div class="modal fade" id="advanceRequestModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
     aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
@@ -22,11 +22,11 @@
 
             <!-- BODY -->
             <div class="modal-body bg-light px-3 px-lg-4 py-4">
-                <form id="TransportForm" action="{% url 'transfer' %}" method="post" novalidate>
+                <form id="AdvanceForm" action="{% url 'salary_advance' %}" method="post" novalidate>
 
                     {% csrf_token %}
 
-                    <input type="hidden" name="TransferNo">
+                    <input type="hidden" name="loanNo">
                     <input type="hidden" name="myAction" value="insert">
 
                     <!-- TRANSFER INFO -->
@@ -50,10 +50,10 @@
                                 <div class="col-lg-4 col-md-6">
                                     <label class="form-label fw-semibold"> Loan Type <span class="text-danger">*</span>
                                     </label>
-                                    <select class="form-select" name="transferType" id="transferType" required>
+                                    <select class="form-select" name="productType" id="productType" required>
                                         <option value="" selected disabled> Select advance Type </option>
                                         {% for prod in salary_products %}
-                                        <option value="{{res.Code}}">{{res.Description}}</option>
+                                        <option value="{{prod.Code}}">{{prod.Product_Description}}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
@@ -61,14 +61,14 @@
                                 <div class="col-lg-4 col-md-6">
                                     <label class="form-label fw-semibold"> Amount <span class="text-danger">*</span>
                                     </label>
-                                    <input type="number" class="form-control" name="transferDate" required>
+                                    <input type="number" class="form-control" name="amountRequested" required>
                                 </div>
 
                                 <!-- DATE -->
                                 <div class="col-lg-4 col-md-6">
                                     <label class="form-label fw-semibold"> Repayment Installments(Months) <span
                                             class="text-danger">*</span> </label>
-                                    <input type="number" class="form-control" name="transferDate" required>
+                                    <input type="number" class="form-control" name="installments" required>
                                 </div>
                             </div>
                         </div>
@@ -87,7 +87,7 @@
         </div>
     </div>
 </div>
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<!-- <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
 
     (function () {
@@ -213,4 +213,4 @@
 
     })();
 
-</script>
+</script> -->

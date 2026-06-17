@@ -467,7 +467,7 @@ class StoreRequest(
         pending_requests = [
             x for x in purchase_requests if x.get("Status") == "Pending Approval"]
         approved_requests = [
-            x for x in purchase_requests if x.get("Status") == "Approved"]
+            x for x in purchase_requests if x.get("Status") == "Released"]
 
         ctx = {
             **session,

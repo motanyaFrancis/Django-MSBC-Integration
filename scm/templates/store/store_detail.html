@@ -68,19 +68,7 @@ Store Request - {{res.No_}}
                         </button>
                         {% endif %}
 
-                        {% if res.Status == "Released" %}
-                        <form action="{% url 'FnGenerateImprestReport' res.No_ %}" method="POST">
 
-                            {% csrf_token %}
-
-                            <button class="btn btn-success">
-
-                                <i class="mdi mdi-download me-1"></i>
-                                Preview Report
-                            </button>
-
-                        </form>
-                        {% endif %}
 
                     </div>
 
@@ -434,16 +422,19 @@ Store Request - {{res.No_}}
                                                     </a> -->
 
                                                     <!-- Delete Button -->
-                                                     <form action="{% url 'delete_store_attachment' attachment.No_  %}" method="POST" id="attachmentDeleteForm" novalidate>        
+                                                    <form action="{% url 'delete_store_attachment' attachment.No_  %}"
+                                                        method="POST" id="attachmentDeleteForm" novalidate>
                                                         {% csrf_token %}
-                                                        <input type="hidden" name="docID" value="{{attachment.AuxiliaryIndex2}}">
-                                                        <input type="hidden" name="tableID" value="{{attachment.Table_ID}}">
-                                                         <button type="submit"
-                                                             class="btn btn-sm btn-outline-danger delete-attachment rounded-1"            
-                                                              title="Delete">
-                                                             <i class="mdi mdi-trash-can"></i>
-                                                         </button>
-                                                     </form>
+                                                        <input type="hidden" name="docID"
+                                                            value="{{attachment.AuxiliaryIndex2}}">
+                                                        <input type="hidden" name="tableID"
+                                                            value="{{attachment.Table_ID}}">
+                                                        <button type="submit"
+                                                            class="btn btn-sm btn-outline-danger delete-attachment rounded-1"
+                                                            title="Delete">
+                                                            <i class="mdi mdi-trash-can"></i>
+                                                        </button>
+                                                    </form>
                                                 </td>
                                                 {% endif %}
                                             </tr>
@@ -658,7 +649,7 @@ Store Request - {{res.No_}}
 
 <!-- STORE REQUEST LINES MODAL -->
 <div class="modal fade" id="employeeModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow rounded-4 overflow-hidden">
             <div class="modal-header bg-primary text-white border-0">
                 <div>
@@ -676,40 +667,46 @@ Store Request - {{res.No_}}
                     {% csrf_token %}
                     <input type="hidden" name="lineNo" value="0">
                     <input type="hidden" name="myAction" value="insert">
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Item Category <span class="text-danger">*</span></label>
-                        <select class="form-select" name="itemCategory" id="itemCategory" required>
-                            <option selected disabled value="">Select Item Category</option>
-                            {% for cat in item_categories %}
-                            <option value="{{ cat.Code }}">{{ cat.Description }}</option>
-                            {% endfor %}
-                        </select>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Item Category <span class="text-danger">*</span></label>
+                            <select class="form-select" name="itemCategory" id="itemCategory" required>
+                                <option selected disabled value="">Select Item Category</option>
+                                {% for cat in item_categories %}
+                                <option value="{{ cat.Code }}">{{ cat.Description }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+    
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Item <span class="text-danger">*</span></label>
+                            <select class="form-select" name="itemCode" id="allItems" required>
+                                <option class="after" value="" disabled selected>-- Select Item --</option>
+                            </select>
+                        </div>
+    
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Unit of Measure <span class="text-danger">*</span></label>
+                            <select class="form-select" name="Unit_of_Measure" id="Unit_of_Measure" required>
+                                <option class="after" value="" disabled selected>-- Select --</option>
+                            </select>
+                        </div>
+    
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label fw-semibold">Quantity <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" name="quantity" min="1" required>
+                        </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Item <span class="text-danger">*</span></label>
-                        <select class="form-select" name="itemCode" id="allItems" required>
-                            <option class="after" value="" disabled selected>-- Select Item --</option>
-                        </select>
+                    <div class="d-flex flex-column flex-md-row justify-content-end gap-3 mt-5">
+                        <button type="button" class="btn btn-outline-danger border px-4 py-2" data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary px-5 py-2 shadow-sm">
+                            Submit Request
+                            <i class="las la-arrow-right ms-2"></i>
+                        </button>
                     </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Unit of Measure <span class="text-danger">*</span></label>
-                        <select class="form-select" name="Unit_of_Measure" id="Unit_of_Measure" required>
-                            <option class="after" value="" disabled selected>-- Select --</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold">Quantity <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" name="quantity" min="1" required>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary w-100 py-3">
-                        <i class="las la-save me-2"></i>
-                        Save Line
-                    </button>
                 </form>
             </div>
         </div>
@@ -880,7 +877,7 @@ Store Request - {{res.No_}}
 
             $submitBtn.prop('disabled', true)
                 .html('<i class="fas fa-spinner fa-spin"></i> Submitting...');
-            
+
 
             $.ajax({
                 url: $form.attr('action') || window.location.href,
@@ -890,7 +887,7 @@ Store Request - {{res.No_}}
                     'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val()
                 },
                 dataType: 'json',
-                
+
                 success: function (response) {
                     if (response.success) {
                         showAlert('Attachment deleted successfully', 'success');

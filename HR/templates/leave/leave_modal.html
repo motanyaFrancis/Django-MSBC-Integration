@@ -3,8 +3,8 @@
      Merges new UI (Doc 1) with full functionality (Doc 2)
      ============================================================ -->
 
-<div class="modal fade" id="raise_leave" data-bs-backdrop="static" data-bs-keyboard="false"
-    tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="raise_leave" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-hidden="true">
 
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
@@ -17,8 +17,8 @@
                     </h4>
                     <small class="opacity-75">Complete the steps below to submit your leave request</small>
                 </div>
-                <button type="button" class="btn-close btn-close-white" id="leave_close-modal"
-                    data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" id="leave_close-modal" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
             </div>
 
             <!-- ───────────── BODY ───────────── -->
@@ -86,8 +86,8 @@
 
                                     <!-- Hidden fields -->
                                     <input type="hidden" name="applicationNo" id="applicationNo">
-                                    <input type="hidden" name="dimension3"    id="dimension3">
-                                    <input type="hidden" name="myAction"      id="myAction" value="insert">
+                                    <input type="hidden" name="dimension3" id="dimension3">
+                                    <input type="hidden" name="myAction" id="myAction" value="insert">
 
                                     <div class="row g-3">
 
@@ -119,9 +119,11 @@
                                                 <div class="d-flex align-items-center gap-3">
                                                     <i class="las la-wallet fs-3 text-info"></i>
                                                     <div class="flex-grow-1">
-                                                        <small class="fw-semibold d-block text-info">Leave Balance</small>
-                                                        <input type="text" class="form-control form-control-sm mt-1" value="{{ leave_balance|default:'0' }}"
-                                                            id="leaveBalance" disabled>
+                                                        <small class="fw-semibold d-block text-info">Leave
+                                                            Balance</small>
+                                                        <input type="text" class="form-control form-control-sm mt-1"
+                                                            value="{{ leave_balance|default:'0' }}" id="leaveBalance"
+                                                            disabled>
                                                     </div>
                                                 </div>
                                             </div>
@@ -132,8 +134,8 @@
                                             <label class="form-label fw-semibold">
                                                 Return Same Day <span class="text-danger">*</span>
                                             </label>
-                                            <select class="form-select" id="isReturnSameDay"
-                                                name="isReturnSameDay" required>
+                                            <select class="form-select" id="isReturnSameDay" name="isReturnSameDay"
+                                                required>
                                                 <option value="0" disabled selected>— Select —</option>
                                                 <option value="True">Yes</option>
                                                 <option value="False">No</option>
@@ -152,8 +154,8 @@
                                             <label class="form-label fw-semibold">
                                                 Reliever <span class="text-danger">*</span>
                                             </label>
-                                            <select class="form-select" name="directorReliever"
-                                                id="directorReliever" disabled>
+                                            <select class="form-select" name="directorReliever" id="directorReliever"
+                                                disabled>
                                                 <option value="0" disabled selected>— Select Reliever —</option>
                                                 {% for reliever in directorReliever %}
                                                 <option value="{{ reliever.No_ }}">
@@ -169,8 +171,7 @@
                                     <!-- Action buttons -->
                                     <div class="d-flex justify-content-end mt-4 gap-2">
                                         <!-- shown after filter_list populates form for edit -->
-                                        <button id="next1" type="button" hidden
-                                            class="btn btn-outline-primary px-4">
+                                        <button id="next1" type="button" hidden class="btn btn-outline-primary px-4">
                                             Next <i class="las la-arrow-right ms-1"></i>
                                         </button>
                                         <button type="submit" class="btn btn-primary px-5">
@@ -216,8 +217,8 @@
 
                                     <div class="border rounded-4 p-4 bg-light">
                                         <label class="form-label fw-semibold">Upload Files</label>
-                                        <input class="form-control" name="attachments" id="attachments"
-                                            type="file" multiple>
+                                        <input class="form-control" name="attachments" id="attachments" type="file"
+                                            multiple>
                                         <small class="text-muted mt-2 d-block">
                                             Multiple files accepted (PDF, Word, images, etc.)
                                         </small>
@@ -227,16 +228,14 @@
                                     </div>
 
                                     <div class="d-flex justify-content-between align-items-center mt-4 gap-2 flex-wrap">
-                                        <button id="prev-btn" type="button"
-                                            class="btn btn-outline-secondary px-4">
+                                        <button id="prev-btn" type="button" class="btn btn-outline-secondary px-4">
                                             <i class="las la-arrow-left me-1"></i>Previous
                                         </button>
                                         <div class="d-flex gap-2">
                                             <button type="submit" class="btn btn-success px-4">
                                                 <i class="las la-upload me-1"></i>Upload Files
                                             </button>
-                                            <button id="next-btn" type="button"
-                                                class="btn btn-primary px-4">
+                                            <button id="next-btn" type="button" class="btn btn-primary px-4">
                                                 Continue <i class="las la-arrow-right ms-1"></i>
                                             </button>
                                         </div>
@@ -280,8 +279,7 @@
 
                                 <!-- Cancel-approval success animation (shown from stage 4) -->
                                 <div class="text-center mx-auto mb-4" id="cancelAnimation" style="display:none;">
-                                    <i class="las la-check-circle text-success"
-                                        style="font-size:4rem;"></i>
+                                    <i class="las la-check-circle text-success" style="font-size:4rem;"></i>
                                     <h5 class="mt-2 text-success">Approval Request Cancelled</h5>
                                 </div>
 
@@ -292,8 +290,7 @@
                                             <i class="las la-check-circle me-2"></i>
                                             Send <span class="leaveId fw-bold mx-1"></span> For Approval
                                         </button>
-                                        <button id="prev3-btn" type="button"
-                                            class="btn btn-outline-secondary px-4">
+                                        <button id="prev3-btn" type="button" class="btn btn-outline-secondary px-4">
                                             <i class="las la-arrow-left me-1"></i>Previous
                                         </button>
                                     </div>
@@ -312,8 +309,7 @@
 
                                 <!-- Approval-sent success animation -->
                                 <div class="text-center mb-3" id="approvalAnimation" style="display:none;">
-                                    <i class="las la-check-circle text-success"
-                                        style="font-size:4rem;"></i>
+                                    <i class="las la-check-circle text-success" style="font-size:4rem;"></i>
                                     <h5 class="mt-2 text-success">Approval Request Sent</h5>
                                 </div>
 
@@ -332,8 +328,7 @@
 
                                 <!-- Approvers table -->
                                 <div class="table-responsive">
-                                    <table id="leave_approvers_table"
-                                        class="table table-hover align-middle">
+                                    <table id="leave_approvers_table" class="table table-hover align-middle">
                                         <thead class="table-light">
                                             <tr>
                                                 <th>Entry No.</th>
@@ -383,603 +378,490 @@
      ============================================================ -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
-$(document).ready(function () {
+    $(document).ready(function () {
 
-    /* ─────────────────────────────────────────────
-       STATE
-    ───────────────────────────────────────────── */
-    var leaveCode = '0';
+        /* ─────────────────────────────────────────────
+           STATE
+        ───────────────────────────────────────────── */
+        var leaveCode = '0';
 
-    /* ─────────────────────────────────────────────
-       INIT
-    ───────────────────────────────────────────── */
-    Leave_Data();
-    get_director();
-
-    // Prevent past dates on start-date
-    $('#start-date').prop('min', new Date().toISOString().split('T')[0]);
-
-    /* ─────────────────────────────────────────────
-       CLOSE MODAL → refresh table
-    ───────────────────────────────────────────── */
-    $('#leave_close-modal').on('click', function () {
+        /* ─────────────────────────────────────────────
+           INIT
+        ───────────────────────────────────────────── */
         Leave_Data();
-    });
+        get_director();
 
-    /* ─────────────────────────────────────────────
-       STEPPER HELPERS
-    ───────────────────────────────────────────── */
-    function hideStage(n) {
-        $('#stage' + n).removeClass('active');
-        $('#stage-' + n + '-step').removeClass('active').addClass('done');
-    }
+        // Prevent past dates on start-date
+        $('#start-date').prop('min', new Date().toISOString().split('T')[0]);
 
-    function showStage(n) {
-        $('#stage' + n).addClass('active');
-        $('#stage-' + n + '-step').addClass('active');
-    }
+        /* ─────────────────────────────────────────────
+           CLOSE MODAL → refresh table
+        ───────────────────────────────────────────── */
+        $('#leave_close-modal').on('click', function () {
+            Leave_Data();
+        });
 
-    /* ─────────────────────────────────────────────
-       LEAVE BALANCE
-    ───────────────────────────────────────────── */
-    function get_leave_balance(leave_type) {
-        $.ajax({
-            url: '/FnLeaveBalances/',
-            type: 'POST',
-            data: {
-                leave_type: leave_type,
-                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
-            },
-            success: function (data) {
-                $('#leaveBalance').val(data + ' days');
-            },
-            error: function (xhr) {
-                console.log(xhr.responseText);
+        /* ─────────────────────────────────────────────
+           STEPPER HELPERS
+        ───────────────────────────────────────────── */
+        function hideStage(n) {
+            $('#stage' + n).removeClass('active');
+            $('#stage-' + n + '-step').removeClass('active').addClass('done');
+        }
+
+        function showStage(n) {
+            $('#stage' + n).addClass('active');
+            $('#stage-' + n + '-step').addClass('active');
+        }
+
+        /* ─────────────────────────────────────────────
+           LEAVE BALANCE
+        ───────────────────────────────────────────── */
+        function get_leave_balance(leave_type) {
+            $.ajax({
+                url: '/FnLeaveBalances/',
+                type: 'POST',
+                data: {
+                    leave_type: leave_type,
+                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+                },
+                success: function (data) {
+                    $('#leaveBalance').val(data + ' days');
+                },
+                error: function (xhr) {
+                    console.log(xhr.responseText);
+                }
+            });
+        }
+
+        $('#leaveType').on('change', function () {
+            var val = $(this).val();
+            if (val && val !== '0') {
+                $('#leaveBalanceRow').show();
+                get_leave_balance(val);
             }
         });
-    }
 
-    $('#leaveType').on('change', function () {
-        var val = $(this).val();
-        if (val && val !== '0') {
-            $('#leaveBalanceRow').show();
-            get_leave_balance(val);
-        }
-    });
+        /* ─────────────────────────────────────────────
+           RETURN SAME DAY TOGGLE
+        ───────────────────────────────────────────── */
+        $('#isReturnSameDay').on('change', function () {
+            if (this.value === 'False') {
+                $('#daysAppliedRow').show(400);
+                $('#daysApplied').prop('disabled', false);
+            } else {
+                $('#daysApplied').prop('disabled', true).val('');
+                $('#daysAppliedRow').hide(400);
+            }
+        });
 
-    /* ─────────────────────────────────────────────
-       RETURN SAME DAY TOGGLE
-    ───────────────────────────────────────────── */
-    $('#isReturnSameDay').on('change', function () {
-        if (this.value === 'False') {
-            $('#daysAppliedRow').show(400);
-            $('#daysApplied').prop('disabled', false);
-        } else {
-            $('#daysApplied').prop('disabled', true).val('');
-            $('#daysAppliedRow').hide(400);
-        }
-    });
+        /* ─────────────────────────────────────────────
+           STAGE 1 — SUBMIT LEAVE FORM
+        ───────────────────────────────────────────── */
+        $('#leave_form').on('submit', function (e) {
+            e.preventDefault();
 
-    /* ─────────────────────────────────────────────
-       STAGE 1 — SUBMIT LEAVE FORM
-    ───────────────────────────────────────────── */
-    $('#leave_form').on('submit', function (e) {
-        e.preventDefault();
-
-        // Basic front-end validation
-        if (!$('#leaveType').val() || $('#leaveType').val() === '0') {
-            iziToast.show({ theme:'dark', icon:'las la-exclamation', title:'Validation',
-                message:'Please select a leave type.', position:'topCenter', progressBarColor:'#ff0800' });
-            return;
-        }
-        if (!$('#start-date').val()) {
-            iziToast.show({ theme:'dark', icon:'las la-exclamation', title:'Validation',
-                message:'Please select a start date.', position:'topCenter', progressBarColor:'#ff0800' });
-            return;
-        }
-        if (!$('#isReturnSameDay').val() || $('#isReturnSameDay').val() === '0') {
-            iziToast.show({ theme:'dark', icon:'las la-exclamation', title:'Validation',
-                message:'Please indicate if you return the same day.', position:'topCenter', progressBarColor:'#ff0800' });
-            return;
-        }
-        // Reliever required if row is visible
-        if ($('#directorRelieverRow').is(':visible') &&
-            (!$('#directorReliever').val() || $('#directorReliever').val() === '0')) {
-            iziToast.show({ theme:'dark', icon:'las la-exclamation', title:'Validation',
-                message:'Please select a reliever.', position:'topCenter', progressBarColor:'#ff0800' });
-            return;
-        }
-
-        $('#leave_form').hide();
-        $('#leave-spinner').show(200);
-
-        $.ajax({
-            type: 'POST',
-            url: '{% url "leave" %}',
-            data: {
-                applicationNo:    $('#applicationNo').val(),
-                dimension3:       $('#dimension3').val(),
-                leaveType:        $('#leaveType').val(),
-                plannerStartDate: $('#start-date').val(),
-                daysApplied:      $('#daysApplied').val(),
-                isReturnSameDay:  $('#isReturnSameDay').val(),
-                myAction:         $('#myAction').val(),
-                directorReliever: $('#directorReliever').val(),
-                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
-            },
-            success: function (response) {
-                $('#leave-spinner').hide();
-                $('#leave_form').show(200);
-
-                if (response['response']) {
-                    leaveCode = response['response'];
-                    $('.leaveId').text(leaveCode);
-                    Leave_Data();
-                    filter_list(leaveCode);
-                    hideStage(1);
-                    showStage(2);
-
-                    iziToast.show({
-                        theme: 'dark', backgroundColor: '#239B56',
-                        icon: 'las la-check-circle', title: 'Done',
-                        message: 'Leave ' + leaveCode + ' created successfully',
-                        position: 'topCenter', progressBarColor: '#F4F6F7'
-                    });
-
-                } else if (response['error']) {
-                    iziToast.show({
-                        theme: 'dark', icon: 'las la-exclamation', title: 'Error',
-                        message: response['error'],
-                        position: 'topCenter', progressBarColor: '#ff0800'
-                    });
-                }
-            },
-            error: function (err) {
-                console.log(err);
-                $('#leave-spinner').hide();
-                $('#leave_form').show(200);
+            // Basic front-end validation
+            if (!$('#leaveType').val() || $('#leaveType').val() === '0') {
                 iziToast.show({
-                    theme: 'dark', icon: 'las la-exclamation', title: 'Error',
-                    message: 'An unexpected error occurred. Please try again.',
-                    position: 'topCenter', progressBarColor: '#ff0800'
+                    theme: 'dark', icon: 'las la-exclamation', title: 'Validation',
+                    message: 'Please select a leave type.', position: 'topCenter', progressBarColor: '#ff0800'
                 });
+                return;
             }
-        });
-    });
-
-    /* ─────────────────────────────────────────────
-       NEXT1 — skip re-save, jump to stage 2
-    ───────────────────────────────────────────── */
-    $('#next1').on('click', function () {
-        hideStage(1);
-        showStage(2);
-        $('.leaveId').text(leaveCode);
-    });
-
-    /* ─────────────────────────────────────────────
-       STAGE 2 — UPLOAD ATTACHMENTS
-    ───────────────────────────────────────────── */
-    $('#leave_attachment_form').on('submit', function (e) {
-        e.preventDefault();
-
-        var files = $('#attachments')[0].files;
-        if (!files.length) {
-            $('#attachmentOutput').text('Please select at least one file.').show();
-            return;
-        }
-        $('#attachmentOutput').hide();
-        $('#leave_attachment_form').hide();
-        $('#attachment-spinner').show();
-
-        var formData = new FormData(this);
-        for (var i = 0; i < files.length; i++) {
-            formData.append('attachment', files[i]);
-        }
-
-        $.ajax({
-            url: '/LeaveAttachments/' + leaveCode + '/',
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            headers: { 'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val() },
-            success: function (data) {
-                $('#attachment-spinner').hide();
-                $('#leave_attachment_form').show();
-                $('#attachments').val('');
-
-                Load_Leave_Attachments(leaveCode);
-
-                if (data['success'] === true) {
-                    iziToast.show({
-                        theme: 'dark', backgroundColor: '#239B56',
-                        icon: 'las la-check-circle', title: 'Done',
-                        message: 'Files uploaded successfully',
-                        position: 'topCenter', progressBarColor: '#F4F6F7'
-                    });
-                } else {
-                    var msg = typeof data === 'string' ? data : (data['error'] || 'Upload failed');
-                    $('#attachmentOutput').text(msg).show();
-                    iziToast.show({
-                        theme: 'dark', icon: 'las la-exclamation', title: 'Error',
-                        message: msg, position: 'topCenter', progressBarColor: '#ff0800'
-                    });
-                }
-            },
-            error: function (xhr) {
-                console.log(xhr.responseText);
-                $('#attachment-spinner').hide();
-                $('#leave_attachment_form').show();
-                $('#attachmentOutput').text('Upload failed. Please try again.').show();
-            }
-        });
-    });
-
-    /* Stage 2 navigation */
-    $('#prev-btn').on('click', function () {
-        hideStage(2);
-        showStage(1);
-    });
-
-    $('#next-btn').on('click', function () {
-        hideStage(2);
-        showStage(3);
-        $('.leaveId').text(leaveCode);
-    });
-
-    /* ─────────────────────────────────────────────
-       STAGE 3 — SEND FOR APPROVAL
-    ───────────────────────────────────────────── */
-    $('#prev3-btn').on('click', function () {
-        hideStage(3);
-        showStage(2);
-    });
-
-    $('#approvalForm').on('submit', function (e) {
-        e.preventDefault();
-        $('#approvalForm').hide();
-        $('#approve-spinner').show(200);
-
-        $.ajax({
-            type: 'POST',
-            url: '/LeaveApprovalRequest/',
-            data: {
-                leaveCode: leaveCode,
-                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
-            },
-            success: function (data) {
-                $('#approve-spinner').hide();
-                $('#approvalForm').show(200);
-
-                if (data['success'] === true) {
-                    Leave_Approvers_Data(leaveCode);
-                    $('#detailsBtn').attr('href', '/leave/detail/' + leaveCode);
-                    $('.leaveId').text(leaveCode);
-                    hideStage(3);
-                    showStage(4);
-
-                    $('#approvalAnimation')
-                        .fadeIn(1000)
-                        .delay(4000)
-                        .fadeOut(1000);
-
-                    iziToast.show({
-                        theme: 'dark', backgroundColor: '#239B56',
-                        icon: 'las la-check-circle', title: 'Done',
-                        message: data['message'],
-                        position: 'topCenter', progressBarColor: '#F4F6F7'
-                    });
-
-                } else {
-                    iziToast.show({
-                        theme: 'dark', icon: 'las la-exclamation', title: 'Error',
-                        message: data['error'],
-                        position: 'topCenter', progressBarColor: '#ff0800'
-                    });
-                }
-            },
-            error: function (err) {
-                console.log(err);
-                $('#approve-spinner').hide();
-                $('#approvalForm').show(200);
-            }
-        });
-    });
-
-    /* ─────────────────────────────────────────────
-       STAGE 4 — CANCEL APPROVAL
-    ───────────────────────────────────────────── */
-    $('#CancelApprovalForm').on('submit', function (e) {
-        e.preventDefault();
-
-        $.ajax({
-            type: 'POST',
-            url: '/CancelApprovalForm/',
-            data: {
-                leaveCode: leaveCode,
-                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
-            },
-            success: function (data) {
-                Leave_Approvers_Data(leaveCode);
-
-                if (data['success'] === true) {
-                    $('.leaveId').text(leaveCode);
-                    hideStage(4);
-                    showStage(3);
-
-                    $('#cancelAnimation')
-                        .fadeIn(1000)
-                        .delay(4000)
-                        .fadeOut(1000);
-
-                    iziToast.show({
-                        theme: 'dark', backgroundColor: '#239B56',
-                        icon: 'las la-check-circle', title: 'Done',
-                        message: data['message'],
-                        position: 'topCenter', progressBarColor: '#F4F6F7'
-                    });
-
-                } else {
-                    iziToast.show({
-                        theme: 'dark', icon: 'las la-exclamation', title: 'Error',
-                        message: data['error'],
-                        position: 'topCenter', progressBarColor: '#ff0800'
-                    });
-                }
-            },
-            error: function (err) {
-                console.log(err);
-            }
-        });
-    });
-
-    /* ─────────────────────────────────────────────
-       LEAVE DATA — populate all three tables
-    ───────────────────────────────────────────── */
-    function Leave_Data() {
-        $.ajax({
-            url: '{% url "Leave_Data" %}',
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                var openBody     = $('#open_leave_table tbody');
-                var pendingBody  = $('#pending_leave_table tbody');
-                var approvedBody = $('#approved_leave_table tbody');
-                openBody.empty(); pendingBody.empty(); approvedBody.empty();
-
-                data.forEach(function (item) {
-                    var row = $('<tr>');
-                    row.append($('<td>').text(item.Application_No));
-                    row.append($('<td>').text(item.Leave_Code));
-                    row.append($('<td>').text(
-                        moment(item.Start_Date, 'YYYY-MM-DD').format('Do MMM YYYY')));
-                    row.append($('<td>').text(
-                        moment(item.Resumption_Date, 'YYYY-MM-DD').format('Do MMM YYYY')));
-                    row.append($('<td>').text(item.Status));
-
-                    if (item.Status === 'Open' && item.Rejected_By_Approver) {
-                        row.addClass('rejected');
-                    }
-
-                    var viewBtn = $('<a>', {
-                        href: '/leave/detail/' + item.Application_No,
-                        class: 'btn btn-primary btn-sm'
-                    }).html('<i class="mdi mdi-folder-eye me-1"></i>View');
-
-                    row.append($('<td>').append(viewBtn));
-
-                    if      (item.Status === 'Open')             openBody.append(row);
-                    else if (item.Status === 'Pending Approval') pendingBody.append(row);
-                    else if (item.Status === 'Released')         approvedBody.append(row);
+            if (!$('#start-date').val()) {
+                iziToast.show({
+                    theme: 'dark', icon: 'las la-exclamation', title: 'Validation',
+                    message: 'Please select a start date.', position: 'topCenter', progressBarColor: '#ff0800'
                 });
-
-                // Highlight rejected rows
-                $('#open_leave_table tbody tr.rejected')
-                    .css('background-color', '#566573')
-                    .css('color', '#fff');
-
-                // Init or refresh DataTables
-                ['open_leave_table', 'pending_leave_table', 'approved_leave_table']
-                    .forEach(function (id) {
-                        if (!$.fn.DataTable.isDataTable('#' + id)) {
-                            $('#' + id).DataTable({
-                                pageLength: 5,
-                                order: [[0, 'desc']]
-                            });
-                        }
-                    });
-
-                $('.open_leave_count').text(
-                    $('#open_leave_table').DataTable().page.info().recordsDisplay);
-                $('.pending_leave_count').text(
-                    $('#pending_leave_table').DataTable().page.info().recordsDisplay);
-                $('.approved_leave_count').text(
-                    $('#approved_leave_table').DataTable().page.info().recordsDisplay);
-            },
-            error: function (xhr, status, err) {
-                console.log('Error:', err);
+                return;
             }
-        });
-    }
-
-    /* ─────────────────────────────────────────────
-       FILTER LIST — re-populate stage-1 form for edits
-    ───────────────────────────────────────────── */
-    function filter_list(pk) {
-        $.ajax({
-            url: '/filter_list/' + pk,
-            type: 'GET',
-            dataType: 'json',
-            data: {
-                query:           '/QyLeaveApplications',
-                filter_one:      'Application_No',
-                filter_two:      'User_ID',
-                filter_two_type: 'user'
-            },
-            success: function (data) {
-                if (data['success'] === true) {
-                    var d = data['data'];
-
-                    $('#applicationNo').val(d.Application_No);
-                    $('#dimension3').val(d.Dimension3 || '');
-                    $('#myAction').val(d.modify);
-                    $('#leaveType').val(d.Leave_Code);
-
-                    get_leave_balance(d.Leave_Code);
-                    $('#leaveBalanceRow').show();
-
-                    $('#start-date').val(d.Start_Date);
-
-                    if (d.Return_same_day === true || d.Return_same_day === 'True') {
-                        $('#isReturnSameDay').val('True');
-                        $('#daysAppliedRow').hide().find('input').prop('disabled', true);
-                    } else {
-                        $('#isReturnSameDay').val('False');
-                        $('#daysAppliedRow').show();
-                        $('#daysApplied').prop('disabled', false).val(d.Days_Applied);
-                    }
-
-                    // Reliever
-                    if (d.Director_Reliever) {
-                        $('#directorReliever').val(d.Director_Reliever);
-                    }
-
-                    // Reveal "Next" so they can skip re-saving
-                    $('#next1').removeAttr('hidden');
-                }
-            },
-            error: function (xhr, status, err) {
-                console.log('Error:', err);
+            if (!$('#isReturnSameDay').val() || $('#isReturnSameDay').val() === '0') {
+                iziToast.show({
+                    theme: 'dark', icon: 'las la-exclamation', title: 'Validation',
+                    message: 'Please indicate if you return the same day.', position: 'topCenter', progressBarColor: '#ff0800'
+                });
+                return;
             }
-        });
-    }
+            // Reliever required if row is visible
+            if ($('#directorRelieverRow').is(':visible') &&
+                (!$('#directorReliever').val() || $('#directorReliever').val() === '0')) {
+                iziToast.show({
+                    theme: 'dark', icon: 'las la-exclamation', title: 'Validation',
+                    message: 'Please select a reliever.', position: 'topCenter', progressBarColor: '#ff0800'
+                });
+                return;
+            }
 
-    /* ─────────────────────────────────────────────
-       LOAD LEAVE ATTACHMENTS
-    ───────────────────────────────────────────── */
-    function Load_Leave_Attachments(pk) {
-        $.ajax({
-            url: '/LeaveAttachments/' + pk + '/',
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                var container = $('#attachments-container').empty();
-                $('#leave_attachments_row').toggle(data.length > 0);
+            $('#leave_form').hide();
+            $('#leave-spinner').show(200);
 
-                data.forEach(function (file) {
-                    var docID   = file.AuxiliaryIndex2;
-                    var tableID = file.Table_ID;
-                    var fname   = file.File_Name + '.' + file.File_Extension;
+            $.ajax({
+                type: 'POST',
+                url: '{% url "leave" %}',
+                data: {
+                    applicationNo: $('#applicationNo').val(),
+                    dimension3: $('#dimension3').val(),
+                    leaveType: $('#leaveType').val(),
+                    plannerStartDate: $('#start-date').val(),
+                    daysApplied: $('#daysApplied').val(),
+                    isReturnSameDay: $('#isReturnSameDay').val(),
+                    myAction: $('#myAction').val(),
+                    directorReliever: $('#directorReliever').val(),
+                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+                },
+                success: function (response) {
+                    $('#leave-spinner').hide();
+                    $('#leave_form').show(200);
 
-                    var deleteBtn = $('<button>', {
-                        type: 'button',
-                        class: 'btn btn-sm btn-outline-danger',
-                        title: 'Remove'
-                    }).html('<i class="las la-times"></i>');
+                    if (response['response']) {
+                        leaveCode = response['response'];
+                        $('.leaveId').text(leaveCode);
+                        Leave_Data();
+                        filter_list(leaveCode);
+                        hideStage(1);
+                        showStage(2);
 
-                    deleteBtn.on('click', function () {
-                        $.ajax({
-                            type: 'POST',
-                            url: '/RemoveAttachment/',
-                            data: {
-                                docID: docID,
-                                tableID: tableID,
-                                leaveCode: pk,
-                                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
-                            },
-                            success: function (res) {
-                                if (res['success'] === true) {
-                                    Load_Leave_Attachments(pk);
-                                    iziToast.show({
-                                        theme: 'dark', backgroundColor: '#239B56',
-                                        icon: 'las la-check-circle', title: 'Done',
-                                        message: res['message'],
-                                        position: 'topCenter', progressBarColor: '#F4F6F7'
-                                    });
-                                } else {
-                                    iziToast.show({
-                                        theme: 'dark', icon: 'las la-exclamation', title: 'Error',
-                                        message: res['error'],
-                                        position: 'topCenter', progressBarColor: '#ff0800'
-                                    });
-                                }
-                            },
-                            error: function (err) { console.log(err); }
+                        iziToast.show({
+                            theme: 'dark', backgroundColor: '#239B56',
+                            icon: 'las la-check-circle', title: 'Done',
+                            message: 'Leave ' + leaveCode + ' created successfully',
+                            position: 'topCenter', progressBarColor: '#F4F6F7'
                         });
+
+                    } else if (response['error']) {
+                        iziToast.show({
+                            theme: 'dark', icon: 'las la-exclamation', title: 'Error',
+                            message: response['error'],
+                            position: 'topCenter', progressBarColor: '#ff0800'
+                        });
+                    }
+                },
+                error: function (err) {
+                    console.log(err);
+                    $('#leave-spinner').hide();
+                    $('#leave_form').show(200);
+                    iziToast.show({
+                        theme: 'dark', icon: 'las la-exclamation', title: 'Error',
+                        message: 'An unexpected error occurred. Please try again.',
+                        position: 'topCenter', progressBarColor: '#ff0800'
                     });
-
-                    var card = $('<div>', { class: 'col-md-3' }).append(
-                        $('<div>', {
-                            class: 'card p-2 d-flex flex-row align-items-center gap-2 border-0 shadow-sm rounded-3'
-                        }).append(
-                            $('<i>', { class: 'las la-file-alt fs-4 text-muted' }),
-                            $('<span>', { class: 'small flex-grow-1 text-truncate', title: fname }).text(fname),
-                            deleteBtn
-                        )
-                    );
-                    container.append(card);
-                });
-            },
-            error: function (xhr, status, err) {
-                console.log('Error:', err);
-            }
-        });
-    }
-
-    /* ─────────────────────────────────────────────
-       LEAVE APPROVERS TABLE
-    ───────────────────────────────────────────── */
-    function Leave_Approvers_Data(pk) {
-        $.ajax({
-            url: '/LeaveApproversData/' + pk + '/',
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                var body = $('#leave_approvers_table tbody').empty();
-                if (!data.length) {
-                    body.append('<tr><td colspan="6" class="text-center text-muted py-3">No approvers found.</td></tr>');
-                    return;
                 }
-                data.forEach(function (a) {
-                    var row = $('<tr>');
-                    row.append($('<td>').text(a.Entry_No_));
-                    row.append($('<td>').text(a.Approver_ID));
-                    row.append($('<td>').text(a.Sequence_No_));
-                    row.append($('<td>').text(a.Status));
-                    row.append($('<td>').text(a.Last_Modified_By_User_ID));
-                    row.append($('<td>').text(
-                        moment(a.Last_Date_Time_Modified, 'YYYY-MM-DD').format('Do MMM YYYY')));
-                    body.append(row);
-                });
-            },
-            error: function (xhr, status, err) {
-                console.log('Error:', err);
-            }
+            });
         });
-    }
 
-    /* ─────────────────────────────────────────────
-       DIRECTOR CHECK — show/hide reliever field
-    ───────────────────────────────────────────── */
-    function get_director() {
-        $.ajax({
-            url: '/get_director/',
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                if (data === true) {
-                    $('#directorReliever').prop('disabled', false);
-                    $('#directorRelieverRow').show();
-                } else {
-                    $('#directorReliever').prop('disabled', true);
-                    $('#directorRelieverRow').hide();
+        /* ─────────────────────────────────────────────
+           NEXT1 — skip re-save, jump to stage 2
+        ───────────────────────────────────────────── */
+        $('#next1').on('click', function () {
+            hideStage(1);
+            showStage(2);
+            $('.leaveId').text(leaveCode);
+        });
+
+        /* ─────────────────────────────────────────────
+           STAGE 2 — UPLOAD ATTACHMENTS
+        ───────────────────────────────────────────── */
+        $('#leave_attachment_form').on('submit', function (e) {
+            e.preventDefault();
+
+            var files = $('#attachments')[0].files;
+            if (!files.length) {
+                $('#attachmentOutput').text('Please select at least one file.').show();
+                return;
+            }
+            $('#attachmentOutput').hide();
+            $('#leave_attachment_form').hide();
+            $('#attachment-spinner').show();
+
+            var formData = new FormData(this);
+            for (var i = 0; i < files.length; i++) {
+                formData.append('attachment', files[i]);
+            }
+
+            $.ajax({
+                url: '/LeaveAttachments/' + leaveCode + '/',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                headers: { 'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val() },
+                success: function (data) {
+                    $('#attachment-spinner').hide();
+                    $('#leave_attachment_form').show();
+                    $('#attachments').val('');
+
+                    Load_Leave_Attachments(leaveCode);
+
+                    if (data['success'] === true) {
+                        iziToast.show({
+                            theme: 'dark', backgroundColor: '#239B56',
+                            icon: 'las la-check-circle', title: 'Done',
+                            message: 'Files uploaded successfully',
+                            position: 'topCenter', progressBarColor: '#F4F6F7'
+                        });
+                    } else {
+                        var msg = typeof data === 'string' ? data : (data['error'] || 'Upload failed');
+                        $('#attachmentOutput').text(msg).show();
+                        iziToast.show({
+                            theme: 'dark', icon: 'las la-exclamation', title: 'Error',
+                            message: msg, position: 'topCenter', progressBarColor: '#ff0800'
+                        });
+                    }
+                },
+                error: function (xhr) {
+                    console.log(xhr.responseText);
+                    $('#attachment-spinner').hide();
+                    $('#leave_attachment_form').show();
+                    $('#attachmentOutput').text('Upload failed. Please try again.').show();
                 }
-            },
-            error: function (xhr, status, err) {
-                console.log('Error:', err);
-            }
+            });
         });
-    }
 
-});
+        /* Stage 2 navigation */
+        $('#prev-btn').on('click', function () {
+            hideStage(2);
+            showStage(1);
+        });
+
+        $('#next-btn').on('click', function () {
+            hideStage(2);
+            showStage(3);
+            $('.leaveId').text(leaveCode);
+        });
+
+        /* ─────────────────────────────────────────────
+           STAGE 3 — SEND FOR APPROVAL
+        ───────────────────────────────────────────── */
+        $('#prev3-btn').on('click', function () {
+            hideStage(3);
+            showStage(2);
+        });
+
+        $('#approvalForm').on('submit', function (e) {
+            e.preventDefault();
+            $('#approvalForm').hide();
+            $('#approve-spinner').show(200);
+
+            $.ajax({
+                type: 'POST',
+                url: '/LeaveApprovalRequest/',
+                data: {
+                    leaveCode: leaveCode,
+                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+                },
+                success: function (data) {
+                    $('#approve-spinner').hide();
+                    $('#approvalForm').show(200);
+
+                    if (data['success'] === true) {
+                        Leave_Approvers_Data(leaveCode);
+                        $('#detailsBtn').attr('href', '/leave/detail/' + leaveCode);
+                        $('.leaveId').text(leaveCode);
+                        hideStage(3);
+                        showStage(4);
+
+                        $('#approvalAnimation')
+                            .fadeIn(1000)
+                            .delay(4000)
+                            .fadeOut(1000);
+
+                        iziToast.show({
+                            theme: 'dark', backgroundColor: '#239B56',
+                            icon: 'las la-check-circle', title: 'Done',
+                            message: data['message'],
+                            position: 'topCenter', progressBarColor: '#F4F6F7'
+                        });
+
+                    } else {
+                        iziToast.show({
+                            theme: 'dark', icon: 'las la-exclamation', title: 'Error',
+                            message: data['error'],
+                            position: 'topCenter', progressBarColor: '#ff0800'
+                        });
+                    }
+                },
+                error: function (err) {
+                    console.log(err);
+                    $('#approve-spinner').hide();
+                    $('#approvalForm').show(200);
+                }
+            });
+        });
+
+        /* ─────────────────────────────────────────────
+           STAGE 4 — CANCEL APPROVAL
+        ───────────────────────────────────────────── */
+        $('#CancelApprovalForm').on('submit', function (e) {
+            e.preventDefault();
+
+            $.ajax({
+                type: 'POST',
+                url: '/CancelApprovalForm/',
+                data: {
+                    leaveCode: leaveCode,
+                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+                },
+                success: function (data) {
+                    Leave_Approvers_Data(leaveCode);
+
+                    if (data['success'] === true) {
+                        $('.leaveId').text(leaveCode);
+                        hideStage(4);
+                        showStage(3);
+
+                        $('#cancelAnimation')
+                            .fadeIn(1000)
+                            .delay(4000)
+                            .fadeOut(1000);
+
+                        iziToast.show({
+                            theme: 'dark', backgroundColor: '#239B56',
+                            icon: 'las la-check-circle', title: 'Done',
+                            message: data['message'],
+                            position: 'topCenter', progressBarColor: '#F4F6F7'
+                        });
+
+                    } else {
+                        iziToast.show({
+                            theme: 'dark', icon: 'las la-exclamation', title: 'Error',
+                            message: data['error'],
+                            position: 'topCenter', progressBarColor: '#ff0800'
+                        });
+                    }
+                },
+                error: function (err) {
+                    console.log(err);
+                }
+            });
+        });
+
+        /* ─────────────────────────────────────────────
+           LOAD LEAVE ATTACHMENTS
+        ───────────────────────────────────────────── */
+        function Load_Leave_Attachments(pk) {
+            $.ajax({
+                url: '/LeaveAttachments/' + pk + '/',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    var container = $('#attachments-container').empty();
+                    $('#leave_attachments_row').toggle(data.length > 0);
+
+                    data.forEach(function (file) {
+                        var docID = file.AuxiliaryIndex2;
+                        var tableID = file.Table_ID;
+                        var fname = file.File_Name + '.' + file.File_Extension;
+
+                        var deleteBtn = $('<button>', {
+                            type: 'button',
+                            class: 'btn btn-sm btn-outline-danger',
+                            title: 'Remove'
+                        }).html('<i class="las la-times"></i>');
+
+                        deleteBtn.on('click', function () {
+                            $.ajax({
+                                type: 'POST',
+                                url: '/RemoveAttachment/',
+                                data: {
+                                    docID: docID,
+                                    tableID: tableID,
+                                    leaveCode: pk,
+                                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+                                },
+                                success: function (res) {
+                                    if (res['success'] === true) {
+                                        Load_Leave_Attachments(pk);
+                                        iziToast.show({
+                                            theme: 'dark', backgroundColor: '#239B56',
+                                            icon: 'las la-check-circle', title: 'Done',
+                                            message: res['message'],
+                                            position: 'topCenter', progressBarColor: '#F4F6F7'
+                                        });
+                                    } else {
+                                        iziToast.show({
+                                            theme: 'dark', icon: 'las la-exclamation', title: 'Error',
+                                            message: res['error'],
+                                            position: 'topCenter', progressBarColor: '#ff0800'
+                                        });
+                                    }
+                                },
+                                error: function (err) { console.log(err); }
+                            });
+                        });
+
+                        var card = $('<div>', { class: 'col-md-3' }).append(
+                            $('<div>', {
+                                class: 'card p-2 d-flex flex-row align-items-center gap-2 border-0 shadow-sm rounded-3'
+                            }).append(
+                                $('<i>', { class: 'las la-file-alt fs-4 text-muted' }),
+                                $('<span>', { class: 'small flex-grow-1 text-truncate', title: fname }).text(fname),
+                                deleteBtn
+                            )
+                        );
+                        container.append(card);
+                    });
+                },
+                error: function (xhr, status, err) {
+                    console.log('Error:', err);
+                }
+            });
+        }
+
+        /* ─────────────────────────────────────────────
+           LEAVE APPROVERS TABLE
+        ───────────────────────────────────────────── */
+        function Leave_Approvers_Data(pk) {
+            $.ajax({
+                url: '/LeaveApproversData/' + pk + '/',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    var body = $('#leave_approvers_table tbody').empty();
+                    if (!data.length) {
+                        body.append('<tr><td colspan="6" class="text-center text-muted py-3">No approvers found.</td></tr>');
+                        return;
+                    }
+                    data.forEach(function (a) {
+                        var row = $('<tr>');
+                        row.append($('<td>').text(a.Entry_No_));
+                        row.append($('<td>').text(a.Approver_ID));
+                        row.append($('<td>').text(a.Sequence_No_));
+                        row.append($('<td>').text(a.Status));
+                        row.append($('<td>').text(a.Last_Modified_By_User_ID));
+                        row.append($('<td>').text(
+                            moment(a.Last_Date_Time_Modified, 'YYYY-MM-DD').format('Do MMM YYYY')));
+                        body.append(row);
+                    });
+                },
+                error: function (xhr, status, err) {
+                    console.log('Error:', err);
+                }
+            });
+        }
+
+        /* ─────────────────────────────────────────────
+           DIRECTOR CHECK — show/hide reliever field
+        ───────────────────────────────────────────── */
+        function get_director() {
+            $.ajax({
+                url: '/get-director/',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    if (data === true) {
+                        $('#directorReliever').prop('disabled', false);
+                        $('#directorRelieverRow').show(400);
+                    } else {
+                        $('#directorReliever').prop('disabled', true);
+                        $('#directorRelieverRow').hide(400);
+                    }
+                },
+                error: function (xhr, status, err) {
+                    console.log('Error:', err);
+                }
+            });
+        }
+
+    });
 </script>

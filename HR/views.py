@@ -71,9 +71,9 @@ class LeaveRequest(
 
             ctx = {
                 **session,
-                "res": open_leave,
-                "response": approved_leave,
-                "pending": pending_leave,
+                "open_request": open_leave,
+                "approved_request": approved_leave,
+                "pending_request": pending_leave,
                 "leave": leave_types,
                 "directorReliever": [
                     x for x in employees if x.get("User_ID") != user_id
@@ -88,77 +88,92 @@ class LeaveRequest(
             return redirect("auth")
 
     async def post(self, request):
-            try:
-                session = self.get_session_context(request)
-                # requisitionNo = pk
-                applicationNo = request.POST.get("applicationNo")
-                usersId =session.get("User_ID")
-                employeeNo =session.get("Employee_No_")
-                dimension3 = request.POST.get("dimension3")
-                leaveType = request.POST.get("leaveType")
-                # plannerStartDate = datetime.strptime(request.POST.get("plannerStartDate"), "%Y-%m-%d").date()
-                date_obj = datetime.strptime('2026-06-22',  "%Y-%m-%d").date()
-                # plannerStartDate = date_obj.strftime("%Y-%m-%dT00:00:00Z")
-                plannerStartDate = request.POST.get("plannerStartDate")
-                daysApplied = request.POST.get("daysApplied")
-                isReturnSameDay = eval(request.POST.get("isReturnSameDay"))
-                myAction = request.POST.get("myAction")
-                directorReliever = request.POST.get("directorReliever")
+        try:
+            session = self.get_session_context(request)
+            # requisitionNo = pk
+            applicationNo = request.POST.get("applicationNo")
+            usersId = session.get("User_ID")
+            employeeNo = session.get("Employee_No_")
+            dimension3 = request.POST.get("dimension3")
+            leaveType = request.POST.get("leaveType")
+            # plannerStartDate = datetime.strptime(request.POST.get("plannerStartDate"), "%Y-%m-%d").date()
+            date_obj = datetime.strptime('2026-06-22',  "%Y-%m-%d").date()
+            # plannerStartDate = date_obj.strftime("%Y-%m-%dT00:00:00Z")
+            plannerStartDate = request.POST.get("plannerStartDate")
+            daysApplied = request.POST.get("daysApplied")
+            isReturnSameDay = eval(request.POST.get("isReturnSameDay"))
+            myAction = request.POST.get("myAction")
+            directorReliever = request.POST.get("directorReliever")
 
-                if not daysApplied or isReturnSameDay == True:
-                    daysApplied = 1
+            if not daysApplied or isReturnSameDay == True:
+                daysApplied = 1
 
-                if not directorReliever:
-                    directorReliever = ""
+            if not directorReliever:
+                directorReliever = ""
 
+            print("applicationNo", applicationNo)
+            print("usersId", usersId)
+            print("employeeNo", employeeNo)
+            print("dimension3", dimension3)
+            print("leaveType", leaveType)
+            print("plannerStartDate", plannerStartDate)
+            print("daysApplied", daysApplied)
+            print("isReturnSameDay", isReturnSameDay)
+            print("myAction", myAction)
+            print("directorReliever", directorReliever)
 
-                print("applicationNo", applicationNo )
-                print("usersId", usersId )
-                print("employeeNo", employeeNo )
-                print("dimension3", dimension3 )
-                print("leaveType", leaveType )
-                print("plannerStartDate", plannerStartDate )
-                print("daysApplied", daysApplied )
-                print("isReturnSameDay", isReturnSameDay )
-                print("myAction", myAction )
-                print("directorReliever", directorReliever )
-                
-
-                response = self.call_soap(
-                    soap_method="FnLeaveApplication",
-                    params=[
-                        applicationNo,
-                        employeeNo,
-                        usersId,
-                        dimension3,
-                        leaveType,
-                        plannerStartDate,
-                        int(daysApplied),
-                        isReturnSameDay,
-                        myAction,
-                        directorReliever,
-                    ],
-                )
-                print("SOAP Response:", response)
-                if request.META.get("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest":
-                    if response != "0" and response != None and response != "":
-                        return JsonResponse({"response": str(response)}, safe=False)
-                    return JsonResponse({"error": str(response)}, safe=False)
+            response = self.call_soap(
+                soap_method="FnLeaveApplication",
+                params=[
+                    applicationNo,
+                    employeeNo,
+                    usersId,
+                    dimension3,
+                    leaveType,
+                    plannerStartDate,
+                    int(daysApplied),
+                    isReturnSameDay,
+                    myAction,
+                    directorReliever,
+                ],
+            )
+            print("SOAP Response:", response)
+            if request.META.get("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest":
+                if response != "0" and response != None and response != "":
+                    return JsonResponse({"response": str(response)}, safe=False)
+                return JsonResponse({"error": str(response)}, safe=False)
+            else:
+                if response != "0" and response != None and response != "":
+                    messages.success(request, "Success")
+                    return redirect("leave_detail", pk=response)
                 else:
-                    if response != "0" and response != None and response != "":
-                        messages.success(request, "Success")
-                        return redirect("leave_detail", pk=response)
-                    else:
-                        messages.error(request, f"{response}")
-                        return redirect("leave_detail", pk=applicationNo)
-    
-            except Exception as e:
-                logging.exception(e)
-                if request.META.get("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest":
-                    return JsonResponse({"error": str(e)}, safe=False)
-                else:
-                    messages.error(request, f"{e}")
-                    return redirect("leave")
+                    messages.error(request, f"{response}")
+                    return redirect("leave_detail", pk=applicationNo)
+
+        except Exception as e:
+            logging.exception(e)
+            if request.META.get("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest":
+                return JsonResponse({"error": str(e)}, safe=False)
+            else:
+                messages.error(request, f"{e}")
+                return redirect("leave")
+
+
+class GetDirector(
+    AuthRequiredMixin,
+    SessionMixin,
+    View,
+):
+    def get(self, request):
+        try:
+            session = self.get_session_context(request)
+            HOD_User = session.get("HOD_User")
+
+            return JsonResponse(HOD_User, safe=False)
+
+        except Exception as e:
+            logging.exception(e)
+            return JsonResponse({"error": str(e)}, safe=False)
 
 
 class Leave_Data(
@@ -263,7 +278,7 @@ class LeaveDetail(
                                     "value": pk,
                                 }
                             ],
-                            "alias": "file",
+                            "alias": "attachments",
                         },
                         {
                             "endpoint": "/QyApprovalCommentLines",
@@ -353,7 +368,13 @@ class FnLeaveBalances(AuthRequiredMixin, View):
             return JsonResponse(0, safe=False)
 
 
-class LeaveAttachments(AuthRequiredMixin, View):
+class LeaveAttachments(
+        AuthRequiredMixin,
+        SessionMixin,
+        ODataMixin,
+        SOAPMixin,
+        ResponseMixin,
+        View):
 
     async def get(self, request, pk):
         try:
@@ -373,29 +394,23 @@ class LeaveAttachments(AuthRequiredMixin, View):
 
     async def post(self, request, pk):
         try:
-            soap_headers = request.session.get("soap_headers")
-            user_id = request.session.get("User_ID")
-
-            files = request.FILES.getlist("attachment")
-
+            attachments = request.FILES.getlist("file_upload")
+            table_id = 52177494
+            user_id = request.session["User_ID"]
             results = []
 
-            for file in files:
-                encoded = base64.b64encode(file.read())
-
-                res = self.upload_attachment(
-                    soap_headers,
+            for file in attachments:
+                response = self.upload_attachment(
+                    "FnUploadAttachedDocument",
                     pk,
-                    file.name,
-                    encoded,
-                    52177494,
+                    file,
+                    table_id,
                     user_id,
                 )
-
-                results.append(res)
+                results.append(response)
 
             return JsonResponse(
-                {"success": True, "uploaded": len(files)},
+                {"success": True, "uploaded": len(attachments)},
                 safe=False,
             )
 
@@ -404,32 +419,74 @@ class LeaveAttachments(AuthRequiredMixin, View):
             return JsonResponse({"success": False, "error": str(e)})
 
 
-class LeaveApproval(AuthRequiredMixin, View):
+class LeaveApproval( 
+    AuthRequiredMixin,
+    SessionMixin,
+    ODataMixin,
+    SOAPMixin,
+    ResponseMixin,
+    View,
+    ):
 
     def post(self, request, pk):
         try:
-            soap_headers = request.session.get("soap_headers")
-            employee_no = request.session.get("Employee_No_")
-            application_no = request.POST.get("applicationNo")
+            session = self.get_session_context(request)
+            Employee_No_ = session.get("Employee_No_")
 
-            response = self.make_soap_request(
-                soap_headers,
-                "FnRequestLeaveApproval",
-                employee_no,
-                application_no,
+            response = self.call_soap(
+                soap_method =    "FnRequestLeaveApproval",
+                params = [
+
+                    Employee_No_,
+                    pk
+                ]
             )
 
-            if response:
-                messages.success(request, "Approval request sent")
-            else:
-                messages.error(request, "Approval failed")
+            if response is True:
+                messages.success(request, "Approval Requested successfully",)
+                return redirect("leave_detail", pk=pk,)
 
-            return redirect("LeaveDetail", pk=pk)
+            messages.error(request, f"{response}",)
+            return redirect("leave_detail", pk=pk,)
 
         except Exception as e:
             logging.exception(e)
-            messages.error(request, str(e))
-            return redirect("LeaveDetail", pk=pk)
+            messages.error(request, f"Failed to process approval action: {e}",)
+            return redirect("leave_detail", pk=pk,)
+
+class CancelLeaveApproval( 
+    AuthRequiredMixin,
+    SessionMixin,
+    ODataMixin,
+    SOAPMixin,
+    ResponseMixin,
+    View,
+    ):
+
+    def post(self, request, pk):
+        try:
+            session = self.get_session_context(request)
+            Employee_No_ = session.get("Employee_No_")
+
+            response = self.call_soap(
+                soap_method =    "FnCancelLeaveApproval",
+                params = [
+                    Employee_No_,
+                    pk
+                ]
+            )
+
+            if response is True:
+                messages.success(request, "Approval Requested successfully",)
+                return redirect("leave_detail", pk=pk,)
+
+            messages.error(request, f"{response}",)
+            return redirect("leave_detail", pk=pk,)
+
+        except Exception as e:
+            logging.exception(e)
+            messages.error(request, f"Failed to process approval action: {e}",)
+            return redirect("leave_detail", pk=pk,)
 
 
 """
@@ -909,6 +966,14 @@ class SalaryAdvance(
             installments = int(request.POST.get('installments'))
             myAction = request.POST.get('myAction')
 
+            print("user_id: ", user_id)
+            print("employee_no: ", employee_no)
+            print("loanNo: ", loanNo)
+            print("productType: ", productType)
+            print("amountRequested: ", amountRequested)
+            print("installments: ", installments)
+            print("myAction: ", myAction)
+
             if installments <= 0 or installments > 12:
                 messages.info(
                     request, "Installments cannot be less than 1 or more than 12")
@@ -921,21 +986,25 @@ class SalaryAdvance(
                     employee_no,
                     productType,
                     amountRequested,
-                    user_id, 
+                    user_id,
                     installments,
                     myAction
                 ],
             )
 
-            if response != "0" and response != '' and response != True:
-                messages.success(request, "Success")
-                return redirect('advanceDetail', pk=response)
-            messages.error(request, f'{response}')
-            return redirect('advance')
+            if response:
+                messages.success(request, "Request sent successfully")
+                return redirect('advance_detail', pk=response)
+            else:
+                messages.error(
+                    request, f'An error occure kindly try again later: {response}')
+                return redirect('salary_advance')
+
         except Exception as e:
-            messages.error(request, 'Failed, 201 denied')
+            messages.error(
+                request, f'Failed to submit Salary Advance Request: {e}')
             logging.exception(e)
-        return redirect('salary-advance')
+        return redirect('salary_advance')
 
 
 """
