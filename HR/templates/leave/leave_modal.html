@@ -580,7 +580,7 @@
             }
 
             $.ajax({
-                url: '/LeaveAttachments/' + leaveCode + '/',
+                url: '/leave-attachments/' + leaveCode + '/',
                 type: 'POST',
                 data: formData,
                 processData: false,
@@ -645,7 +645,7 @@
 
             $.ajax({
                 type: 'POST',
-                url: '/LeaveApprovalRequest/',
+                url: '/leave-approval/'+ leaveCode + '/',
                 data: {
                     leaveCode: leaveCode,
                     csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
@@ -656,7 +656,7 @@
 
                     if (data['success'] === true) {
                         Leave_Approvers_Data(leaveCode);
-                        $('#detailsBtn').attr('href', '/leave/detail/' + leaveCode);
+                        $('#detailsBtn').attr('href', '/leave/' + leaveCode);
                         $('.leaveId').text(leaveCode);
                         hideStage(3);
                         showStage(4);
