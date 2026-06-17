@@ -71,9 +71,9 @@ class LeaveRequest(
 
             ctx = {
                 **session,
-                "open_request": open_leave,
-                "approved_request": approved_leave,
-                "pending_request": pending_leave,
+                "open_requests": open_leave,
+                "approved_requests": approved_leave,
+                "pending_requests": pending_leave,
                 "leave": leave_types,
                 "directorReliever": [
                     x for x in employees if x.get("User_ID") != user_id

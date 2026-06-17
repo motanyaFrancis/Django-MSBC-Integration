@@ -645,7 +645,7 @@
 
             $.ajax({
                 type: 'POST',
-                url: '/leave-approval/'+ leaveCode + '/',
+                url: '/leave-approval/' + leaveCode + '/',
                 data: {
                     leaveCode: leaveCode,
                     csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
@@ -735,6 +735,127 @@
                 }
             });
         });
+
+        /* ─────────────────────────────────────────────
+            LEAVE DATA — populate all three tables
+        ───────────────────────────────────────────── */
+        function Leave_Data() {
+            $.ajax({
+                url: '{% url "Leave_Data" %}',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    var openBody = $('#open_leave_table tbody');
+                    var pendingBody = $('#pending_leave_table tbody');
+                    var approvedBody = $('#approved_leave_table tbody');
+                    openBody.empty(); pendingBody.empty(); approvedBody.empty();
+
+                    data.forEach(function (item) {
+                        var row = $('<tr>');
+                        row.append($('<td>').text(item.Application_No));
+                        row.append($('<td>').text(item.Leave_Code));
+                        row.append($('<td>').text(
+                            moment(item.Start_Date, 'YYYY-MM-DD').format('Do MMM YYYY')));
+                        row.append($('<td>').text(
+                            moment(item.Resumption_Date, 'YYYY-MM-DD').format('Do MMM YYYY')));
+                        row.append($('<td>').text(item.Status));
+
+                        if (item.Status === 'Open' && item.Rejected_By_Approver) {
+                            row.addClass('rejected');
+                        }
+
+                        var viewBtn = $('<a>', {
+                            href: '/leave/detail/' + item.Application_No,
+                            class: 'btn btn-primary btn-sm'
+                        }).html('<i class="mdi mdi-folder-eye me-1"></i>View');
+
+                        row.append($('<td>').append(viewBtn));
+
+                        if (item.Status === 'Open') openBody.append(row);
+                        else if (item.Status === 'Pending Approval') pendingBody.append(row);
+                        else if (item.Status === 'Released') approvedBody.append(row);
+                    });
+
+                    // Highlight rejected rows
+                    $('#open_leave_table tbody tr.rejected')
+                        .css('background-color', '#566573')
+                        .css('color', '#fff');
+
+                    // Init or refresh DataTables
+                    ['open_leave_table', 'pending_leave_table', 'approved_leave_table']
+                        .forEach(function (id) {
+                            if (!$.fn.DataTable.isDataTable('#' + id)) {
+                                $('#' + id).DataTable({
+                                    pageLength: 5,
+                                    order: [[0, 'desc']]
+                                });
+                            }
+                        });
+
+                    $('.open_leave_count').text(
+                        $('#open_leave_table').DataTable().page.info().recordsDisplay);
+                    $('.pending_leave_count').text(
+                        $('#pending_leave_table').DataTable().page.info().recordsDisplay);
+                    $('.approved_leave_count').text(
+                        $('#approved_leave_table').DataTable().page.info().recordsDisplay);
+                },
+                error: function (xhr, status, err) {
+                    console.log('Error:', err);
+                }
+            });
+        }
+
+        /* ─────────────────────────────────────────────
+           FILTER LIST — re-populate stage-1 form for edits
+        ───────────────────────────────────────────── */
+        function filter_list(pk) {
+            $.ajax({
+                url: '/filter_list/' + pk,
+                type: 'GET',
+                dataType: 'json',
+                data: {
+                    query: '/QyLeaveApplications',
+                    filter_one: 'Application_No',
+                    filter_two: 'User_ID',
+                    filter_two_type: 'user'
+                },
+                success: function (data) {
+                    if (data['success'] === true) {
+                        var d = data['data'];
+
+                        $('#applicationNo').val(d.Application_No);
+                        $('#dimension3').val(d.Dimension3 || '');
+                        $('#myAction').val(d.modify);
+                        $('#leaveType').val(d.Leave_Code);
+
+                        get_leave_balance(d.Leave_Code);
+                        $('#leaveBalanceRow').show();
+
+                        $('#start-date').val(d.Start_Date);
+
+                        if (d.Return_same_day === true || d.Return_same_day === 'True') {
+                            $('#isReturnSameDay').val('True');
+                            $('#daysAppliedRow').hide().find('input').prop('disabled', true);
+                        } else {
+                            $('#isReturnSameDay').val('False');
+                            $('#daysAppliedRow').show();
+                            $('#daysApplied').prop('disabled', false).val(d.Days_Applied);
+                        }
+
+                        // Reliever
+                        if (d.Director_Reliever) {
+                            $('#directorReliever').val(d.Director_Reliever);
+                        }
+
+                        // Reveal "Next" so they can skip re-saving
+                        $('#next1').removeAttr('hidden');
+                    }
+                },
+                error: function (xhr, status, err) {
+                    console.log('Error:', err);
+                }
+            });
+        }
 
         /* ─────────────────────────────────────────────
            LOAD LEAVE ATTACHMENTS
