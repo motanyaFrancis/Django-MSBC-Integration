@@ -521,18 +521,6 @@ class ChangePortalPasswordView(
             new_password = request.POST.get("new_password")
             confirm_password = request.POST.get("confirm_password")
 
-            print('Portal_Password:', Portal_Password)
-
-            print('current_password:', current_password)
-            print('new_password:', new_password)
-            print('confirm_password:', confirm_password)
-
-            encrypted_current = self.encrypt_password(current_password)
-            encrypted_new = self.encrypt_password(new_password)
-
-            print('encrypted_current:', encrypted_current)
-            print('encrypted_new:', encrypted_new)
-
             if not current_password or not new_password or not confirm_password:
                 messages.error(request, "All fields are required.")
                 return redirect("profile")
@@ -545,7 +533,9 @@ class ChangePortalPasswordView(
                 messages.error(request, "Current password is incorrect.")
                 return redirect("profile")
 
-            if encrypted_current == encrypted_new:
+            encrypted_new = self.encrypt_password(new_password)
+
+            if self.encrypt_password(current_password) == encrypted_new:
                 messages.error(
                     request, "New password cannot be the same as current password.")
                 return redirect("profile")
@@ -556,15 +546,22 @@ class ChangePortalPasswordView(
             )
 
             if response is True:
+                # =====================================================
+                # UPDATE SESSION WITH NEW PASSWORD
+                # =====================================================
+                self.update_session(
+                    request,
+                    Portal_Password=new_password,
+                    password=encrypted_new,
+                )
                 messages.success(request, "Password changed successfully.")
             else:
-                messages.error(request, "Current password is incorrect.")
+                messages.error(request, "Password change failed on server.")
 
             return redirect("profile")
 
         except Exception as e:
             logging.exception(e)
-            print(str(e))
             messages.error(
                 request, "An error occurred while changing password.")
             return redirect("profile")
@@ -626,7 +623,8 @@ class UpdateProfilePicture(AuthRequiredMixin, SOAPMixin, EncryptionMixin, Sessio
             cache.delete(profile_image_key(employee_no))
             cache.delete(profile_image_format_key(employee_no))
 
-            cache.set(profile_image_key(employee_no), new_image, timeout=60 * 60)
+            cache.set(profile_image_key(employee_no),
+                      new_image, timeout=60 * 60)
             cache.set(
                 profile_image_format_key(employee_no),
                 kind.extension if kind else "jpg",
