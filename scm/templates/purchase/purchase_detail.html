@@ -732,6 +732,12 @@ Purchase Request - {{res.No_}}
 
     $(document).ready(function () {
 
+        /* ── CSRF token from cookie ───────────────────────────────────── */
+        function csrf() {
+            var match = document.cookie.match(/csrftoken=([^;]+)/);
+            return match ? match[1] : '';
+        }
+
         $("#request_date").val(
             moment('{{res.Order_Date}}', "YYYY-MM-DD")
                 .format('Do MMM YYYY')

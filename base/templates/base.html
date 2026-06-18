@@ -61,6 +61,7 @@
 </head>
 
 <body>
+  {% include 'loader.html' %}
   <div class="container-scroller">
     {% include 'accounts/alert.html' %}
     {% block body %}
@@ -72,8 +73,7 @@
             background:rgba(0,0,0,0.6); z-index:9999;" class="modal-xl ">
 
     <div style="background:white; width:400px; margin:15% auto; padding:20px; border-radius:10px; text-align:center;"
-      class="d-flex align-items-center justify-content-center gap-3 flex-column p-8"
-    >
+      class="d-flex align-items-center justify-content-center gap-3 flex-column p-8">
 
       <h3>Session Expiring Soon</h3>
       <p>You will be logged out in 1 minute due to inactivity.</p>
@@ -126,6 +126,8 @@
   <script src="{% static 'assets/js/Chart.roundedBarCharts.js' %}"></script>
   <!-- End custom js for this page-->
   <script>
+
+    
     (function () {
 
       // ===== CONFIG =====
@@ -211,6 +213,8 @@
       startTimers();
 
     })();
+
+   
   </script>
 </body>
 
