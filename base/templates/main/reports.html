@@ -80,8 +80,7 @@
                                                         {% if approved_leave %}
                                                         {% for leave in approved_leave %}
                                                         <option value="{{ leave.Application_No }}">
-                                                            {{ leave.Application_No }} — ({{ leave.Start_Date }} to {{
-                                                            leave.Resumption_Date }})
+                                                            {{ leave.Application_No }} — ({{ leave.Start_Date }} to {{ leave.Resumption_Date }})
                                                         </option>
                                                         {% endfor %}
                                                         {% else %}
@@ -143,7 +142,7 @@
                                             </div>
                                             <div class="list-group-item d-flex justify-content-between ps-0 pe-0 py-2">
                                                 <span class="text-muted">Approved</span>
-                                                <span class="badge bg-success">{{ leaves_stats.Released|default:"0"                                                    }}</span>
+                                                <span class="badge bg-success">{{ leaves_stats.Released|default:"0" }}</span>
                                             </div>
                                             <div class="list-group-item d-flex justify-content-between ps-0 pe-0 py-2">
                                                 <span class="text-muted">Pending Approval</span>

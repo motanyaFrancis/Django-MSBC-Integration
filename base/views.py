@@ -467,7 +467,7 @@ class UserReportView(
 
             approved_leave = [
                 leave for leave in response
-                if leave["Status"] == "Open"
+                if leave["Status"] == "Released"
             ]
             # print("Approved Leaves:", approved_leave)
 
