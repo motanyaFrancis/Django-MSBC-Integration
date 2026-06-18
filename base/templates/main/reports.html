@@ -79,13 +79,15 @@
                                                         </option>
                                                         {% if approved_leave %}
                                                         {% for leave in approved_leave %}
-                                                        <option value="{{ leave.Application_No }}">
-                                                            {{ leave.Application_No }} — ({{ leave.Start_Date }} to {{ leave.Resumption_Date }})
+                                                        <option class="leave-option" value="{{ leave.Application_No }}" data-start="{{ leave.Start_Date }}"
+                                                            data-resumption="{{ leave.Resumption_Date }}">
+                                                            {{ leave.Application_No }} — Loading dates...
                                                         </option>
                                                         {% endfor %}
                                                         {% else %}
                                                         <option disabled value="">No approved leave found</option>
                                                         {% endif %}
+
                                                     </select>
                                                 </div>
                                             </div>
@@ -325,7 +327,38 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // 1. Grab all the option elements
+        const options = document.querySelectorAll('.leave-option');
+
+        options.forEach(option => {
+            // 2. Fetch the raw date strings from data attributes
+            const rawStart = option.getAttribute('data-start');         // e.g., "2026-06-18"
+            const rawResumption = option.getAttribute('data-resumption'); // e.g., "2026-07-02"
+            const appNo = option.value;
+
+            // 3. Helper function to turn "YYYY-MM-DD" into "DD-MM-YYYY"
+            function formatDateStr(dateStr) {
+                if (!dateStr || !dateStr.includes('-')) return dateStr;
+                const parts = dateStr.split('-'); // Splits into ["YYYY", "MM", "DD"]
+                if (parts.length === 3) {
+                    return `${parts[2]}-${parts[1]}-${parts[0]}`; // Combines to "DD-MM-YYYY"
+                }
+                return dateStr;
+            }
+
+            // 4. Format both dates
+            const formattedStart = formatDateStr(rawStart);
+            const formattedResumption = formatDateStr(rawResumption);
+
+            // 5. Update the visual text of the <option> tag
+            option.textContent = `${appNo} — (${formattedStart} to ${formattedResumption})`;
+        });
+    });
+
+    
     $(document).ready(function () {
+
 
         /* ─────────────────────────────────────────────
            PER-TAB REPORT STORE
