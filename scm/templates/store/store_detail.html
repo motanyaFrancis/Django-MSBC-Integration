@@ -429,15 +429,11 @@ Store Request - {{res.No_}}
 
                                                     <!-- Delete Button -->
                                                     <form action="{% url 'delete_store_attachment' attachment.No_  %}"
-                                                        method="POST" id="attachmentDeleteForm" novalidate>
+                                                        method="POST" class="attachmentDeleteForm" novalidate>
                                                         {% csrf_token %}
-                                                        <input type="hidden" name="docID"
-                                                            value="{{attachment.AuxiliaryIndex2}}">
-                                                        <input type="hidden" name="tableID"
-                                                            value="{{attachment.Table_ID}}">
-                                                        <button type="submit"
-                                                            class="btn btn-sm btn-outline-danger delete-attachment rounded-1"
-                                                            title="Delete">
+                                                        <input type="hidden" name="docID" value="{{attachment.AuxiliaryIndex2}}">
+                                                        <input type="hidden" name="tableID" value="{{attachment.Table_ID}}">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger delete-attachment rounded-1" title="Delete">
                                                             <i class="mdi mdi-trash-can"></i>
                                                         </button>
                                                     </form>
@@ -891,7 +887,7 @@ Store Request - {{res.No_}}
         $(document).on('submit', '.attachmentDeleteForm', function (e) {
             e.preventDefault();
 
-            if (!confirm('Delete this attachment?')) return;
+            if (!confirm('Are you sure you want to delete this attachment?')) return;
 
             var $form = $(this);
             var $btn = $form.find('button[type=submit]');
@@ -923,244 +919,282 @@ Store Request - {{res.No_}}
             });
         });
 
-        // ====================================================================
-        // DATE FORMATTING
-        // ====================================================================
-
-        $("#request_date").val(
-            moment('{{res.Request_Date}}', "YYYY-MM-DD")
-                .format('Do MMM YYYY')
-        );
-
-        $("#start_date").val(
-            moment('{{res.Trip_Planned_Start_Date}}', "YYYY-MM-DD")
-                .format('Do MMM YYYY')
-        );
-
-        $("#end_date").val(
-            moment('{{res.Trip_Planned_End_Date}}', "YYYY-MM-DD")
-                .format('Do MMM YYYY')
-        );
-
-        // Format upload dates
-        $('[id^="uploadDate"]').each(function () {
-            const dateText = $(this).text().trim();
-            if (dateText) {
-                const formattedDate = moment(dateText, "YYYY-MM-DD").format('Do MMM YYYY');
-                $(this).text(formattedDate);
-            }
-        });
-
+        
         // ====================================================================
         // STORE REQUEST LINE - CASCADING DROPDOWNS
         // ====================================================================
 
-        $('#itemCategory').on('change', function (e) {
+        /* ── STORE REQUEST LINE INSERT ───────────────────────────── */
+        $(document).on('submit', '#formAdd', function (e) {
             e.preventDefault();
-            var ItemCode = $(this).val();
-            if (ItemCode) {
-                $("#formAdd select[name='itemCode']").find('.after').nextAll().remove();
-                $.ajax({
-                    type: 'GET',
-                    url: '{% url "get_items" %}',
-                    dataType: 'json',
-                    data: { ItemCode: ItemCode },
-                    success: function (response) {
-                        let options = '<option value="" disabled selected>-- Select Item --</option>';
-                        for (var i = 0; i < response.value.length; i++) {
-                            if (response.value[i].Item_Category_Code == ItemCode) {
-                                options += `<option value="${response.value[i].No_}">${response.value[i].Description}</option>`;
-                            }
-                        }
-                        $("#formAdd select[name='itemCode']").find('.after').after(options);
-                    },
-                    error: function () { console.log('Failed to load items'); }
-                });
-            } else {
-                $("#formAdd select[name='itemCode']").find('.after').nextAll().remove();
+
+            var $form = $(this);
+            var $btn = $form.find('button[type="submit"]');
+
+            // Basic validation
+            if (!$('#itemCategory').val()) {
+                toastErr('Please select an item category');
+                return;
             }
+
+            if (!$('#allItems').val()) {
+                toastErr('Please select an item');
+                return;
+            }
+
+            if (!$('#Unit_of_Measure').val()) {
+                toastErr('Please select a unit of measure');
+                return;
+            }
+
+            if (!$form.find('[name="quantity"]').val()) {
+                toastErr('Please enter a quantity');
+                return;
+            }
+
+            $btn.prop('disabled', true)
+                .html('<span class="spinner-border spinner-border-sm me-2"></span>Submitting...');
+
+            $.ajax({
+                type: 'POST',
+                url: $form.attr('action'),
+                headers: {
+                    'X-CSRFToken': csrf()
+                },
+                data: $form.serialize(),
+
+                success: function (data) {
+
+                    if (data.success === true) {
+
+                        toastOk(data.message || 'Store request line added successfully');
+
+                        var modalEl = document.getElementById('employeeModal');
+                        var modal = bootstrap.Modal.getInstance(modalEl);
+
+                        if (modal) {
+                            modal.hide();
+                        }
+
+                        reloadAfter(1200);
+
+                    } else {
+
+                        toastErr(data.error || 'Failed to add line');
+
+                        $btn.prop('disabled', false)
+                            .html('Submit Request <i class="las la-arrow-right ms-2"></i>');
+                    }
+                },
+
+                error: function (xhr) {
+
+                    var msg = 'An unexpected error occurred';
+
+                    try {
+                        msg = xhr.responseJSON.error || msg;
+                    } catch (e) { }
+
+                    toastErr(msg);
+
+                    $btn.prop('disabled', false)
+                        .html('Submit Request <i class="las la-arrow-right ms-2"></i>');
+                }
+            });
         });
 
-        $('#allItems').on('change', function (e) {
-            e.preventDefault();
-            var ItemNumber = $(this).val();
-            if (ItemNumber) {
-                $("#formAdd select[name='Unit_of_Measure']").find('.after').nextAll().remove();
-                $.ajax({
-                    type: 'GET',
-                    url: '{% url "get_units_of_measure" %}',
-                    dataType: 'json',
-                    data: { ItemNumber: ItemNumber },
-                    success: function (response) {
-                        let options = '';
-                        for (var i = 0; i < response.value.length; i++) {
-                            if (response.value[i].Item_No_ == ItemNumber) {
-                                options += `<option value="${response.value[i].Code}">
-                            ${response.value[i].Code} - (${response.value[i].Qty__per_Unit_of_Measure} PER ${response.value[i].Code})
-                        </option>`;
-                            }
-                        }
-                        $("#formAdd select[name='Unit_of_Measure']").find('.after').after(options);
-                    },
-                    error: function () { console.log('Failed to load units'); }
-                });
-            } else {
-                $("#formAdd select[name='Unit_of_Measure']").find('.after').nextAll().remove();
-            }
-        });
-
-        // // ====================================================================
-        // // FILE UPLOAD HANDLING
-        // // ====================================================================
-
-        // $('#attachmentForm').on('submit', function (e) {
+        // $('#itemCategory').on('change', function (e) {
         //     e.preventDefault();
-
-        //     const fileInput = $('#fileInput')[0];
-        //     if (!fileInput.files[0]) {
-        //         alert('Please select a file');
-        //         return;
-        //     }
-
-        //     const formData = new FormData(this);
-        //     $('#uploadBtn').prop('disabled', true);
-        //     $('#uploadProgress').removeClass('d-none');
-        //     $('#progressBar').css('width', '0%');
-
-        //     $.ajax({
-        //         url: '{% url "upload_store_attachment" res.No_ %}',
-        //         type: 'POST',
-        //         data: formData,
-        //         contentType: false,
-        //         processData: false,
-        //         xhr: function () {
-        //             const xhr = new window.XMLHttpRequest();
-        //             xhr.upload.addEventListener('progress', function (e) {
-        //                 if (e.lengthComputable) {
-        //                     const pct = (e.loaded / e.total) * 100;
-        //                     $('#progressBar').css('width', pct + '%');
-        //                     $('#progressText').text('Uploading: ' + Math.round(pct) + '%');
-        //                 }
-        //             });
-        //             return xhr;
-        //         },
-        //         success: function (response) {
-        //             if (response.success) {
-        //                 showAlert('File uploaded successfully!', 'success');
-        //                 const modal = bootstrap.Modal.getInstance(document.getElementById('Attachment'));
-        //                 if (modal) modal.hide();
-        //                 setTimeout(() => location.reload(), 1000);
-        //             } else {
-        //                 showAlert(response.message || 'Upload failed', 'error');
-        //             }
-        //             $('#uploadBtn').prop('disabled', false);
-        //             $('#uploadProgress').addClass('d-none');
-        //         },
-        //         error: function (xhr) {
-        //             showAlert(xhr.responseJSON?.message || 'An error occurred', 'error');
-        //             $('#uploadBtn').prop('disabled', false);
-        //             $('#uploadProgress').addClass('d-none');
-        //         }
-        //     });
-        // });
-
-
-        // // ====================================================================
-        // // DELETE ATTACHMENT
-        // // ====================================================================
-
-        // $('#attachmentDeleteForm').on('submit', function (e) {
-        //     e.preventDefault();
-
-        //     const $form = $(this);
-        //     const $submitBtn = $('#submitBtn');
-        //     const originalBtnHtml = $submitBtn.html();
-
-        //     $('.is-invalid').removeClass('is-invalid');
-        //     $('.invalid-feedback').remove();
-        //     $('#formAlert').remove();
-
-        //     $submitBtn.prop('disabled', true)
-        //         .html('<i class="fas fa-spinner fa-spin"></i> Submitting...');
-
-
-        //     $.ajax({
-        //         url: $form.attr('action') || window.location.href,
-        //         type: 'POST',
-        //         data: $form.serialize(),
-        //         headers: {
-        //             'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val()
-        //         },
-        //         dataType: 'json',
-
-        //         success: function (response) {
-        //             if (response.success) {
-        //                 showAlert('Attachment deleted successfully', 'success');
-        //                 setTimeout(() => {
-        //                     location.reload();
-        //                 }, 1000);
-        //             } else {
-        //                 showAlert(response.message || 'Deletion failed', 'error');
-        //             }
-        //         },
-        //         error: function () {
-        //             showAlert('An error occurred', 'error');
-        //         }
-        //     });
-
-        // })
-
-        // $(document).on('click', '.delete-attachment', function () {
-        //     if (confirm('Are you sure you want to delete this attachment?')) {
-        //         const attachmentId = $(this).data('attachment-id');
-        //         const attachmentTableId = $(this).data('attachment-table-id');
-        //         const requestNo = $(this).data('request-no');
-
+        //     var ItemCode = $(this).val();
+        //     if (ItemCode) {
+        //         $("#formAdd select[name='itemCode']").find('.after').nextAll().remove();
         //         $.ajax({
-        //             url: '{% url "delete_store_attachment" "0" %}'.replace('0', attachmentId),
-        //             type: 'POST',
-        //             data: {
-        //                 'csrfmiddlewaretoken': $('[name="csrfmiddlewaretoken"]').val(),
-        //                 'docID': requestNo,
-        //                 'docID': attachmentTableId,
-
-        //             },
+        //             type: 'GET',
+        //             url: '{% url "get_items" %}',
+        //             dataType: 'json',
+        //             data: { ItemCode: ItemCode },
         //             success: function (response) {
-        //                 if (response.success) {
-        //                     showAlert('Attachment deleted successfully', 'success');
-        //                     setTimeout(() => {
-        //                         location.reload();
-        //                     }, 1000);
-        //                 } else {
-        //                     showAlert(response.message || 'Deletion failed', 'error');
+        //                 let options = '<option value="" disabled selected>-- Select Item --</option>';
+        //                 for (var i = 0; i < response.value.length; i++) {
+        //                     if (response.value[i].Item_Category_Code == ItemCode) {
+        //                         options += `<option value="${response.value[i].No_}">${response.value[i].Description}</option>`;
+        //                     }
         //                 }
+        //                 $("#formAdd select[name='itemCode']").find('.after').after(options);
         //             },
-        //             error: function () {
-        //                 showAlert('An error occurred', 'error');
-        //             }
+        //             error: function () { console.log('Failed to load items'); }
         //         });
+        //     } else {
+        //         $("#formAdd select[name='itemCode']").find('.after').nextAll().remove();
         //     }
         // });
 
-        // ====================================================================
-        // UTILITY FUNCTIONS
-        // ====================================================================
+        /* ── ITEM CATEGORY → ITEMS ─────────────────────────────── */
+        $('#itemCategory').on('change', function () {
 
-        function showAlert(message, type) {
-            const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
-            const icon = type === 'success' ? 'mdi-check-circle' : 'mdi-alert-circle';
+            var itemCategory = $(this).val();
+            var $itemSelect = $('#allItems');
+            var $uomSelect = $('#Unit_of_Measure');
 
-            const alert = $(`
-                <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
-                    <i class="mdi ${icon} me-2"></i>
-                    ${message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            `);
+            // Reset child dropdowns
+            $itemSelect.html(
+                '<option selected disabled>Loading items...</option>'
+            ).prop('disabled', true);
 
-            $('body').prepend(alert);
-            setTimeout(() => alert.fadeOut(), 5000);
-        }
+            $uomSelect.html(
+                '<option selected disabled>-- Select --</option>'
+            ).prop('disabled', true);
+
+            if (!itemCategory) {
+                $itemSelect.html(
+                    '<option selected disabled>-- Select Item --</option>'
+                );
+                return;
+            }
+
+            $.ajax({
+                type: 'GET',
+                url: '{% url "get_items" %}',
+                dataType: 'json',
+                data: {
+                    ItemCode: itemCategory
+                },
+
+                success: function (response) {
+
+                    let options =
+                        '<option value="" disabled selected>-- Select Item --</option>';
+
+                    if (response.value && response.value.length) {
+
+                        response.value.forEach(function (item) {
+
+                            if (item.Item_Category_Code === itemCategory) {
+                                options += `
+                            <option value="${item.No_}">
+                                ${item.No_} - ${item.Description}
+                            </option>
+                        `;
+                            }
+                        });
+
+                    } else {
+
+                        options =
+                            '<option value="" disabled selected>No items found</option>';
+                    }
+
+                    $itemSelect.html(options)
+                        .prop('disabled', false);
+                },
+
+                error: function () {
+
+                    toastErr('Failed to load items');
+
+                    $itemSelect.html(
+                        '<option value="" disabled selected>Failed to load items</option>'
+                    ).prop('disabled', false);
+                }
+            });
+        });
+
+
+        /* ── ITEM → UOM ────────────────────────────────────────── */
+        $('#allItems').on('change', function () {
+
+            var itemNo = $(this).val();
+            var $uomSelect = $('#Unit_of_Measure');
+
+            $uomSelect.html(
+                '<option selected disabled>Loading units...</option>'
+            ).prop('disabled', true);
+
+            if (!itemNo) {
+                $uomSelect.html(
+                    '<option selected disabled>-- Select --</option>'
+                );
+                return;
+            }
+
+            $.ajax({
+                type: 'GET',
+                url: '{% url "get_units_of_measure" %}',
+                dataType: 'json',
+                data: {
+                    ItemNumber: itemNo
+                },
+
+                success: function (response) {
+
+                    let options =
+                        '<option value="" disabled selected>-- Select Unit --</option>';
+
+                    if (response.value && response.value.length) {
+
+                        response.value.forEach(function (uom) {
+
+                            if (uom.Item_No_ === itemNo) {
+
+                                options += `
+                            <option value="${uom.Code}">
+                                ${uom.Code}
+                                (${uom.Qty__per_Unit_of_Measure} PER ${uom.Code})
+                            </option>
+                        `;
+                            }
+                        });
+
+                    } else {
+
+                        options =
+                            '<option value="" disabled selected>No units found</option>';
+                    }
+
+                    $uomSelect.html(options)
+                        .prop('disabled', false);
+                },
+
+                error: function () {
+
+                    toastErr('Failed to load units of measure');
+
+                    $uomSelect.html(
+                        '<option value="" disabled selected>Failed to load units</option>'
+                    ).prop('disabled', false);
+                }
+            });
+        });
+
+        // $('#allItems').on('change', function (e) {
+        //     e.preventDefault();
+        //     var ItemNumber = $(this).val();
+        //     if (ItemNumber) {
+        //         $("#formAdd select[name='Unit_of_Measure']").find('.after').nextAll().remove();
+        //         $.ajax({
+        //             type: 'GET',
+        //             url: '{% url "get_units_of_measure" %}',
+        //             dataType: 'json',
+        //             data: { ItemNumber: ItemNumber },
+        //             success: function (response) {
+        //                 let options = '';
+        //                 for (var i = 0; i < response.value.length; i++) {
+        //                     if (response.value[i].Item_No_ == ItemNumber) {
+        //                         options += `<option value="${response.value[i].Code}">
+        //                     ${response.value[i].Code} - (${response.value[i].Qty__per_Unit_of_Measure} PER ${response.value[i].Code})
+        //                 </option>`;
+        //                     }
+        //                 }
+        //                 $("#formAdd select[name='Unit_of_Measure']").find('.after').after(options);
+        //             },
+        //             error: function () { console.log('Failed to load units'); }
+        //         });
+        //     } else {
+        //         $("#formAdd select[name='Unit_of_Measure']").find('.after').nextAll().remove();
+        //     }
+        // });
+
+       
     });
 </script>
 

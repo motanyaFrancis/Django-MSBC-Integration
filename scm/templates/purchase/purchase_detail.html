@@ -909,7 +909,7 @@ Purchase Request - {{res.No_}}
         $(document).on('submit', '.attachmentDeleteForm', function (e) {
             e.preventDefault();
 
-            if (!confirm('Delete this attachment?')) return;
+            if (!confirm('Are you sure you want to delete this attachment?')) return;
 
             var $form = $(this);
             var $btn = $form.find('button[type=submit]');
