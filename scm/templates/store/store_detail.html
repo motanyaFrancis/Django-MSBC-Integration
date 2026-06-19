@@ -53,7 +53,13 @@ Store Request - {{res.No_}}
 
                     <div class="d-flex flex-wrap gap-2">
                         {% if res.Status == "Open" %}
-                        <button class="btn btn-primary text-white" data-bs-toggle="modal" data-bs-target="#Attachment">
+                        <button
+                            class="btn btn-primary text-white"
+                            data-bs-toggle="modal"
+                            data-bs-target="#attachmentModal"
+                            data-upload-url="{% url 'upload_store_attachment' res.No_ %}"
+                            data-doc-no="{{ res.No_ }}"
+                            data-table-name="Store Request">
                             <i class="mdi mdi-paperclip me-1"></i>
                             Upload Attachment
                         </button>
@@ -612,40 +618,6 @@ Store Request - {{res.No_}}
 <!-- ============================================================================
      MODALS
      ============================================================================ -->
-
-<!-- ATTACHMENT UPLOAD MODAL -->
-<div class="modal fade" id="Attachment" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Upload Attachment</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="" enctype="multipart/form-data" method="post"
-                    action='{% url "upload_store_attachment" res.No_ %}'>
-                    {% csrf_token %}
-                    <input type="hidden" name="request_no" value="{{ res.No_ }}">
-                    <div class="mb-3">
-                        <label class="form-label">Select File</label>
-                        <input type="file" class="form-control" name="file_upload" id="fileInput"
-                            accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.txt,.ppt,.pptx" required>
-                    </div>
-                    <div id="uploadProgress" class="d-none mb-3">
-                        <div class="progress">
-                            <div class="progress-bar" id="progressBar" style="width: 0%"></div>
-                        </div>
-                        <small class="text-muted" id="progressText">Uploading...</small>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary" id="uploadBtn">Upload</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- STORE REQUEST LINES MODAL -->
 <div class="modal fade" id="employeeModal" tabindex="-1" aria-hidden="true">

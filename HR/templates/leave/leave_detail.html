@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 {% load static %}
 
-{% block title %}Leave Request Details{% endblock %}
+{% block title %}Leave Request - {{ res.Application_No }}{% endblock %}
 
 {% block content %}
 
@@ -36,11 +36,11 @@
                         </nav>
 
                         <h3 class="fw-bold mb-1">
-                            Leave Request Details
+                            Leave Request 
                         </h3>
 
                         <p class="text-muted mb-0">
-                            View and manage leave request information
+                            View, modify and manage leave request information
                         </p>
                     </div>
 
@@ -48,20 +48,26 @@
                         
 
                         {% if res.Status == "Open" %}
-                        <button class="btn btn-primary text-white" data-bs-toggle="modal" data-bs-target="#Attachment">
+                        <button
+                            class="btn btn-primary text-white"
+                            data-bs-toggle="modal"
+                            data-bs-target="#attachmentModal"
+                            data-upload-url="{% url 'Leave_Attachments' res.Application_No %}"
+                            data-doc-no="{{ res.Application_No }}"
+                            data-table-name="Leave">
                             <i class="mdi mdi-paperclip me-1"></i>
                             Upload Attachment
                         </button>
                         {% endif %}
 
                         {% if res.Status == "Released" %}
-                        <form action="" method="post">
+                        <!-- <form action="" method="post">
                             {% csrf_token %}
                             <button class="btn btn-success">
                                 <i class="mdi mdi-download me-1"></i>
                                 Preview Report
                             </button>
-                        </form>
+                        </form> -->
                         {% endif %}
 
                     </div>
@@ -553,44 +559,6 @@
     </div>
 </div>
 
-<!-- ============================================================================
-     MODALS
-     ============================================================================ -->
-
-<!-- ATTACHMENT UPLOAD MODAL -->
-<div class="modal fade" id="Attachment" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Upload Attachment</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="" enctype="multipart/form-data" method="post"
-                    action='{% url "Leave_Attachments" res.Application_No %}'>
-                    {% csrf_token %}
-                    <input type="hidden" name="request_no" value="{{ res.Application_No }}">
-                    <div class="mb-3">
-                        <label class="form-label">Select File</label>
-                        <input type="file" class="form-control" name="attachments" id="fileInput"
-                            accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.txt,.ppt,.pptx" required>
-                    </div>
-                    <div id="uploadProgress" class="d-none mb-3">
-                        <div class="progress">
-                            <div class="progress-bar" id="progressBar" style="width: 0%"></div>
-                        </div>
-                        <small class="text-muted" id="progressText">Uploading...</small>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary" id="uploadBtn">Upload</button>
-                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
 <script>
@@ -836,6 +804,7 @@
                 }
             });
         });
+        
         /* ── MODIFY LEAVE ──────────────────────────────────────────────── */
 
         var editMode = false;

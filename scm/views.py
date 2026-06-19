@@ -266,7 +266,6 @@ class PurchaseDetails(
             return redirect("purchase_details", pk=pk,)
 
 
-
 class UploadPurchaseAttachment(
     AuthRequiredMixin,
     SessionMixin,
@@ -278,7 +277,7 @@ class UploadPurchaseAttachment(
 
     async def post(self, request, pk):
         try:
-            attachments = request.FILES.getlist("file_upload")
+            attachments = request.FILES.getlist("attachments")
 
             table_id = 52177432
             user_id = request.session["User_ID"]
@@ -295,34 +294,25 @@ class UploadPurchaseAttachment(
                 )
                 responses.append(response)
 
-            print(responses)
-            print(attachments)
-
-            if all(responses):
-                messages.success(
-                    request,
-                    f"Uploaded {len(attachments)} attachments successfully"
-                )
-                return redirect("purchase_details", pk=pk)
-
-            messages.error(request, "Some attachments failed to upload.")
-            return redirect("purchase_details", pk=pk)
+            return JsonResponse({
+                "success": True,
+                "message": f"{len(attachments)} file(s) uploaded successfully",
+            })
 
         except Exception as e:
             logging.exception(e)
-            messages.error(request, f"An error Occured: {e}")
-            return redirect("purchase_details", pk=pk)
+            return JsonResponse({"success": False, "error": str(e)})
 
 
 class DeletePurchaseAttachment(
-     AuthRequiredMixin,
+    AuthRequiredMixin,
         SessionMixin,
         ODataMixin,
         SOAPMixin,
         ResponseMixin,
         View,
 ):
-    
+
     async def post(self, request, pk):
         try:
             session = self.get_session_context(request)
@@ -332,100 +322,59 @@ class DeletePurchaseAttachment(
 
             response = self.call_soap(
                 soap_method="FnDeleteDocumentAttachment",
-                params=[                    
-                    pk,
-                    docID,
-                    tableID,
-                ],
+                params=[pk, docID, tableID,],
             )
-
             if response is True:
-                messages.success(request, "Action completed successfully",)
-                return redirect("purchase_details", pk=pk,)
+                return JsonResponse({"success": True, "message": "Attachment deleted successfully", })
 
-            messages.error(request, f"{response}",)
-            return redirect("purchase_details", pk=pk,)
+            return JsonResponse({"success": False, "error": str(response), })
 
         except Exception as e:
             logging.exception(e)
-            messages.error(request, f"Failed to deletethe line: {e}",)
-            return redirect("purchase_details", pk=pk,)
+            return JsonResponse({
+                "success": False,
+                "error": f"Failed to delete attachment: {e}",
+            })
 
 
-
-
-class PurchaseApproval(
-    AuthRequiredMixin,
-    SessionMixin,
-    ODataMixin,
-    SOAPMixin,
-    ResponseMixin,
-    View,
-):
+class PurchaseApproval(AuthRequiredMixin, SessionMixin, ODataMixin, SOAPMixin, ResponseMixin, View):
     async def post(self, request, pk):
         try:
             session = self.get_session_context(request)
             user_id = session.get("User_ID")
-
             response = self.call_soap(
                 soap_method="FnRequestInternalRequestApproval",
-                params=[
-                    user_id,
-                    pk,
-                ],
+                params=[user_id, pk,],
             )
-
             if response is True:
-                messages.success(request, "Action completed successfully",)
-                return redirect("purchase_details", pk=pk,)
-
-            messages.error(request, f"{response}",)
-            return redirect("purchase_details", pk=pk,)
-
+                return JsonResponse({"success": True, "message": "Approval requested successfully"})
+            return JsonResponse({"success": False, "error": str(response)})
         except Exception as e:
             logging.exception(e)
-            messages.error(request, f"Failed to process approval action: {e}",)
-            return redirect("purchase_details", pk=pk,)
+            return JsonResponse({"success": False, "error": str(e)})
 
 
-class CancelPurchaseApproval(
-    AuthRequiredMixin,
-    SessionMixin,
-    ODataMixin,
-    SOAPMixin,
-    ResponseMixin,
-    View,
-):
+class CancelPurchaseApproval(AuthRequiredMixin, SessionMixin, ODataMixin, SOAPMixin, ResponseMixin, View):
     async def post(self, request, pk):
         try:
             session = self.get_session_context(request)
             user_id = session.get("User_ID")
-
             response = self.call_soap(
                 soap_method="FnCancelInternalRequestApproval",
-                params=[
-                    user_id,
-                    pk,
-                ],
+                params=[user_id, pk],
             )
-
             if response is True:
-                messages.success(request, "Action completed successfully",)
-                return redirect("purchase_details", pk=pk,)
-
-            messages.error(request, f"{response}",)
-            return redirect("purchase_details", pk=pk,)
-
+                return JsonResponse({"success": True, "message": "Approval cancelled successfully"})
+            return JsonResponse({"success": False, "error": str(response)})
         except Exception as e:
             logging.exception(e)
-            messages.error(
-                request, f"Failed to cancel process approval action: {e}",)
-            return redirect("purchase_details", pk=pk,)
+            return JsonResponse({"success": False, "error": str(e)})
 
 
 """
 
 """
+
 
 class StoreRequest(
     AuthRequiredMixin,
@@ -715,14 +664,14 @@ class UploadStoreAttachment(
 
 
 class DeleteStoreAttachment(
-     AuthRequiredMixin,
+    AuthRequiredMixin,
         SessionMixin,
         ODataMixin,
         SOAPMixin,
         ResponseMixin,
         View,
 ):
-    
+
     async def post(self, request, pk):
         try:
             session = self.get_session_context(request)
@@ -732,7 +681,7 @@ class DeleteStoreAttachment(
 
             response = self.call_soap(
                 soap_method="FnDeleteDocumentAttachment",
-                params=[                    
+                params=[
                     pk,
                     docID,
                     tableID,
@@ -750,7 +699,6 @@ class DeleteStoreAttachment(
             logging.exception(e)
             messages.error(request, f"Failed to deletethe line: {e}",)
             return redirect("store_details", pk=pk,)
-
 
 
 class DeleteStoreLine(
@@ -774,7 +722,7 @@ class DeleteStoreLine(
 
             response = self.call_soap(
                 soap_method="FnDeleteStoreRequisitionLine",
-                params=[                    
+                params=[
                     pk,
                     lineNo,
                 ],
@@ -793,70 +741,35 @@ class DeleteStoreLine(
             return redirect("store_details", pk=pk,)
 
 
-class StoreApproval(
-    AuthRequiredMixin,
-    SessionMixin,
-    ODataMixin,
-    SOAPMixin,
-    ResponseMixin,
-    View,
-):
+class StoreApproval(AuthRequiredMixin, SessionMixin, ODataMixin, SOAPMixin, ResponseMixin, View):
     async def post(self, request, pk):
         try:
             session = self.get_session_context(request)
             user_id = session.get("User_ID")
-
             response = self.call_soap(
                 soap_method="FnRequestInternalRequestApproval",
-                params=[
-                    user_id,
-                    pk,
-                ],
+                params=[user_id, pk,],
             )
-
             if response is True:
-                messages.success(request, "Action completed successfully",)
-                return redirect("store_details", pk=pk,)
-
-            messages.error(request, f"{response}",)
-            return redirect("store_details", pk=pk,)
-
+                return JsonResponse({"success": True, "message": "Approval requested successfully"})
+            return JsonResponse({"success": False, "error": str(response)})
         except Exception as e:
             logging.exception(e)
-            messages.error(request, f"Failed to process approval action: {e}",)
-            return redirect("store_details", pk=pk,)
+            return JsonResponse({"success": False, "error": str(e)})
 
 
-class CancelStoreApproval(
-    AuthRequiredMixin,
-    SessionMixin,
-    ODataMixin,
-    SOAPMixin,
-    ResponseMixin,
-    View,
-):
+class CancelStoreApproval(AuthRequiredMixin, SessionMixin, SOAPMixin, View):
     async def post(self, request, pk):
         try:
             session = self.get_session_context(request)
             user_id = session.get("User_ID")
-
             response = self.call_soap(
                 soap_method="FnCancelInternalRequestApproval",
-                params=[
-                    user_id,
-                    pk,
-                ],
+                params=[user_id, pk],
             )
-
             if response is True:
-                messages.success(request, "Action completed successfully",)
-                return redirect("store_details", pk=pk,)
-
-            messages.error(request, f"{response}",)
-            return redirect("store_details", pk=pk,)
-
+                return JsonResponse({"success": True, "message": "Approval cancelled successfully"})
+            return JsonResponse({"success": False, "error": str(response)})
         except Exception as e:
             logging.exception(e)
-            messages.error(
-                request, f"Failed to cancel process approval action: {e}",)
-            return redirect("store_details", pk=pk,)
+            return JsonResponse({"success": False, "error": str(e)})
