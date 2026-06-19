@@ -294,6 +294,7 @@ class UploadPurchaseAttachment(
                 )
                 responses.append(response)
 
+                print(responses)
             return JsonResponse({
                 "success": True,
                 "message": f"{len(attachments)} file(s) uploaded successfully",
@@ -627,7 +628,7 @@ class UploadStoreAttachment(
 
     async def post(self, request, pk):
         try:
-            attachments = request.FILES.getlist("file_upload")
+            attachments = request.FILES.getlist("attachments")
 
             table_id = 52177432
             user_id = request.session["User_ID"]
@@ -644,23 +645,15 @@ class UploadStoreAttachment(
                 )
                 responses.append(response)
 
-            print(responses)
-            print(attachments)
-
-            if all(responses):
-                messages.success(
-                    request,
-                    f"Uploaded {len(attachments)} attachments successfully"
-                )
-                return redirect("store_details", pk=pk)
-
-            messages.error(request, "Some attachments failed to upload.")
-            return redirect("store_details", pk=pk)
+                print(responses)
+            return JsonResponse({
+                "success": True,
+                "message": f"{len(attachments)} file(s) uploaded successfully",
+            })
 
         except Exception as e:
             logging.exception(e)
-            messages.error(request, f"An error Occured: {e}")
-            return redirect("store_details", pk=pk)
+            return JsonResponse({"success": False, "error": str(e)})
 
 
 class DeleteStoreAttachment(
@@ -681,24 +674,19 @@ class DeleteStoreAttachment(
 
             response = self.call_soap(
                 soap_method="FnDeleteDocumentAttachment",
-                params=[
-                    pk,
-                    docID,
-                    tableID,
-                ],
+                params=[pk, docID, tableID,],
             )
-
             if response is True:
-                messages.success(request, "Action completed successfully",)
-                return redirect("store_details", pk=pk,)
+                return JsonResponse({"success": True, "message": "Attachment deleted successfully", })
 
-            messages.error(request, f"{response}",)
-            return redirect("store_details", pk=pk,)
+            return JsonResponse({"success": False, "error": str(response), })
 
         except Exception as e:
             logging.exception(e)
-            messages.error(request, f"Failed to deletethe line: {e}",)
-            return redirect("store_details", pk=pk,)
+            return JsonResponse({
+                "success": False,
+                "error": f"Failed to delete attachment: {e}",
+            })
 
 
 class DeleteStoreLine(

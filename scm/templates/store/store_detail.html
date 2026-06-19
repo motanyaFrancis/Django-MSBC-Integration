@@ -517,30 +517,21 @@ Store Request - {{res.No_}}
                         <div class="card border-0 shadow-sm rounded-4 mb-4">
                             <div class="card-body p-4">
                                 <h5 class="fw-bold mb-4"> Request Actions </h5>
-
                                 {% if res.Status == "Open" %}
-                                <form action="{% url 'store_aproval' res.No_ %}" method="POST">
-                                    {% csrf_token %}
-
-                                    <button class="btn btn-info w-100 py-3 mb-3">
-                                        <i class="las la-paper-plane me-2"></i>
-                                        Request For Approval
-                                    </button>
-
-                                </form>
+                                <button id="requestApprovalBtn" class="btn btn-primary w-100 py-3 mb-3"
+                                    data-url="{% url 'store_aproval' res.No_ %}">
+                                    <i class="mdi mdi-send me-2"></i>
+                                    Request For Approval
+                                </button>                            
                                 {% endif %}
 
                                 {% if res.Status == "Pending Approval" %}
-                                <form action="{% url 'cancel_store_aproval' res.No_ %}" method="POST">
-                                    {% csrf_token %}
-
-                                    <button class="btn btn-outline-danger w-100 py-3">
-                                        <i class="las la-times-circle me-2"></i> Cancel Approval Request
-                                    </button>
-
-                                </form>
-                                {% endif %}
-
+                                <button id="cancelApprovalBtn" class="btn btn-outline-danger w-100 py-3"
+                                    data-url="{% url 'cancel_store_aproval' res.No_ %}">
+                                    <i class="mdi mdi-close-circle-outline me-2"></i>
+                                    Cancel Approval Request
+                                </button>                                
+                                {% endif %}            
                             </div>
 
                         </div>
@@ -690,6 +681,248 @@ Store Request - {{res.No_}}
 <script>
     $(document).ready(function () {
 
+         /* ── CSRF token from cookie ───────────────────────────────────── */
+        function csrf() {
+            var match = document.cookie.match(/csrftoken=([^;]+)/);
+            return match ? match[1] : '';
+        }
+
+        /* ── Toast helpers matching your message templates ────────────── */
+        function toastOk(msg) {
+            iziToast.success({
+                title: 'Success',
+                message: msg,
+                position: 'topCenter',
+                timeout: 4000,
+                theme: 'dark',
+                progressBarColor: '#ffffff',
+                backgroundColor: '#198754',
+                titleColor: '#fff',
+                messageColor: '#fff',
+                maxWidth: '400px',
+                transitionIn: 'fadeInDown',
+                transitionOut: 'fadeOutUp'
+            });
+        }
+
+        function toastErr(msg) {
+            iziToast.error({
+                title: 'Error',
+                message: msg,
+                position: 'topCenter',
+                timeout: 5000,
+                theme: 'dark',
+                progressBarColor: '#ffffff',
+                backgroundColor: '#dc3545',
+                titleColor: '#fff',
+                messageColor: '#fff',
+                maxWidth: '400px',
+                transitionIn: 'fadeInDown',
+                transitionOut: 'fadeOutUp'
+            });
+        }
+
+        function toastInfo(msg) {
+            iziToast.info({
+                title: 'Info',
+                message: msg,
+                position: 'topCenter',
+                timeout: 4000,
+                theme: 'dark',
+                progressBarColor: '#ffffff',
+                backgroundColor: '#0dcaf0',
+                titleColor: '#fff',
+                messageColor: '#fff',
+                maxWidth: '400px',
+                transitionIn: 'fadeInDown',
+                transitionOut: 'fadeOutUp'
+            });
+        }
+
+        /* ── Reload after delay ───────────────────────────────────────── */
+        function reloadAfter(ms) {
+            setTimeout(function () { location.reload(); }, ms || 1500);
+        }
+
+        /* ── REQUEST FOR APPROVAL ─────────────────────────────────────── */
+        $(document).on('click', '#requestApprovalBtn', function () {
+            var url = $(this).data('url');
+            var $btn = $(this);
+            
+            console.log('URL:', url); // Debug: Check if URL is populated
+
+            if (!url) {
+                console.error('data-url is empty!');
+                return;
+            }
+
+            $btn.prop('disabled', true)
+                .html('<span class="spinner-border spinner-border-sm me-2"></span>Sending...');
+
+            $.ajax({
+                type: 'POST',
+                url: url,
+                headers: { 'X-CSRFToken': csrf() },
+                data: {},
+
+                success: function (data) {
+                    if (data.success === true) {
+                        toastOk(data.message);
+                        reloadAfter(1600);
+                    } else {
+                        toastErr(data.error);
+                        $btn.prop('disabled', false)
+                            .html('<i class="mdi mdi-send me-2"></i>Request For Approval');
+                    }
+                },
+                error: function (xhr) {
+                    var msg = 'An unexpected error occurred';
+                    try { msg = xhr.responseJSON.error || msg; } catch (e) { }
+                    toastErr(msg);
+                    $btn.prop('disabled', false)
+                        .html('<i class="mdi mdi-send me-2"></i>Request For Approval');
+                }
+            });
+        });
+
+        /* ── CANCEL APPROVAL ──────────────────────────────────────────── */
+        $(document).on('click', '#cancelApprovalBtn', function () {
+            var url = $(this).data('url');
+            var $btn = $(this);
+
+            if (!confirm('Are you sure you want to cancel this approval request?')) return;
+
+            $btn.prop('disabled', true)
+                .html('<span class="spinner-border spinner-border-sm me-2"></span>Cancelling...');
+
+            $.ajax({
+                type: 'POST',
+                url: url,
+                headers: { 'X-CSRFToken': csrf() },
+                data: {},
+                success: function (data) {
+                    if (data.success === true) {
+                        toastOk(data.message);
+                        reloadAfter(1600);
+                    } else {
+                        toastErr(data.error);
+                        $btn.prop('disabled', false)
+                            .html('<i class="mdi-close-circle-outline me-2"></i>Cancel Approval Request');
+                    }
+                },
+                error: function (xhr) {
+                    var msg = 'An unexpected error occurred';
+                    try { msg = xhr.responseJSON.error || msg; } catch (e) { }
+                    toastErr(msg);
+                    $btn.prop('disabled', false)
+                        .html('<i class="mdi-close-circle-outline me-2"></i>Cancel Approval Request');
+                }
+            });
+        });
+
+          /* ── ATTACHMENT UPLOAD ────────────────────────────────────────── */
+        $(document).on('submit', '#Attachment form', function (e) {
+            e.preventDefault();
+
+            var files = $('#fileInput')[0].files;
+            if (!files.length) {
+                toastErr('Please select at least one file');
+                return;
+            }
+
+            var $form = $(this);
+            var $btn = $('#uploadBtn');
+            var $progress = $('#uploadProgress');
+            var $bar = $('#progressBar');
+            var $text = $('#progressText');
+
+            $btn.prop('disabled', true).text('Uploading...');
+            $progress.removeClass('d-none');
+            $bar.css('width', '0%');
+            $text.text('Uploading...');
+
+            var formData = new FormData();
+            for (var i = 0; i < files.length; i++) {
+                formData.append('attachments', files[i]);
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: $form.attr('action'),
+                headers: { 'X-CSRFToken': csrf() },
+                data: formData,
+                processData: false,
+                contentType: false,
+                xhr: function () {
+                    var xhr = new window.XMLHttpRequest();
+                    xhr.upload.addEventListener('progress', function (e) {
+                        if (e.lengthComputable) {
+                            var pct = Math.round((e.loaded / e.total) * 100);
+                            $bar.css('width', pct + '%');
+                            $text.text(pct + '%');
+                        }
+                    }, false);
+                    return xhr;
+                },
+                success: function (data) {
+                    $btn.prop('disabled', false).text('Upload');
+                    $progress.addClass('d-none');
+                    $('#fileInput').val('');
+
+                    if (data.success === true) {
+                        toastOk(data.message);
+                        $('#Attachment').modal('hide');
+                        reloadAfter(1200);
+                    } else {
+                        toastErr(data.error);
+                    }
+                },
+                error: function (xhr) {
+                    $btn.prop('disabled', false).text('Upload');
+                    $progress.addClass('d-none');
+                    var msg = 'Upload failed. Please try again.';
+                    try { msg = xhr.responseJSON.error || msg; } catch (e) { }
+                    toastErr(msg);
+                }
+            });
+        });
+
+        /* ── ATTACHMENT DELETE ────────────────────────────────────────── */
+        $(document).on('submit', '.attachmentDeleteForm', function (e) {
+            e.preventDefault();
+
+            if (!confirm('Delete this attachment?')) return;
+
+            var $form = $(this);
+            var $btn = $form.find('button[type=submit]');
+            $btn.prop('disabled', true);
+
+            $.ajax({
+                type: 'POST',
+                url: $form.attr('action'),
+                headers: { 'X-CSRFToken': csrf() },
+                data: {
+                    docID: $form.find('[name=docID]').val(),
+                    tableID: $form.find('[name=tableID]').val(),
+                },
+                success: function (data) {
+                    if (data.success === true) {
+                        toastOk(data.message);
+                        reloadAfter(1200);
+                    } else {
+                        toastErr(data.error);
+                        $btn.prop('disabled', false);
+                    }
+                },
+                error: function (xhr) {
+                    var msg = 'Delete failed. Please try again.';
+                    try { msg = xhr.responseJSON.error || msg; } catch (e) { }
+                    toastErr(msg);
+                    $btn.prop('disabled', false);
+                }
+            });
+        });
+
         // ====================================================================
         // DATE FORMATTING
         // ====================================================================
@@ -776,138 +1009,138 @@ Store Request - {{res.No_}}
             }
         });
 
-        // ====================================================================
-        // FILE UPLOAD HANDLING
-        // ====================================================================
+        // // ====================================================================
+        // // FILE UPLOAD HANDLING
+        // // ====================================================================
 
-        $('#attachmentForm').on('submit', function (e) {
-            e.preventDefault();
+        // $('#attachmentForm').on('submit', function (e) {
+        //     e.preventDefault();
 
-            const fileInput = $('#fileInput')[0];
-            if (!fileInput.files[0]) {
-                alert('Please select a file');
-                return;
-            }
+        //     const fileInput = $('#fileInput')[0];
+        //     if (!fileInput.files[0]) {
+        //         alert('Please select a file');
+        //         return;
+        //     }
 
-            const formData = new FormData(this);
-            $('#uploadBtn').prop('disabled', true);
-            $('#uploadProgress').removeClass('d-none');
-            $('#progressBar').css('width', '0%');
+        //     const formData = new FormData(this);
+        //     $('#uploadBtn').prop('disabled', true);
+        //     $('#uploadProgress').removeClass('d-none');
+        //     $('#progressBar').css('width', '0%');
 
-            $.ajax({
-                url: '{% url "upload_store_attachment" res.No_ %}',
-                type: 'POST',
-                data: formData,
-                contentType: false,
-                processData: false,
-                xhr: function () {
-                    const xhr = new window.XMLHttpRequest();
-                    xhr.upload.addEventListener('progress', function (e) {
-                        if (e.lengthComputable) {
-                            const pct = (e.loaded / e.total) * 100;
-                            $('#progressBar').css('width', pct + '%');
-                            $('#progressText').text('Uploading: ' + Math.round(pct) + '%');
-                        }
-                    });
-                    return xhr;
-                },
-                success: function (response) {
-                    if (response.success) {
-                        showAlert('File uploaded successfully!', 'success');
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('Attachment'));
-                        if (modal) modal.hide();
-                        setTimeout(() => location.reload(), 1000);
-                    } else {
-                        showAlert(response.message || 'Upload failed', 'error');
-                    }
-                    $('#uploadBtn').prop('disabled', false);
-                    $('#uploadProgress').addClass('d-none');
-                },
-                error: function (xhr) {
-                    showAlert(xhr.responseJSON?.message || 'An error occurred', 'error');
-                    $('#uploadBtn').prop('disabled', false);
-                    $('#uploadProgress').addClass('d-none');
-                }
-            });
-        });
-
-
-        // ====================================================================
-        // DELETE ATTACHMENT
-        // ====================================================================
-
-        $('#attachmentDeleteForm').on('submit', function (e) {
-            e.preventDefault();
-
-            const $form = $(this);
-            const $submitBtn = $('#submitBtn');
-            const originalBtnHtml = $submitBtn.html();
-
-            $('.is-invalid').removeClass('is-invalid');
-            $('.invalid-feedback').remove();
-            $('#formAlert').remove();
-
-            $submitBtn.prop('disabled', true)
-                .html('<i class="fas fa-spinner fa-spin"></i> Submitting...');
+        //     $.ajax({
+        //         url: '{% url "upload_store_attachment" res.No_ %}',
+        //         type: 'POST',
+        //         data: formData,
+        //         contentType: false,
+        //         processData: false,
+        //         xhr: function () {
+        //             const xhr = new window.XMLHttpRequest();
+        //             xhr.upload.addEventListener('progress', function (e) {
+        //                 if (e.lengthComputable) {
+        //                     const pct = (e.loaded / e.total) * 100;
+        //                     $('#progressBar').css('width', pct + '%');
+        //                     $('#progressText').text('Uploading: ' + Math.round(pct) + '%');
+        //                 }
+        //             });
+        //             return xhr;
+        //         },
+        //         success: function (response) {
+        //             if (response.success) {
+        //                 showAlert('File uploaded successfully!', 'success');
+        //                 const modal = bootstrap.Modal.getInstance(document.getElementById('Attachment'));
+        //                 if (modal) modal.hide();
+        //                 setTimeout(() => location.reload(), 1000);
+        //             } else {
+        //                 showAlert(response.message || 'Upload failed', 'error');
+        //             }
+        //             $('#uploadBtn').prop('disabled', false);
+        //             $('#uploadProgress').addClass('d-none');
+        //         },
+        //         error: function (xhr) {
+        //             showAlert(xhr.responseJSON?.message || 'An error occurred', 'error');
+        //             $('#uploadBtn').prop('disabled', false);
+        //             $('#uploadProgress').addClass('d-none');
+        //         }
+        //     });
+        // });
 
 
-            $.ajax({
-                url: $form.attr('action') || window.location.href,
-                type: 'POST',
-                data: $form.serialize(),
-                headers: {
-                    'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val()
-                },
-                dataType: 'json',
+        // // ====================================================================
+        // // DELETE ATTACHMENT
+        // // ====================================================================
 
-                success: function (response) {
-                    if (response.success) {
-                        showAlert('Attachment deleted successfully', 'success');
-                        setTimeout(() => {
-                            location.reload();
-                        }, 1000);
-                    } else {
-                        showAlert(response.message || 'Deletion failed', 'error');
-                    }
-                },
-                error: function () {
-                    showAlert('An error occurred', 'error');
-                }
-            });
+        // $('#attachmentDeleteForm').on('submit', function (e) {
+        //     e.preventDefault();
 
-        })
+        //     const $form = $(this);
+        //     const $submitBtn = $('#submitBtn');
+        //     const originalBtnHtml = $submitBtn.html();
 
-        $(document).on('click', '.delete-attachment', function () {
-            if (confirm('Are you sure you want to delete this attachment?')) {
-                const attachmentId = $(this).data('attachment-id');
-                const attachmentTableId = $(this).data('attachment-table-id');
-                const requestNo = $(this).data('request-no');
+        //     $('.is-invalid').removeClass('is-invalid');
+        //     $('.invalid-feedback').remove();
+        //     $('#formAlert').remove();
 
-                $.ajax({
-                    url: '{% url "delete_store_attachment" "0" %}'.replace('0', attachmentId),
-                    type: 'POST',
-                    data: {
-                        'csrfmiddlewaretoken': $('[name="csrfmiddlewaretoken"]').val(),
-                        'docID': requestNo,
-                        'docID': attachmentTableId,
+        //     $submitBtn.prop('disabled', true)
+        //         .html('<i class="fas fa-spinner fa-spin"></i> Submitting...');
 
-                    },
-                    success: function (response) {
-                        if (response.success) {
-                            showAlert('Attachment deleted successfully', 'success');
-                            setTimeout(() => {
-                                location.reload();
-                            }, 1000);
-                        } else {
-                            showAlert(response.message || 'Deletion failed', 'error');
-                        }
-                    },
-                    error: function () {
-                        showAlert('An error occurred', 'error');
-                    }
-                });
-            }
-        });
+
+        //     $.ajax({
+        //         url: $form.attr('action') || window.location.href,
+        //         type: 'POST',
+        //         data: $form.serialize(),
+        //         headers: {
+        //             'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val()
+        //         },
+        //         dataType: 'json',
+
+        //         success: function (response) {
+        //             if (response.success) {
+        //                 showAlert('Attachment deleted successfully', 'success');
+        //                 setTimeout(() => {
+        //                     location.reload();
+        //                 }, 1000);
+        //             } else {
+        //                 showAlert(response.message || 'Deletion failed', 'error');
+        //             }
+        //         },
+        //         error: function () {
+        //             showAlert('An error occurred', 'error');
+        //         }
+        //     });
+
+        // })
+
+        // $(document).on('click', '.delete-attachment', function () {
+        //     if (confirm('Are you sure you want to delete this attachment?')) {
+        //         const attachmentId = $(this).data('attachment-id');
+        //         const attachmentTableId = $(this).data('attachment-table-id');
+        //         const requestNo = $(this).data('request-no');
+
+        //         $.ajax({
+        //             url: '{% url "delete_store_attachment" "0" %}'.replace('0', attachmentId),
+        //             type: 'POST',
+        //             data: {
+        //                 'csrfmiddlewaretoken': $('[name="csrfmiddlewaretoken"]').val(),
+        //                 'docID': requestNo,
+        //                 'docID': attachmentTableId,
+
+        //             },
+        //             success: function (response) {
+        //                 if (response.success) {
+        //                     showAlert('Attachment deleted successfully', 'success');
+        //                     setTimeout(() => {
+        //                         location.reload();
+        //                     }, 1000);
+        //                 } else {
+        //                     showAlert(response.message || 'Deletion failed', 'error');
+        //                 }
+        //             },
+        //             error: function () {
+        //                 showAlert('An error occurred', 'error');
+        //             }
+        //         });
+        //     }
+        // });
 
         // ====================================================================
         // UTILITY FUNCTIONS
