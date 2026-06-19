@@ -312,8 +312,12 @@
                             </div>
                         </div>
 
-                        <!-- ATTACHMENTS + COMMENTS unchanged UI -->
-                        <!-- (kept exactly as you provided) -->
+                       
+
+                    </div>
+                    <!-- RIGHT SIDE -->
+                    <div class="col-lg-4">
+                
                           <!-- ATTACHMENTS SECTION -->
                         <div class="card border-0 shadow-sm rounded-4 mb-4">
                             <div class="card-header bg-white border-0 pt-4 px-4">
@@ -342,7 +346,7 @@
                                         <thead class="table-light">
                                             <tr>
                                                 <th>File Name</th>
-                                                <th>Type</th>
+                                                <!-- <th>Type</th> -->
                                                 {% if res.Status == "Open" %}
                                                 <th class="text-center">Action</th>
                                                 {% endif %}
@@ -354,14 +358,14 @@
                                                 <td>
                                                     <div class="d-flex align-items-center">
                                                         <i class="mdi mdi-file-pdf-box me-2 fs-5"></i>
-                                                        <span class="fw-semibold">{{ attachment.File_Name }}</span>
+                                                        <span class="fw-semibold">{{ attachment.File_Name }}.{{ attachment.File_Type }}</span>
                                                     </div>
                                                 </td>
-                                                <td>
+                                                <!-- <td>
                                                     <span class="badge bg-light text-dark">
                                                         {{ attachment.File_Type }}
                                                     </span>
-                                                </td>
+                                                </td> -->
 
                                                 {% if res.Status == "Open" %}
                                                 <td class="text-center">
@@ -404,35 +408,10 @@
                                 {% endif %}
                             </div>
                         </div>
-
-                    </div>
-                    <!-- RIGHT SIDE -->
-                    <div class="col-lg-4">
-
-                        <!-- ACTIONS -->
-                        <div class="card border-0 shadow-sm rounded-4 mb-4">
-                            <div class="card-body p-4">
-                                <h5 class="fw-bold mb-4"> Request Actions </h5>
-                                {% if res.Status == "Open" %}
-                                <button id="requestApprovalBtn" class="btn btn-primary w-100 py-3 mb-3"
-                                    data-url="{% url 'leave_approval' res.Application_No %}">
-                                    <i class="mdi mdi-send me-2"></i>
-                                    Request For Approval
-                                </button>
-                                {% endif %}
                         
-                                {% if res.Status == "Pending Approval" %}
-                                <button id="cancelApprovalBtn" class="btn btn-outline-danger w-100 py-3"
-                                    data-url="{% url 'cancel_leave_approval' res.Application_No %}">
-                                    <i class="mdi-close-circle-outline me-2"></i>
-                                    Cancel Approval Request
-                                </button>
-                                {% endif %}
-                            </div>
-                        </div>
 
                         <!-- TIMELINE -->
-                        <div class="card border-0 shadow-sm rounded-4">
+                        <div class="card border-0 shadow-sm rounded-4 mb-4">
                             <div class="card-body p-4">
                                 <h5 class="fw-bold mb-4">
                                     Request Timeline
@@ -483,6 +462,28 @@
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- ACTIONS -->
+                        <div class="card border-0 shadow-sm rounded-4 mb-4">
+                            <div class="card-body p-4">
+                                <h5 class="fw-bold mb-4"> Request Actions </h5>
+                                {% if res.Status == "Open" %}
+                                <button id="requestApprovalBtn" class="btn btn-primary w-100 py-3 mb-3"
+                                    data-url="{% url 'leave_approval' res.Application_No %}">
+                                    <i class="mdi mdi-send me-2"></i>
+                                    Request For Approval
+                                </button>
+                                {% endif %}
+                        
+                                {% if res.Status == "Pending Approval" %}
+                                <button id="cancelApprovalBtn" class="btn btn-outline-danger w-100 py-3"
+                                    data-url="{% url 'cancel_leave_approval' res.Application_No %}">
+                                    <i class="mdi-close-circle-outline me-2"></i>
+                                    Cancel Approval Request
+                                </button>
+                                {% endif %}
                             </div>
                         </div>
                     </div>

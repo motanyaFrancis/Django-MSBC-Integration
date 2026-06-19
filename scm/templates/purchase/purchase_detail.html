@@ -384,6 +384,12 @@ Purchase Request - {{res.No_}}
                             </div>
                         </div>
 
+                      
+                    </div>
+
+                    <!-- RIGHT SIDE -->
+                    <div class="col-lg-4">
+
                         <!-- ATTACHMENTS SECTION -->
                         <div class="card border-0 shadow-sm rounded-4 mb-4">
                             <div class="card-header bg-white border-0 pt-4 px-4">
@@ -412,7 +418,7 @@ Purchase Request - {{res.No_}}
                                         <thead class="table-light">
                                             <tr>
                                                 <th>File Name</th>
-                                                <th>Type</th>
+                                                <!-- <th>Type</th> -->
                                                 {% if res.Status == "Open" %}
                                                 <th class="text-center">Action</th>
                                                 {% endif %}
@@ -424,14 +430,14 @@ Purchase Request - {{res.No_}}
                                                 <td>
                                                     <div class="d-flex align-items-center">
                                                         <i class="mdi mdi-file-pdf-box me-2 fs-5"></i>
-                                                        <span class="fw-semibold">{{ attachment.File_Name }}</span>
+                                                        <span class="fw-semibold">{{ attachment.File_Name }}{{ attachment.File_Type }}.</span>
                                                     </div>
                                                 </td>
-                                                <td>
+                                                <!-- <td>
                                                     <span class="badge bg-light text-dark">
                                                         {{ attachment.File_Type }}
                                                     </span>
-                                                </td>
+                                                </td> -->
 
                                                 {% if res.Status == "Open" %}
                                                 <td class="text-center">
@@ -478,10 +484,6 @@ Purchase Request - {{res.No_}}
                                 {% endif %}
                             </div>
                         </div>
-                    </div>
-
-                    <!-- RIGHT SIDE -->
-                    <div class="col-lg-4">
                         <!-- TIMELINE -->
                         <div class="card border-0 shadow-sm rounded-4  mb-4">
                             <div class="card-body p-4">
