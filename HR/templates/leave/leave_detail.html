@@ -45,6 +45,7 @@
                     </div>
 
                     <div class="d-flex flex-wrap gap-2">
+                        
 
                         {% if res.Status == "Open" %}
                         <button class="btn btn-primary text-white" data-bs-toggle="modal" data-bs-target="#Attachment">
@@ -178,39 +179,53 @@
                         <div class="card border-0 shadow-sm rounded-4 mb-4">
 
                             <div class="card-header bg-white border-0 pt-4 px-4">
-                                <div class="d-flex align-items-center">
+                                <div class="d-flex justify-content-between flex-wrap g-3">
 
-                                    <div class="bg-primary-subtle timeline-icon p-3 me-3">
-                                        <i class="mdi mdi-file-document text-primary fs-4"></i>
+                                    <div class="d-flex align-items-center mb-3">
+    
+                                        <div class="bg-primary-subtle timeline-icon p-3 me-3">
+                                            <i class="mdi mdi-file-document text-primary fs-4"></i>
+                                        </div>
+    
+                                        <div>
+                                            <h5 class="fw-bold mb-1">Leave Information</h5>
+                                            <small class="text-muted">Detailed leave request information</small>
+                                        </div>
+    
+                                        
                                     </div>
-
                                     <div>
-                                        <h5 class="fw-bold mb-1">Leave Information</h5>
-                                        <small class="text-muted">Detailed leave request information</small>
+                                        {% if res.Status == "Open" %}
+                                        <button id="editLeaveBtn" class="btn btn-outline-primary text-dark">
+                                            <i class="mdi mdi-pencil me-1"></i>
+                                            Edit Request
+                                        </button>
+                                        {% endif %}
                                     </div>
-
                                 </div>
                             </div>
 
                             <div class="card-body px-4 pb-4">
 
-                                <form action="{% url 'leave' %}" method="post">
+                                <form action="{% url 'leave' %}" method="post" id="modifyLeaveForm">
                                     {% csrf_token %}
-
+                                
                                     <input type="hidden" name="applicationNo" value="{{ res.Application_No }}">
                                     <input type="hidden" name="myAction" value="modify">
-
+                                    <input type="hidden" name="dimension3" value="{{ res.Dimension3|default:'' }}">
+                                
                                     <div class="row g-4">
-
+                                
                                         <div class="col-md-6">
                                             <label class="form-label fw-semibold">Leave Period</label>
-                                            <input type="text" class="form-control"
-                                                value="{{ res.Leave_Period|default:'-' }}" disabled>
+                                            <input type="text" class="form-control" value="{{ res.Leave_Period|default:'-' }}" disabled>
                                         </div>
-
+                                
                                         <div class="col-md-6">
-                                            <label class="form-label fw-semibold">Leave Type</label>
-                                            <select class="form-select" disabled>
+                                            <label class="form-label fw-semibold">
+                                                Leave Type <span class="text-danger edit-only d-none">*</span>
+                                            </label>
+                                            <select class="form-select detail-field" name="leaveType" disabled>
                                                 {% for type in leave %}
                                                 <option value="{{ type.Code }}" {% if type.Code == res.Leave_Code %}selected{% endif %}>
                                                     {{ type.Description }}
@@ -218,55 +233,53 @@
                                                 {% endfor %}
                                             </select>
                                         </div>
-
+                                
                                         <div class="col-md-6">
-                                            <label class="form-label fw-semibold">Start Date</label>
-                                            <input type="date" class="form-control" id="start_date"
+                                            <label class="form-label fw-semibold">
+                                                Start Date <span class="text-danger edit-only d-none">*</span>
+                                            </label>
+                                            <input type="date" class="form-control detail-field" name="plannerStartDate" id="mod_start_date"
                                                 value="{{ res.Start_Date }}" disabled>
                                         </div>
-
+                                
                                         <div class="col-md-6">
-                                            <label class="form-label fw-semibold">Return Same Day</label>
-                                            <select class="form-select" disabled>
-                                                <option value="True" {% if res.Return_same_day %}selected{% endif %}>
-                                                    Yes
-                                                </option>
-                                                <option value="False" {% if not res.Return_same_day %}selected{% endif  %}>
-                                                    No
-                                                </option>
+                                            <label class="form-label fw-semibold">
+                                                Return Same Day <span class="text-danger edit-only d-none">*</span>
+                                            </label>
+                                            <select class="form-select detail-field" id="mod_isReturnSameDay" name="isReturnSameDay" disabled>
+                                                <option value="True" {% if res.Return_same_day %}selected{% endif %}>Yes</option>
+                                                <option value="False" {% if not res.Return_same_day %}selected{% endif %}>No</option>
                                             </select>
                                         </div>
-
+                                
                                         <div class="col-md-6">
                                             <label class="form-label fw-semibold">Days Applied</label>
-                                            <input type="number" class="form-control"
-                                                value="{{ res.Days_Applied|default:'0' }}" disabled>
+                                            <input type="number" class="form-control detail-field" name="daysApplied" id="mod_daysApplied"
+                                                value="{{ res.Days_Applied|default:'0' }}" min="0" step="0.5" disabled>
                                         </div>
-
+                                
                                         <div class="col-md-6">
                                             <label class="form-label fw-semibold">End Date</label>
-                                            <input type="text" class="form-control" id="end_date"
-                                                value="{{ res.End_Date }}" disabled>
+                                            <input type="text" class="form-control" value="{{ res.End_Date }}" disabled>
                                         </div>
-
+                                
                                         <div class="col-md-6">
                                             <label class="form-label fw-semibold">Resumption Date</label>
-                                            <input type="text" class="form-control" id="resumption_date"
-                                                value="{{ res.Resumption_Date}}" disabled>
+                                            <input type="text" class="form-control" value="{{ res.Resumption_Date }}" disabled>
                                         </div>
-
+                                
                                         <div class="col-md-6">
                                             <label class="form-label fw-semibold">Application Date</label>
-                                            <input type="text" class="form-control" id="application_date"
-                                                value="{{ res.Application_Date}}" disabled>
+                                            <input type="text" class="form-control" value="{{ res.Application_Date }}" disabled>
                                         </div>
-
+                                
                                         {% if HOD_User %}
                                         <div class="col-md-12">
-                                            <label class="form-label fw-semibold">Reliever</label>
-                                            <input type="text" class="form-control" id="application_date"
-                                                value="{{ res.Staff_Name_Relievers}}" disabled>
-                                            <select class="form-select" disabled hidden>
+                                            <label class="form-label fw-semibold">
+                                                Reliever <span class="text-danger edit-only d-none">*</span>
+                                            </label>
+                                            <select class="form-select detail-field" name="directorReliever" id="mod_directorReliever" disabled>
+                                                <option value="">— Select Reliever —</option>
                                                 {% for reliever in directorReliever %}
                                                 <option value="{{ reliever.No_ }}" {% if reliever.No_ == res.Staff_No_Relievers %}selected{% endif %}>
                                                     {{ reliever.First_Name }} {{ reliever.Last_Name }}
@@ -275,9 +288,19 @@
                                             </select>
                                         </div>
                                         {% endif %}
-
+                                
                                     </div>
-
+                                
+                                    <!-- Edit mode action bar — hidden until Edit is clicked -->
+                                    <div id="modifyActionBar" class="d-none mt-4 pt-3 border-top d-flex gap-2 justify-content-end">
+                                        <button type="button" id="cancelEditBtn" class="btn btn-outline-danger px-4">
+                                            <i class="mdi mdi-close me-1"></i> Cancel
+                                        </button>
+                                        <button type="submit" class="btn btn-primary px-5" id="saveModifyBtn">
+                                            <i class="mdi mdi-content-save me-1"></i> Save Changes
+                                        </button>
+                                    </div>
+                                
                                 </form>
 
                             </div>
@@ -560,7 +583,7 @@
                     </div>
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary" id="uploadBtn">Upload</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
                     </div>
                 </form>
             </div>
@@ -810,6 +833,119 @@
                     try { msg = xhr.responseJSON.error || msg; } catch (e) { }
                     toastErr(msg);
                     $btn.prop('disabled', false);
+                }
+            });
+        });
+        /* ── MODIFY LEAVE ──────────────────────────────────────────────── */
+
+        var editMode = false;
+
+        /* Fields that become editable — note: read-only display fields stay disabled */
+        var $editableFields = $('.detail-field');
+
+        $('#editLeaveBtn').on('click', function () {
+            editMode = true;
+
+            /* Unlock all editable detail fields */
+            $editableFields.prop('disabled', false);
+
+            /* Show required asterisks */
+            $('.edit-only').removeClass('d-none');
+
+            /* Show the save/cancel action bar */
+            $('#modifyActionBar').removeClass('d-none');
+
+            /* Change Edit button to indicate active edit state */
+            $(this)
+                .addClass('btn-warning')
+                .removeClass('btn-outline-danger')
+                .html('<i class="mdi mdi-pencil-off me-1"></i> Editing…')
+                .prop('disabled', true);
+
+            /* Sync daysApplied visibility with current Return Same Day value */
+            syncDaysField();
+        });
+
+        /* Return Same Day toggle while in edit mode */
+        $(document).on('change', '#mod_isReturnSameDay', function () {
+            syncDaysField();
+        });
+
+        function syncDaysField() {
+            var val = $('#mod_isReturnSameDay').val();
+            var $daysInput = $('#mod_daysApplied');
+            if (val === 'True') {
+                $daysInput.val(1).prop('disabled', true);
+            } else {
+                if (editMode) $daysInput.prop('disabled', false);
+            }
+        }
+
+        /* Cancel edit — restore all fields to disabled, hide bar */
+        $('#cancelEditBtn').on('click', function () {
+            editMode = false;
+            $editableFields.prop('disabled', true);
+            $('.edit-only').addClass('d-none');
+            $('#modifyActionBar').addClass('d-none');
+            $('#editLeaveBtn')
+                .removeClass('btn-warning')
+                .addClass('btn-outline-primary')
+                .html('<i class="mdi mdi-pencil me-1"></i> Edit Request')
+                .prop('disabled', false);
+        });
+
+        /* Submit modify via AJAX */
+        $('#modifyLeaveForm').on('submit', function (e) {
+            e.preventDefault();
+
+            /* Basic validation */
+            if (!$('select[name=leaveType]').val()) {
+                return toastErr('Please select a leave type.');
+            }
+            if (!$('#mod_start_date').val()) {
+                return toastErr('Please select a start date.');
+            }
+            if (!$('#mod_isReturnSameDay').val()) {
+                return toastErr('Please indicate if you return the same day.');
+            }
+
+            var $btn = $('#saveModifyBtn');
+            $btn.prop('disabled', true)
+                .html('<span class="spinner-border spinner-border-sm me-2"></span>Saving…');
+
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'leave' %}",
+                headers: { 'X-CSRFToken': csrf() },
+                data: {
+                    applicationNo: $('input[name=applicationNo]').val(),
+                    myAction: 'modify',
+                    dimension3: $('input[name=dimension3]').val(),
+                    leaveType: $('select[name=leaveType]').val(),
+                    plannerStartDate: $('#mod_start_date').val(),
+                    daysApplied: $('#mod_daysApplied').val() || 1,
+                    isReturnSameDay: $('#mod_isReturnSameDay').val(),
+                    directorReliever: $('#mod_directorReliever').val() || '',
+                },
+                success: function (data) {
+                    $btn.prop('disabled', false)
+                        .html('<i class="mdi mdi-content-save me-1"></i> Save Changes');
+
+                    if (data.response) {
+                        toastOk('Leave request updated successfully.');
+                        /* Exit edit mode then reload to reflect server-side recalculations */
+                        $('#cancelEditBtn').trigger('click');
+                        reloadAfter(1600);
+                    } else {
+                        toastErr(data.error || 'Could not save changes. Please try again.');
+                    }
+                },
+                error: function (xhr) {
+                    $btn.prop('disabled', false)
+                        .html('<i class="mdi mdi-content-save me-1"></i> Save Changes');
+                    var msg = 'An unexpected error occurred.';
+                    try { msg = xhr.responseJSON.error || msg; } catch (e) { }
+                    toastErr(msg);
                 }
             });
         });

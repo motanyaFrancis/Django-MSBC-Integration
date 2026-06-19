@@ -412,7 +412,11 @@
                         let status = row.Status;
                         let tr = `
                         <tr>
-                            <td>${row.Application_No}</td>
+                            <td>
+                                <a href="/leave/${row.Application_No}">
+                                    ${row.Application_No}
+                                </a>
+                            </td>
                             <td>${row.Leave_Code}</td>
                             <td>${row.Start_Date}</td>
                             <td>${row.Resumption_Date || '-'}</td>
@@ -420,7 +424,7 @@
                             <td>
                                 <a class="btn btn-primary text-white btn-sm"
                                    href="/leave/${row.Application_No}">
-                                    <i class="mdi mdi-folder-eye"></i> View
+                                    <i class="mdi mdi-folder-eye"></i> View...
                                 </a>
                             </td>
                         </tr>`;

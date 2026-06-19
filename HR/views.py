@@ -96,9 +96,6 @@ class LeaveRequest(
             employeeNo = session.get("Employee_No_")
             dimension3 = request.POST.get("dimension3")
             leaveType = request.POST.get("leaveType")
-            # plannerStartDate = datetime.strptime(request.POST.get("plannerStartDate"), "%Y-%m-%d").date()
-            date_obj = datetime.strptime('2026-06-22',  "%Y-%m-%d").date()
-            # plannerStartDate = date_obj.strftime("%Y-%m-%dT00:00:00Z")
             plannerStartDate = request.POST.get("plannerStartDate")
             daysApplied = request.POST.get("daysApplied")
             isReturnSameDay = eval(request.POST.get("isReturnSameDay"))
@@ -292,7 +289,7 @@ class LeaveDetail(
                         },
                         {
                             "endpoint": "/QyEmployees",
-                            "alias": "employees",
+                            "alias": "directorReliever",
                         },
                     ]
                 )
@@ -330,9 +327,6 @@ class LeaveDetail(
                 # "file": attachments,
                 # "Comments": comments,
                 # "leave": leave_types,
-                # "directorReliever": [
-                #     x for x in employees if x.get("User_ID") != user_id
-                # ],
             }
 
             return self.render_response(request, "leave/leave_detail.html", ctx)
