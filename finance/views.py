@@ -27,6 +27,10 @@ class ImprestRequisition(
     async def get(self, request):
         try:
             # return render(request, 'imprest/imprestRequisition.html')
+            session = self.get_session_context(request)
+            accountNo = session.get('Customer_No_')
+            responsibilityCenter = session.get("User_Responsibility_Center")
+            print(accountNo, responsibilityCenter)
             return self.render_response(request, "imprest/imprestRequisition.html")
         except Exception as e:
             print(e)
@@ -41,9 +45,8 @@ class ImprestRequisition(
             # soap_headers = session.get("soap_headers")
             imprestNo = request.POST.get("imprestNo")
             # accountNo = session.get("Customer_No_")
-            accountNo = "CUST000002"
-            # responsibilityCenter = session.get("User_Responsibility_Center")
-            responsibilityCenter = "FIN & IT"
+            accountNo = session.get('Customer_No_')
+            responsibilityCenter = session.get("User_Responsibility_Center")
             purpose = request.POST.get("purpose")
             personalNo = session.get("Employee_No_")
             myAction = request.POST.get("myAction")
@@ -95,7 +98,6 @@ class ImprestRequisitionData(AuthRequiredMixin, SessionMixin, ODataMixin, Respon
         try:
             session = self.get_session_context(request)
             user_id = session.get("User_ID")
-            print(user_id)
             employee_no = session.get("Employee_No_")
             async with aiohttp.ClientSession() as client:
                 (imprest, BudgetMemos, DimensionValues) = await asyncio.gather(
@@ -129,27 +131,28 @@ class ImprestDetail(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, 
             print(user_id)
             employee_no = session.get("Employee_No_")
             async with aiohttp.ClientSession() as client:
-                (imprest, BudgetMemos, DimensionValues) = await asyncio.gather(
+                (imprest, receiptsAndPaymentTypes, DimensionValues, destinations, approvals, getLines) = await asyncio.gather(
                     self.filter_data(endpoint="/QyImprests", field="No_", operator="eq", value=pk),
-                    self.filter_data(endpoint="/QyBudgetMemos", field="CreatedBy", operator="eq", value=user_id),
-                    self.all_data(endpoint="/QyDimensionValues")
+                    self.filter_data(endpoint="/QyReceiptsAndPaymentTypes", field="Type", operator="eq", value="Imprest"),
+                    self.all_data(endpoint="/QyDimensionValues"),
+                    self.all_data(endpoint="/QyDestinations"),
+                    self.filter_data(endpoint="/QyApprovalEntries", field="Document_No_", operator="eq", value=pk),
+                    self.all_data(endpoint="/QyImprestLines")
                 )
-            openImprest = [x for x in imprest if x["Status"] == "Open"]
-            pendingImprest = [x for x in imprest if x["Status"] == "Pending Approval"]
-            approvedImprest = [x for x in imprest if x["Status"] == "Released"]
-            memos = [x for x in BudgetMemos if x["Status"] == "Approved"]
+            rAndPTypes = [x for x in receiptsAndPaymentTypes]
+            destinations = [x for x in destinations]
+            lines = [x for x in getLines if x["AuxiliaryIndex1"] == pk]
             divisions = [x for x in DimensionValues if x["Global_Dimension_No_"] == 2]
             print(divisions)
             ctx = {
-                "openImprest": openImprest,
-                "pendingImprest": pendingImprest,
-                "approvedImprest": approvedImprest,
+                "res": imprest,
+                "Approvers": approvals
             }
             return render(request, "imprest/ImprestDetail.html", ctx)
         except Exception as e:
             print(e)
             messages.error(e)
-            return redirect('dashboard')
+            return redirect('ImprestRequisition')
 
 class ImprestSurrender(
     AuthRequiredMixin,

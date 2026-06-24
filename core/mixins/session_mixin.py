@@ -17,6 +17,7 @@ class SessionMixin:
             "HOD_User": request.session.get("HOD_User"),
             "Region": request.session.get("Region"),
             "User_Responsibility_Center": request.session.get("User_Responsibility_Center"),
+            "Customer_No_": request.session.get("Customer_No_"),
             "Employment_Type": request.session.get("Employment_Type"),
             "is_authenticated": request.session.get("is_authenticated", False),
             "Portal_Password": request.session.get("Portal_Password"),

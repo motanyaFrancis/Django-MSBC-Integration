@@ -9,7 +9,6 @@ class SessionService:
         email,
         extra=None,
     ):
-
         request.session["User_ID"] = user
         request.session["Employee_No_"] = employee
         request.session["full_name"] = full_name
