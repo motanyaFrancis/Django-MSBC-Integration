@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-Salary Advance - 
+Salary Advance - {{res.Loan_No}}
 {% endblock %}
 
 {% block content %}
@@ -23,30 +23,30 @@ Salary Advance -
 
                                 <li class="breadcrumb-item">
                                     <a href="{% url 'dashboard' %}">
-                                        <i class="ti-home me-1"></i>
+                                        <i class="mdi mdi-view-dashboard-variant me-1"></i>
                                         Dashboard
                                     </a>
                                 </li>
 
                                 <li class="breadcrumb-item">
-                                    <a href="{% url 'transfer' %}">
-                                        Transport Requests
+                                    <a href="{% url 'salary_advance' %}">
+                                        Salary Advance
                                     </a>
                                 </li>
 
                                 <li class="breadcrumb-item active">
-                                    {{res.TransferNo}}
+                                    {{res.Loan_No}}
                                 </li>
 
                             </ol>
                         </nav>
 
                         <h3 class="fw-bold mb-1">
-                            Employee Transfer Request Details
+                            Salary Advance Request
                         </h3>
 
                         <p class="text-muted mb-0">
-                            View and manage transfer request information
+                            View and manage advance request information
                         </p>
 
                     </div>
@@ -63,17 +63,7 @@ Salary Advance -
                         {% endif %}
 
                         {% if res.Status == "Released" %}
-                        <form action="{% url 'FnGenerateImprestReport' res.Request_No_ %}" method="POST">
-
-                            {% csrf_token %}
-
-                            <button class="btn btn-success">
-
-                                <i class="mdi mdi-download me-1"></i>
-                                Preview Report
-                            </button>
-
-                        </form>
+                        
                         {% endif %}
 
                     </div>
@@ -83,7 +73,7 @@ Salary Advance -
                 <!-- SUMMARY CARDS -->
                 <div class="row g-4 mb-4">
 
-                    <div class="col-xl-3 col-md-6">
+                    <div class="col-xl-4 col-md-6">
 
                         <div class="card border-0 shadow-sm rounded-4 h-100">
 
@@ -97,24 +87,24 @@ Salary Advance -
                                             Request Status
                                         </p>
 
-                                        {% if res.Status == "Open" %}
+                                        {% if res.Loan_Status == "Open" or res.Loan_Status == "Application" %}
                                         <span class="badge bg-info fs-6">
-                                            {{res.Status}}
+                                            {{res.Loan_Status}}
                                         </span>
 
-                                        {% elif res.Status == "Pending Approval" %}
+                                        {% elif res.Loan_Status == "Pending Approval" or res.Loan_Status == "Being Processed" %}
                                         <span class="badge bg-warning fs-6">
-                                            {{res.Status}}
+                                            {{res.Loan_Status}}
                                         </span>
 
-                                        {% elif res.Status == "Released" or res.Status == "Approved" %}
+                                        {% elif res.Loan_Status == "Released" or res.Loan_Status == "Approved" %}
                                         <span class="badge bg-success fs-6">
-                                            {{res.Status}}
+                                            {{res.Loan_Status}}
                                         </span>
 
                                         {% else %}
                                         <span class="badge bg-secondary fs-6">
-                                            {{res.Status}}
+                                            {{res.Loan_Status}}
                                         </span>
                                         {% endif %}
 
@@ -132,7 +122,7 @@ Salary Advance -
 
                     </div>
 
-                    <div class="col-xl-3 col-md-6">
+                    <div class="col-xl-4 col-md-6">
 
                         <div class="card border-0 shadow-sm rounded-4 h-100">
 
@@ -143,17 +133,17 @@ Salary Advance -
                                     <div>
 
                                         <p class="text-muted mb-2">
-                                            Requested Region
+                                            Requested Amount
                                         </p>
 
                                         <h5 class="fw-bold mb-0">
-                                            {{res.TransfertoRegionCode}}
+                                            {{res.Amount_Requested}}
                                         </h5>
 
                                     </div>
 
                                     <div class="bg-success-subtle timeline-icon p-3">
-                                        <i class="mdi mdi-map-marker text-success fs-3"></i>
+                                        <i class="mdi mdi-cash text-success fs-3"></i>
                                     </div>
 
                                 </div>
@@ -164,39 +154,9 @@ Salary Advance -
 
                     </div>
 
-                    <div class="col-xl-3 col-md-6">
+                   
 
-                        <div class="card border-0 shadow-sm rounded-4 h-100">
-
-                            <div class="card-body">
-
-                                <div class="d-flex align-items-center justify-content-between">
-
-                                    <div>
-
-                                        <p class="text-muted mb-2">
-                                            Requested Division
-                                        </p>
-
-                                        <h5 class="fw-bold mb-0" id="planned_start_date">
-                                            {{res.DivisionName}}
-                                        </h5>
-
-                                    </div>
-
-                                    <div class="bg-warning-subtle timeline-icon p-3">
-                                        <i class="mdi mdi-office-building-marker-outline text-warning fs-3"></i>
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div class="col-xl-3 col-md-6">
+                    <div class="col-xl-4 col-md-6">
 
                         <div class="card border-0 shadow-sm rounded-4 h-100">
 
@@ -211,7 +171,7 @@ Salary Advance -
                                         </p>
 
                                         <h5 class="fw-bold mb-0" id="planned_end_date">
-                                            {{res.Date}}
+                                            {{res.Application_Date}}
                                         </h5>
 
                                     </div>
@@ -249,11 +209,11 @@ Salary Advance -
 
                                     <div>
                                         <h5 class="fw-bold mb-1">
-                                            Transfer Information
+                                            Salary Advance Information
                                         </h5>
 
                                         <small class="text-muted">
-                                            Detailed transfer request information
+                                            Detailed advance request information
                                         </small>
                                     </div>
 
@@ -268,67 +228,56 @@ Salary Advance -
                                     <div class="col-md-4">
 
                                         <label class="form-label fw-semibold">
-                                            Employee NUmber
+                                            Employee Number
                                         </label>
 
                                         <input type="text" class="form-control" id="request_date"
-                                            value="{{res.EmployeeNo}}" disabled>
+                                            value="{{res.Employee_No}}" disabled>
                                     </div>
 
                                     <div class="col-md-4">
                                         <label class="form-label fw-semibold"> Employee Name </label>
-                                        <input type="text" class="form-control" value="{{res.EmployeeName}}" disabled>
+                                        <input type="text" class="form-control" value="{{res.Employee_Name}}" disabled>
                                     </div>
 
                                     <div class="col-md-4">
-                                        <label class="form-label fw-semibold"> Transfer Type </label>
+                                        <label class="form-label fw-semibold"> Loan Type </label>
                                         <input type="text" class="form-control" id="start_date"
-                                            value="{{res.TransferType}}" disabled>
+                                            value="{{res.Loan_Product_Type}}" disabled>
                                     </div>
 
                                     <div class="col-md-4">
-                                        <label class="form-label fw-semibold"> Transfer to Region Code </label>
+                                        <label class="form-label fw-semibold"> Loan Product Name </label>
                                         <input type="text" class="form-control" id="end_date"
-                                            value="{{res.TransfertoRegionCode}}" disabled>
+                                            value="{{res.Loan_Product_Name}}" disabled>
                                     </div>
 
                                     <div class="col-md-4">
-                                        <label class="form-label fw-semibold"> Transfer to Division  </label>
-                                        <input type="text" class="form-control" value="{{res.DivisionName}}" disabled>
+                                        <label class="form-label fw-semibold"> Instalments  </label>
+                                        <input type="text" class="form-control" value="{{res.Instalment}}" disabled>
                                     </div>
 
                                     <div class="col-md-4">
-                                        <label class="form-label fw-semibold"> Request Date </label>
-                                        <input type="text" class="form-control" value="{{res.Date}}" disabled>
+                                        <label class="form-label fw-semibold"> Repayment amount </label>
+                                        <input type="text" class="form-control" value="{{res.Repayment_Amount}}" disabled>
                                     </div>
                                     <div class="col-md-4">
-                                        <label class="form-label fw-semibold"> Requested By </label>
-                                        <input type="text" class="form-control" value="{{res.EmployeeNo}}" disabled>
+                                        <label class="form-label fw-semibold"> Interest Rate </label>
+                                        <input type="text" class="form-control" value="{{res.Interest_Rate}}" disabled>
                                     </div>
                                     <div class="col-md-4">
-                                        <label class="form-label fw-semibold"> Qualified for Allowance </label>
-                                        <input type="text" class="form-control" value="{{res.QualifiedforAllowance}}" disabled>
+                                        <label class="form-label fw-semibold"> Total Paid </label>
+                                        <input type="text" class="form-control" value="{{res.Total_Repayment}}" disabled>
                                     </div>
                                     <div class="col-md-4">
-                                        <label class="form-label fw-semibold"> Email </label>
-                                        <input type="text" class="form-control" value="{{res.Email}}" disabled>
+                                        <label class="form-label fw-semibold"> Period Repaid </label>
+                                        <input type="text" class="form-control" value="{{res.Period_Repayment}}" disabled>
                                     </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold"> HOD Employee Number </label>
-                                        <input type="text" class="form-control" value="{{res.HODEmployeeNo}}" disabled>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold"> HOD Name </label>
-                                        <input type="text" class="form-control" value="{{res.HODName}}" disabled>
+                                    <div class="col-md-12">
+                                        <label class="form-label fw-semibold"> Interest Calculation Method </label>
+                                        <input type="text" class="form-control" value="{{res.Interest_Calculation_Method}}" disabled>
                                     </div>
                                     
-                                    <div class="col-md-12">
-                                        <label class="form-label fw-semibold">
-                                            Reason for Transfer
-                                        </label>
-                                        <textarea class="form-control" rows="4"
-                                            disabled>{{res.ReasonofTransfer}}</textarea>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -349,8 +298,8 @@ Salary Advance -
                                                 <i class="mdi mdi-file-document text-white"></i>
                                             </div>
                                             <div>
-                                                <h6 class="fw-semibold mb-1"> Request Created </h6>
-                                                <small class="text-muted"> {{res.Date}} </small>
+                                                <h6 class="fw-semibold mb-1"> Application Created </h6>
+                                                <small class="text-muted"> {{res.Application_Date}} </small>
                                             </div>
                                         </div>
                                     </div>
@@ -362,7 +311,7 @@ Salary Advance -
                                             </div>
                                             <div>
                                                 <h6 class="fw-semibold mb-1"> Current Status </h6>
-                                                <small class="text-muted"> {{res.Status}} </small>
+                                                <small class="text-muted"> {{res.Loan_Status}} </small>
                                             </div>
                                         </div>
                                     </div>
@@ -373,8 +322,8 @@ Salary Advance -
                                                 <i class="mdi mdi-calendar-check text-white"></i>
                                             </div>
                                             <div>
-                                                <h6 class="fw-semibold mb-1"> Planned Transfer Date </h6>
-                                                <small class="text-muted"> {{res.TransferDate}} </small>
+                                                <h6 class="fw-semibold mb-1"> Issued Date </h6>
+                                                <small class="text-muted"> {{res.Issued_Date}} </small>
                                             </div>
                                         </div>
                                     </div>
@@ -386,29 +335,20 @@ Salary Advance -
                             <div class="card-body p-4">
                                 <h5 class="fw-bold mb-4"> Request Actions </h5>
 
-                                {% if res.Status == "New" %}
-                                <form action="{% url 'submit_transfer' %}" method="POST">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="myAction" value="requestApproval">
-                                    <input type="hidden" hidden name="TransferNo" value="{{res.TransferNo}}">
-                                    <button class="btn btn-primary w-100 py-3 mb-3">
-                                        <i class="las la-paper-plane me-2"></i>
-                                        Request For Approval
-                                    </button>
-
-                                </form>
+                                {% if res.Loan_Status == "New" or res.Loan_Status == "Application" %}
+                                <button id="requestApprovalBtn" class="btn btn-primary w-100 py-3 mb-3"
+                                    data-url="{% url 'request_salary_advance_approval' res.Loan_No %}">
+                                    <i class="mdi mdi-send me-2"></i>
+                                    Request For Approval
+                                </button>
                                 {% endif %}
 
-                                {% if res.Status == "Pending Approval" %}
-                                <form action="{% url 'submit_transfer' %}" method="POST">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="myAction" value="cancelApproval">
-                                    <input type="hidden" hidden name="TransferNo" value="{{res.TransferNo}}">
-                                    <button class="btn btn-outline-danger w-100 py-3">
-                                        <i class="las la-times-circle me-2"></i> Cancel Approval Request
-                                    </button>
-
-                                </form>
+                                {% if res.Status == "Pending Approval" or res.Loan_Status == "Being Processed"%}
+                                <button id="cancelApprovalBtn" class="btn btn-outline-danger w-100 py-3"
+                                    data-url="{% url 'cancel_salary_advance_approval' res.Loan_No %}">
+                                    <i class="mdi-close-circle-outline me-2"></i>
+                                    Cancel Approval Request
+                                </button>
                                 {% endif %}
 
                             </div>
@@ -487,68 +427,255 @@ Salary Advance -
     </div>
 </div>
 
-<style>
-    .timeline-icon {
-        width: 42px;
-        height: 42px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-    }
-
-    .form-control,
-    .form-select {
-        min-height: 48px;
-        border-radius: 12px;
-    }
-
-    .card {
-        transition: all 0.3s ease;
-    }
-
-    .card:hover {
-        transform: translateY(-2px);
-    }
-
-    .breadcrumb-item a {
-        text-decoration: none;
-    }
-</style>
-
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
 
     $(document).ready(function () {
+        /* ── CSRF token from cookie ───────────────────────────────────── */
+        function csrf() {
+            var match = document.cookie.match(/csrftoken=([^;]+)/);
+            return match ? match[1] : '';
+        }
 
-        $("#request_date").val(
-            moment('{{res.Request_Date}}', "YYYY-MM-DD")
-                .format('Do MMM YYYY')
-        );
+        /* ── Toast helpers matching your message templates ────────────── */
+        function toastOk(msg) {
+            iziToast.success({
+                title: 'Success',
+                message: msg,
+                position: 'topCenter',
+                timeout: 4000,
+                theme: 'dark',
+                progressBarColor: '#ffffff',
+                backgroundColor: '#198754',
+                titleColor: '#fff',
+                messageColor: '#fff',
+                maxWidth: '400px',
+                transitionIn: 'fadeInDown',
+                transitionOut: 'fadeOutUp'
+            });
+        }
 
-        $("#start_date").val(
-            moment('{{res.Trip_Planned_Start_Date}}', "YYYY-MM-DD")
-                .format('Do MMM YYYY')
-        );
+        function toastErr(msg) {
+            iziToast.error({
+                title: 'Error',
+                message: msg,
+                position: 'topCenter',
+                timeout: 5000,
+                theme: 'dark',
+                progressBarColor: '#ffffff',
+                backgroundColor: '#dc3545',
+                titleColor: '#fff',
+                messageColor: '#fff',
+                maxWidth: '400px',
+                transitionIn: 'fadeInDown',
+                transitionOut: 'fadeOutUp'
+            });
+        }
 
-        $("#end_date").val(
-            moment('{{res.Trip_Planned_End_Date}}', "YYYY-MM-DD")
-                .format('Do MMM YYYY')
-        );
+        function toastInfo(msg) {
+            iziToast.info({
+                title: 'Info',
+                message: msg,
+                position: 'topCenter',
+                timeout: 4000,
+                theme: 'dark',
+                progressBarColor: '#ffffff',
+                backgroundColor: '#0dcaf0',
+                titleColor: '#fff',
+                messageColor: '#fff',
+                maxWidth: '400px',
+                transitionIn: 'fadeInDown',
+                transitionOut: 'fadeOutUp'
+            });
+        }
 
-        // {% for Approvers in Approvers %}
-        // $("#ModifiedDate{{Approvers.Entry_No_}}")
-        //     .empty()
-        //     .append(
-        //         moment(
-        //             '{{Approvers.Last_Date_Time_Modified}}',
-        //             "YYYY-MM-DD"
-        //         ).format('Do MMM YYYY')
-        //     );
-        // {% endfor %}
+        /* ── Reload after delay ───────────────────────────────────────── */
+        function reloadAfter(ms) {
+            setTimeout(function () { location.reload(); }, ms || 1500);
+        }
+
+        /* ── REQUEST FOR APPROVAL ─────────────────────────────────────── */
+        $(document).on('click', '#requestApprovalBtn', function () {
+            var url = $(this).data('url');
+            var $btn = $(this);
+            
+            console.log('URL:', url); // Debug: Check if URL is populated
+
+            if (!url) {
+                console.error('data-url is empty!');
+                return;
+            }
+
+            $btn.prop('disabled', true)
+                .html('<span class="spinner-border spinner-border-sm me-2"></span>Sending...');
+
+            $.ajax({
+                type: 'POST',
+                url: url,
+                headers: { 'X-CSRFToken': csrf() },
+                data: {},
+
+                success: function (data) {
+                    if (data.success === true) {
+                        toastOk(data.message);
+                        reloadAfter(1600);
+                    } else {
+                        toastErr(data.error);
+                        $btn.prop('disabled', false)
+                            .html('<i class="mdi mdi-send me-2"></i>Request For Approval');
+                    }
+                },
+                error: function (xhr) {
+                    var msg = 'An unexpected error occurred';
+                    try { msg = xhr.responseJSON.error || msg; } catch (e) { }
+                    toastErr(msg);
+                    $btn.prop('disabled', false)
+                        .html('<i class="mdi mdi-send me-2"></i>Request For Approval');
+                }
+            });
+        });
+
+        /* ── CANCEL APPROVAL ──────────────────────────────────────────── */
+        $(document).on('click', '#cancelApprovalBtn', function () {
+            var url = $(this).data('url');
+            var $btn = $(this);
+
+            if (!confirm('Are you sure you want to cancel this approval request?')) return;
+
+            $btn.prop('disabled', true)
+                .html('<span class="spinner-border spinner-border-sm me-2"></span>Cancelling...');
+
+            $.ajax({
+                type: 'POST',
+                url: url,
+                headers: { 'X-CSRFToken': csrf() },
+                data: {},
+                success: function (data) {
+                    if (data.success === true) {
+                        toastOk(data.message);
+                        reloadAfter(1600);
+                    } else {
+                        toastErr(data.error);
+                        $btn.prop('disabled', false)
+                            .html('<i class="mdi-close-circle-outline me-2"></i>Cancel Approval Request');
+                    }
+                },
+                error: function (xhr) {
+                    var msg = 'An unexpected error occurred';
+                    try { msg = xhr.responseJSON.error || msg; } catch (e) { }
+                    toastErr(msg);
+                    $btn.prop('disabled', false)
+                        .html('<i class="mdi-close-circle-outline me-2"></i>Cancel Approval Request');
+                }
+            });
+        });
+
+          /* ── ATTACHMENT UPLOAD ────────────────────────────────────────── */
+        $(document).on('submit', '#Attachment form', function (e) {
+            e.preventDefault();
+
+            var files = $('#fileInput')[0].files;
+            if (!files.length) {
+                toastErr('Please select at least one file');
+                return;
+            }
+
+            var $form = $(this);
+            var $btn = $('#uploadBtn');
+            var $progress = $('#uploadProgress');
+            var $bar = $('#progressBar');
+            var $text = $('#progressText');
+
+            $btn.prop('disabled', true).text('Uploading...');
+            $progress.removeClass('d-none');
+            $bar.css('width', '0%');
+            $text.text('Uploading...');
+
+            var formData = new FormData();
+            for (var i = 0; i < files.length; i++) {
+                formData.append('attachments', files[i]);
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: $form.attr('action'),
+                headers: { 'X-CSRFToken': csrf() },
+                data: formData,
+                processData: false,
+                contentType: false,
+                xhr: function () {
+                    var xhr = new window.XMLHttpRequest();
+                    xhr.upload.addEventListener('progress', function (e) {
+                        if (e.lengthComputable) {
+                            var pct = Math.round((e.loaded / e.total) * 100);
+                            $bar.css('width', pct + '%');
+                            $text.text(pct + '%');
+                        }
+                    }, false);
+                    return xhr;
+                },
+                success: function (data) {
+                    $btn.prop('disabled', false).text('Upload');
+                    $progress.addClass('d-none');
+                    $('#fileInput').val('');
+
+                    if (data.success === true) {
+                        toastOk(data.message);
+                        $('#Attachment').modal('hide');
+                        reloadAfter(1200);
+                    } else {
+                        toastErr(data.error);
+                    }
+                },
+                error: function (xhr) {
+                    $btn.prop('disabled', false).text('Upload');
+                    $progress.addClass('d-none');
+                    var msg = 'Upload failed. Please try again.';
+                    try { msg = xhr.responseJSON.error || msg; } catch (e) { }
+                    toastErr(msg);
+                }
+            });
+        });
+
+        /* ── ATTACHMENT DELETE ────────────────────────────────────────── */
+        $(document).on('submit', '.attachmentDeleteForm', function (e) {
+            e.preventDefault();
+
+            if (!confirm('Are you sure you want to delete this attachment?')) return;
+
+            var $form = $(this);
+            var $btn = $form.find('button[type=submit]');
+            $btn.prop('disabled', true);
+
+            $.ajax({
+                type: 'POST',
+                url: $form.attr('action'),
+                headers: { 'X-CSRFToken': csrf() },
+                data: {
+                    docID: $form.find('[name=docID]').val(),
+                    tableID: $form.find('[name=tableID]').val(),
+                },
+                success: function (data) {
+                    if (data.success === true) {
+                        toastOk(data.message);
+                        reloadAfter(1200);
+                    } else {
+                        toastErr(data.error);
+                        $btn.prop('disabled', false);
+                    }
+                },
+                error: function (xhr) {
+                    var msg = 'Delete failed. Please try again.';
+                    try { msg = xhr.responseJSON.error || msg; } catch (e) { }
+                    toastErr(msg);
+                    $btn.prop('disabled', false);
+                }
+            });
+        });
 
     });
 
 </script>
+
 
 {% endblock %}

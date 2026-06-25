@@ -929,11 +929,15 @@ class SalaryAdvance(
                 )
 
                 open_requests = [
-                    x for x in salary_advance if x.get("Status") == "Open"]
+                    x for x in salary_advance if x.get("Loan_Status") == "Application"]
                 pending_requests = [x for x in salary_advance if x.get(
-                    "Status") == "Pending Approval"]
+                    "Loan_Status") == "Being Processed"]
                 approved_requests = [
-                    x for x in salary_advance if x.get("Status") == "Released"]
+                    x for x in salary_advance if x.get("Loan_Status") == "Approved"]
+
+                print('open_requests: ', open_requests)
+                print(employee_no)
+                print('salary_advance: ', salary_advance)
 
             ctx = {
                 **session,
@@ -999,6 +1003,127 @@ class SalaryAdvance(
                 request, f'Failed to submit Salary Advance Request: {e}')
             logging.exception(e)
         return redirect('salary_advance')
+
+class SalaryAdvanceDetail(
+    AuthRequiredMixin,
+    SessionMixin,
+    ODataMixin,
+    ResponseMixin,
+    View,
+):
+
+    async def get(self, request, pk):
+        try:
+            session = self.get_session_context(request)
+            user_id = session.get("User_ID")
+
+            async with aiohttp.ClientSession() as client:
+
+                document = await self.fetch_one(
+                    endpoint="/QySalaryAdvances",
+                    field="Loan_No",
+                    value=pk,
+                )
+                if not document:
+                    messages.error(request, "Advance application not found")
+                    return redirect("leave")
+
+                
+                related = await self.fetch_related(
+                    queries=[
+                        {
+                            "endpoint": "/QyApprovalEntries",
+                            "filters": [
+                                {
+                                    "field": "Document_No_",
+                                    "operator": "eq",
+                                    "value": pk,
+                                }
+                            ],
+                            "alias": "Approvers",
+                        },
+                        {
+                            "endpoint": "/QyDocumentAttachments",
+                            "filters": [
+                                {
+                                    "field": "No_",
+                                    "operator": "eq",
+                                    "value": pk,
+                                }
+                            ],
+                            "alias": "attachments",
+                        },
+                        {
+                            "endpoint": "/QyApprovalCommentLines",
+                            "filters": [
+                                {
+                                    "field": "Document_No_",
+                                    "operator": "eq",
+                                    "value": pk,
+                                }
+                            ],
+                            "alias": "Comments",
+                        },
+                        {
+                            "endpoint": "/QyLeaveTypes",
+                            "alias": "leave",
+                        },
+                        {
+                            "endpoint": "/QyEmployees",
+                            "alias": "directorReliever",
+                        },
+                    ]
+                )
+
+            ctx = {
+                **session,
+                "res": document,
+                **related,
+                # "Approvers": approvals,
+                # "file": attachments,
+                # "Comments": comments,
+                # "leave": leave_types,
+            }
+
+            return self.render_response(request, "advance/advance_details.html", ctx)
+
+        except Exception as e:
+            logging.exception(e)
+            messages.error(request, "Failed to load leave details")
+            return redirect("leave")
+
+class RequestAdvanceApproval(AuthRequiredMixin, SessionMixin, ODataMixin, SOAPMixin, ResponseMixin, View):
+    def post(self, request, pk):
+        try:
+            session = self.get_session_context(request)
+            Employee_No_ = session.get("Employee_No_")
+            response = self.call_soap(
+                soap_method="FnRequestSalaryAdvanceApproval",
+                params=[Employee_No_, pk]
+            )
+            if response is True:
+                return JsonResponse({"success": True, "message": "Approval requested successfully"})
+            return JsonResponse({"success": False, "error": str(response)})
+        except Exception as e:
+            logging.exception(e)
+            return JsonResponse({"success": False, "error": str(e)})
+
+
+class CancelAdvanceApproval(AuthRequiredMixin, SessionMixin, ODataMixin, SOAPMixin, ResponseMixin, View):
+    def post(self, request, pk):
+        try:
+            session = self.get_session_context(request)
+            Employee_No_ = session.get("Employee_No_")
+            response = self.call_soap(
+                soap_method="FnCancelSalaryAdvanceApproval",
+                params=[Employee_No_, pk]
+            )
+            if response is True:
+                return JsonResponse({"success": True, "message": "Approval cancelled successfully"})
+            return JsonResponse({"success": False, "error": str(response)})
+        except Exception as e:
+            logging.exception(e)
+            return JsonResponse({"success": False, "error": str(e)})
 
 
 """

@@ -16,6 +16,7 @@ from core.mixins.odata_mixin import ODataMixin
 from core.mixins.ResponseMixin import ResponseMixin
 from core.mixins.soap_mixin import SOAPMixin
 
+
 class ImprestRequisition(
     AuthRequiredMixin,
     SessionMixin,
@@ -36,7 +37,7 @@ class ImprestRequisition(
             print(e)
             messages.error(request, e)
             return redirect('dashboard')
-        
+
     async def post(self, request):
         try:
             session = self.get_session_context(request)
@@ -53,14 +54,15 @@ class ImprestRequisition(
             budget_memo = request.POST.get("budget_memo")
             isOnBehalf = eval(request.POST.get("isOnBehalf"))
             divisionCode = request.POST.get("divisionCode")
-            print(accountNo, imprestNo, purpose, usersId, personalNo, myAction, budget_memo, isOnBehalf, divisionCode)
+            print(accountNo, imprestNo, purpose, usersId, personalNo,
+                  myAction, budget_memo, isOnBehalf, divisionCode)
             if not budget_memo or budget_memo == "":
                 budget_memo = ""
 
             response = self.call_soap(
                 # soap_headers,
                 soap_method="FnImprestHeader",
-                params = [
+                params=[
                     imprestNo,
                     accountNo,
                     responsibilityCenter,
@@ -83,7 +85,7 @@ class ImprestRequisition(
             elif response == "0":
                 messages.error(request, f"error, {response}")
                 return JsonResponse({"status": "error"})
-        except  Exception as e:
+        except Exception as e:
             messages.error(request, e)
             print(e)
             return JsonResponse({"status": "error"})
@@ -92,7 +94,8 @@ class ImprestRequisition(
             messages.error(request, f"{e}")
             # logging.exception(e)
             return JsonResponse({"status": "error"})
-        
+
+
 class ImprestRequisitionData(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SOAPMixin, View):
     async def get(self, request):
         try:
@@ -101,15 +104,19 @@ class ImprestRequisitionData(AuthRequiredMixin, SessionMixin, ODataMixin, Respon
             employee_no = session.get("Employee_No_")
             async with aiohttp.ClientSession() as client:
                 (imprest, BudgetMemos, DimensionValues) = await asyncio.gather(
-                    self.filter_data(endpoint="/QyImprests", field="User_ID", operator="eq", value=user_id,),
-                    self.filter_data(endpoint="/QyBudgetMemos", field="CreatedBy", operator="eq", value=user_id),
+                    self.filter_data(
+                        endpoint="/QyImprests", field="User_ID", operator="eq", value=user_id,),
+                    self.filter_data(
+                        endpoint="/QyBudgetMemos", field="CreatedBy", operator="eq", value=user_id),
                     self.all_data(endpoint="/QyDimensionValues")
                 )
             openImprest = [x for x in imprest if x["Status"] == "Open"]
-            pendingImprest = [x for x in imprest if x["Status"] == "Pending Approval"]
+            pendingImprest = [
+                x for x in imprest if x["Status"] == "Pending Approval"]
             approvedImprest = [x for x in imprest if x["Status"] == "Released"]
             memos = [x for x in BudgetMemos if x["Status"] == "Approved"]
-            divisions = [x for x in DimensionValues if x["Global_Dimension_No_"] == 2]
+            divisions = [
+                x for x in DimensionValues if x["Global_Dimension_No_"] == 2]
             ctx = {
                 "openImprest": openImprest,
                 "pendingImprest": pendingImprest,
@@ -122,7 +129,8 @@ class ImprestRequisitionData(AuthRequiredMixin, SessionMixin, ODataMixin, Respon
             print(e)
             messages.error(e)
             return redirect('dashboard')
-        
+
+
 class ImprestDetail(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SOAPMixin, View):
     async def get(self, request, pk):
         try:
@@ -132,17 +140,21 @@ class ImprestDetail(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, 
             employee_no = session.get("Employee_No_")
             async with aiohttp.ClientSession() as client:
                 (imprest, receiptsAndPaymentTypes, DimensionValues, destinations, approvals, getLines) = await asyncio.gather(
-                    self.filter_data(endpoint="/QyImprests", field="No_", operator="eq", value=pk),
-                    self.filter_data(endpoint="/QyReceiptsAndPaymentTypes", field="Type", operator="eq", value="Imprest"),
+                    self.filter_data(endpoint="/QyImprests",
+                                     field="No_", operator="eq", value=pk),
+                    self.filter_data(endpoint="/QyReceiptsAndPaymentTypes",
+                                     field="Type", operator="eq", value="Imprest"),
                     self.all_data(endpoint="/QyDimensionValues"),
                     self.all_data(endpoint="/QyDestinations"),
-                    self.filter_data(endpoint="/QyApprovalEntries", field="Document_No_", operator="eq", value=pk),
+                    self.filter_data(endpoint="/QyApprovalEntries",
+                                     field="Document_No_", operator="eq", value=pk),
                     self.all_data(endpoint="/QyImprestLines")
                 )
             rAndPTypes = [x for x in receiptsAndPaymentTypes]
             destinations = [x for x in destinations]
             lines = [x for x in getLines if x["AuxiliaryIndex1"] == pk]
-            divisions = [x for x in DimensionValues if x["Global_Dimension_No_"] == 2]
+            divisions = [
+                x for x in DimensionValues if x["Global_Dimension_No_"] == 2]
             print(divisions)
             ctx = {
                 "res": imprest,
@@ -153,6 +165,7 @@ class ImprestDetail(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, 
             print(e)
             messages.error(e)
             return redirect('ImprestRequisition')
+
 
 class ImprestSurrender(
     AuthRequiredMixin,
@@ -169,7 +182,7 @@ class ImprestSurrender(
             print(e)
             messages.error(e)
             return redirect('dashboard')
-        
+
     async def post(self, request):
         try:
             session = self.get_session_context(request)
@@ -178,7 +191,8 @@ class ImprestSurrender(
             print(e)
             messages.error(e)
             return redirect('dashboard')
-        
+
+
 class StaffClaim(
     AuthRequiredMixin,
     SessionMixin,
@@ -197,7 +211,7 @@ class StaffClaim(
             print(e)
             messages.error(e)
             return redirect('dashboard')
-        
+
     async def post(self, request):
         try:
             session = self.get_session_context(request)

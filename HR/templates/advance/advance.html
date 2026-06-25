@@ -78,7 +78,7 @@ Salary Advance
                         data-bs-target="#advanceRequestModal">
 
                         <i class="mdi mdi-plus-circle-outline"></i>
-                        New Transfer Request
+                        New Advance Request
                     </button>
 
                 </div>
@@ -127,7 +127,7 @@ Salary Advance
                                                     <!-- <td> {{ res.Trip_Planned_End_Date }} </td> -->
                                                     <td>
 
-                                                        <a href="{% url 'advance_details' res.TransferNo %}"
+                                                        <a href="{% url 'advance_details' res.Loan_No %}"
                                                             class="btn btn-primary text-white">
 
                                                             <i class="mdi mdi-folder-eye"></i>
@@ -200,7 +200,7 @@ Salary Advance
                                                     <td id="open_amount{{res.Loan_No}}">{{res.Amount_Requested}}</td>
                                                     <!-- <td> {{ res.Trip_Planned_End_Date }} </td> -->
 
-                                                    <a href="{% url 'advance_details' res.TransferNo %}"
+                                                    <a href="{% url 'advance_details' res.Loan_No %}"
                                                         class="btn btn-primary text-white">
 
                                                         <i class="mdi mdi-folder-eye"></i>
@@ -266,7 +266,7 @@ Salary Advance
                                                     <!-- <td> {{ res.Trip_Planned_End_Date }} </td> -->
 
                                                     <td>
-                                                        <a href="{% url 'advance_details' res.TransferNo %}"
+                                                        <a href="{% url 'advance_details' res.Loan_No %}"
                                                             class="btn btn-primary text-white">
                                                             <i class="mdi mdi-folder-eye"></i>
                                                             View

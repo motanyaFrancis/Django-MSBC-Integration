@@ -44,11 +44,11 @@
 
                                     <!-- Training Card -->
                                     <div >
-                                        <p class="statistics-title">Training Requests</p>
-                                        <h3 class="rate-percentage">{{ total_training|default:"0" }}</h3>
+                                        <p class="statistics-title">Imprest Requests</p>
+                                        <h3 class="rate-percentage">{{ total_imprest|default:"0" }}</h3>
                                         <p class="text-muted small">
-                                            <span class="text-warning">Open: {{ training_stats.Open|default:"0" }}</span>
-                                            <span class="text-info ms-1">Pending: {{ training_stats.Pending_Approval|default:"0" }}</span>
+                                            <span class="text-warning">Open: {{ imprest_stats.Open|default:"0" }}</span>
+                                            <span class="text-info ms-1">Pending: {{ imprest_stats.Pending_Approval|default:"0" }}</span>
                                         </p>
                                     </div>
 
@@ -63,11 +63,11 @@
                                     </div>
 
                                     <!-- Approvals Queue Card -->
-                                    <div class="d-none d-md-block">
+                                    <!-- <div class="d-none d-md-block">
                                         <p class="statistics-title">Approvals Queue</p>
                                         <h3 class="rate-percentage">{{ pending_approval_count|default:"0" }}</h3>
                                         <p class="text-muted small">Awaiting Your Action</p>
-                                    </div>
+                                    </div> -->
 
                                     <!-- Purchase Card -->
                                     <div class="d-none d-md-block">
@@ -128,16 +128,16 @@
 
                                                     <!-- Training Row -->
                                                     <tr>
-                                                        <td><strong>Training</strong></td>
-                                                        <td class="text-center">{{ total_training|default:"0" }}</td>
+                                                        <td><strong>Imprest</strong></td>
+                                                        <td class="text-center">{{ total_imprest|default:"0" }}</td>
                                                         <td class="text-center">
-                                                            <span class="badge bg-warning">{{ training_stats.Open|default:"0" }}</span>
+                                                            <span class="badge bg-warning">{{ imprest_stats.Open|default:"0" }}</span>
                                                         </td>
                                                         <td class="text-center">
-                                                            <span class="badge bg-info">{{ training_stats.Pending_Approval|default:"0" }}</span>
+                                                            <span class="badge bg-info">{{ imprest_stats.Pending_Approval|default:"0" }}</span>
                                                         </td>
                                                         <td class="text-center">
-                                                            <span class="badge bg-success">{{ training_stats.Released|default:"0" }}</span>
+                                                            <span class="badge bg-success">{{ imprest_stats.Released|default:"0" }}</span>
                                                         </td>
                                                     </tr>
 
@@ -172,7 +172,7 @@
                                                     </tr>
 
                                                     <!-- Repair Row -->
-                                                    <tr>
+                                                    <!-- <tr>
                                                         <td><strong>Repairs</strong></td>
                                                         <td class="text-center">{{ total_repair|default:"0" }}</td>
                                                         <td class="text-center">
@@ -184,7 +184,7 @@
                                                         <td class="text-center">
                                                             <span class="badge bg-success">{{ repair_stats.Released|default:"0" }}</span>
                                                         </td>
-                                                    </tr>
+                                                    </tr> -->
 
                                                     <!-- Store Row -->
                                                     <tr>
@@ -202,7 +202,7 @@
                                                     </tr>
 
                                                     <!-- General Row -->
-                                                    <tr>
+                                                    <!-- <tr>
                                                         <td><strong>General Requisitions</strong></td>
                                                         <td class="text-center">{{ total_general|default:"0" }}</td>
                                                         <td class="text-center">
@@ -214,7 +214,7 @@
                                                         <td class="text-center">
                                                             <span class="badge bg-success">{{ general_stats.Released|default:"0" }}</span>
                                                         </td>
-                                                    </tr>
+                                                    </tr> -->
 
                                                     <!-- Surrender Row -->
                                                     <tr>

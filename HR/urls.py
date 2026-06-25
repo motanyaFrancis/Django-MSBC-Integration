@@ -26,10 +26,10 @@ urlpatterns = [
     # Salary Advance
 
     path("salary-advance/", views.SalaryAdvance.as_view(), name="salary_advance"),
-    # path("advance/<str:pk>", views.TrainingDetailsView.as_view(), name="advance_details"),
-    # path("advance-data/", views.TrainingDataView.as_view(), name="advance_Data"),
-    # path("advance-lines/<str:pk>/", views.TrainingLines.as_view(), name="advance_lines"
-    # ),
+    path("salary-advance/<str:pk>", views.SalaryAdvanceDetail.as_view(), name="advance_details"),
+    path("request-salary-advance-approval/<str:pk>/", views.LeaveApproval.as_view(), name="request_salary_advance_approval"),
+    path("cancel-salary-advance-approval/<str:pk>/", views.CancelLeaveApproval.as_view(), name="cancel_salary_advance_approval"),
+    
     
     
     # Employee transfers

@@ -73,6 +73,11 @@ class DashboardView(
             "endpoint": "/QyGeneralRequisitionHeaders",
             "field": "Requested_By",
         },
+
+         "imprest": {
+            "endpoint": "/QyImprests",
+            "field": "User_ID",
+        },
     }
 
     async def get(self, request):
@@ -88,7 +93,7 @@ class DashboardView(
             first_name = session.get("First_Name")
             hod_user = session.get("HOD_User")
             leave_balance = session.get("leave_balance")
-            print(" leave_balance from session:", leave_balance)
+            # print(" leave_balance from session:", leave_balance)
 
             if not all([user_id, employee_no]):
                 messages.error(request, "Session data incomplete")
@@ -260,7 +265,7 @@ class Destinations(
                 else "Local"
             )
 
-            print(destination_type)
+            # print(destination_type)
 
             response = await self.filter_data(
                 endpoint="/QyDestinations",
@@ -296,7 +301,7 @@ class Dimensions(
 
             regions = [
                 item for item in open_records if item["Global_Dimension_No_"] == 1]
-            print("regions: ", regions)
+            # print("regions: ", regions)
 
             divisions = [
                 item for item in open_records if item["Global_Dimension_No_"] == 2]
@@ -392,9 +397,9 @@ class LeaveBalanceView(
             employee_no = request.session.get("Employee_No_")
             employment_type = request.session.get("Employment_Type")
 
-            print('employee_no:', employee_no)
+            # print('employee_no:', employee_no)
 
-            print('leave_type:', leave_type)
+            # print('leave_type:', leave_type)
             leave_period = '2023- CON'
 
             response = self.call_soap(
@@ -405,8 +410,8 @@ class LeaveBalanceView(
                     leave_period
                 ]
             )
-            print("SOAP Response:", response)
-            print("Leave Balance Response:", response)
+            # print("SOAP Response:", response)
+            # print("Leave Balance Response:", response)
 
             if not employee_no:
                 return JsonResponse(
@@ -559,7 +564,7 @@ class ReportGeneratorView(
 
         try:
             report_type = request.POST.get("report_type")
-            print("Requested report type:", report_type)
+            # print("Requested report type:", report_type)
 
             if report_type == "leave":
                 return await self.generate_leave_report(request)
@@ -602,8 +607,8 @@ class ReportGeneratorView(
             # from_date = request.POST.get("from_date")
             # to_date = request.POST.get("to_date")
 
-            print("Generating leave report for employee:", employee_no)
-            print("Document ID:", document_id)
+            # print("Generating leave report for employee:", employee_no)
+            # print("Document ID:", document_id)
             # print("From Date:", from_date)
             # print("To Date:", to_date)
             # # ============================================
@@ -687,8 +692,8 @@ class ReportGeneratorView(
 
             startDate = request.POST.get("startDate")
             document_type = request.POST.get("document_type")
-            print(" Generating payroll report for employee:",
-                  document_type, employee_no, startDate)
+            # print(" Generating payroll report for employee:",
+            #       document_type, employee_no, startDate)
 
             filenameFromApp = f"Payroll_Report_{employee_no}_{datetime.now().strftime('%Y%m%d%H%M%S')}.pdf"
             year = int(startDate[0:4])  # Extract year from startDate

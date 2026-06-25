@@ -80,17 +80,7 @@ Purchase Request - {{res.No_}}
                         {% endif %}
 
                         {% if res.Status == "Released" %}
-                        <form action="{% url 'FnGenerateImprestReport' res.No_ %}" method="POST">
-
-                            {% csrf_token %}
-
-                            <button class="btn btn-success">
-
-                                <i class="mdi mdi-download me-1"></i>
-                                Preview Report
-                            </button>
-
-                        </form>
+                        
                         {% endif %}
 
                     </div>
