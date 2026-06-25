@@ -1,0 +1,10 @@
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path("ImprestRequisition/", views.ImprestRequisition.as_view(), name="ImprestRequisition"),
+    path("ImprestRequisitionData/", views.ImprestRequisitionData.as_view(), name="ImprestRequisitionData"),
+    path("ImprestDetail/<str:pk>", views.ImprestDetail.as_view(), name="ImprestDetail"),
+    path("ImprestSurrender/", views.ImprestSurrender.as_view(), name="ImprestSurrender"),
+    path("StaffClaim/", views.StaffClaim.as_view(), name="StaffClaim"),
+]
