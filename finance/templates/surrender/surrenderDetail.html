@@ -36,18 +36,18 @@
                         </nav>
 
                         <h3 class="fw-bold mb-1">
-                            Imprest Detail
+                            Imprest Surrender Detail
                         </h3>
 
                         <p class="text-muted mb-0">
-                            View and manage imprest information
+                            View and manage imprest Surrender information
                         </p>
                     </div>
 
                     <div class="d-flex flex-wrap gap-2">
+
                         {% if res.Status == "Open" %}
-                        <button class="btn btn-primary text-white" data-bs-toggle="modal" data-bs-target="#uploadAttachment"><i class="mdi mdi-paperclip me-1"></i>Upload Attachment</button>
-                        <button class="btn btn-primary text-white" data-bs-toggle="modal" data-bs-target="#viewAttachment"><i class="mdi mdi-paperclip me-1"></i>view Attachments</button>
+                        <button class="btn btn-primary text-white" data-bs-toggle="modal" data-bs-target="#Attachment"><i class="mdi mdi-paperclip me-1"></i>Upload Attachment</button>
                         {% endif %}
                     </div>
 
@@ -102,49 +102,58 @@
                                 <div class="d-flex align-items-center">
                                     <div class="bg-primary-subtle timeline-icon p-3 me-3"><i class="mdi mdi-file-document text-primary fs-4"></i></div>
                                     <div>
-                                        <h5 class="fw-bold mb-1">Imprest Information</h5>
-                                        <small class="text-muted">Detailed Imprest request information</small>
+                                        <h5 class="fw-bold mb-1">Leave Information</h5>
+                                        <small class="text-muted">Detailed leave request information</small>
                                     </div>
 
                                 </div>
                             </div>
 
                             <div class="card-body px-4 pb-4">
-                                <div class="row g-4">
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold">Imprest Amount</label>
-                                        <input type="text" class="form-control"
-                                            value="{{res.Imprest_Amount}}" disabled>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold">Payment Due Date</label>
-                                        <input type="date" class="form-control" id="start_date"
-                                            value="{{res.Due_Date}}" disabled>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold">Date Inserted</label>
-                                        <input type="number" class="form-control"
-                                            value="{{res.Date}}" disabled>
-                                    </div>
 
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold">Account No</label>
-                                        <input type="text" class="form-control" id="end_date"
-                                            value="{{res.Account_No_}}" disabled>
-                                    </div>
+                                <form action="{% url 'leave' %}" method="post">
+                                    {% csrf_token %}
 
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold">Travel Type</label>
-                                        <input type="text" class="form-control" id="resumption_date"
-                                            value="{{res.Travel_Type}}" disabled>
-                                    </div>
+                                    <input type="hidden" name="applicationNo" value="{{ res.Application_No }}">
+                                    <input type="hidden" name="myAction" value="modify">
 
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold">Payee</label>
-                                        <input type="text" class="form-control" id="application_date"
-                                            value="{{res.Payee}}" disabled>
+                                    <div class="row g-4">
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Leave Period</label>
+                                            <input type="text" class="form-control"
+                                                value="" disabled>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Start Date</label>
+                                            <input type="date" class="form-control" id="start_date"
+                                                value="" disabled>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Days Applied</label>
+                                            <input type="number" class="form-control"
+                                                value="" disabled>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">End Date</label>
+                                            <input type="text" class="form-control" id="end_date"
+                                                value="" disabled>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Resumption Date</label>
+                                            <input type="text" class="form-control" id="resumption_date"
+                                                value="" disabled>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Application Date</label>
+                                            <input type="text" class="form-control" id="application_date"
+                                                value="" disabled>
+                                        </div>
                                     </div>
-                                </div>
+                                </form>
                             </div>
                         </div>
 
@@ -314,50 +323,6 @@
         </div>
     </div>
 </div>
-
-<div class="modal fade" id="viewAttachment" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-            <div class="modal-header bg-primary text-white border-0 px-4 py-3">
-                <div>
-                    <h4 class="modal-title fw-bold mb-1"><i class="las la-calendar-plus me-2"></i>Attachments</h4>
-                    <!-- <small class="opacity-75">Complete the steps below to submit your leave request</small> -->
-                </div>
-                <button type="button" class="btn-close btn-close-white" id="leave_close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-
-            <!-- BODY -->
-            <div class="modal-body bg-light p-4">
-                <form class="myForm" id="ImprestForm" method="post" novalidate>
-                    {% csrf_token %}
-                </form>
-            </div>
-
-        </div>
-    </div>
-</div>
-<div class="modal fade" id="uploadAttachment" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-            <div class="modal-header bg-primary text-white border-0 px-4 py-3">
-                <div>
-                    <h4 class="modal-title fw-bold mb-1"><i class="las la-calendar-plus me-2"></i>New Attachments</h4>
-                    <!-- <small class="opacity-75">Complete the steps below to submit your leave request</small> -->
-                </div>
-                <button type="button" class="btn-close btn-close-white" id="leave_close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-
-            <!-- BODY -->
-            <div class="modal-body bg-light p-4">
-                <form class="myForm" id="ImprestForm" method="post" novalidate>
-                    {% csrf_token %}
-                </form>
-            </div>
-
-        </div>
-    </div>
-</div>
-
 
 <script>
 

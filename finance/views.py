@@ -120,7 +120,7 @@ class ImprestRequisitionData(AuthRequiredMixin, SessionMixin, ODataMixin, Respon
             return JsonResponse(ctx)
         except Exception as e:
             print(e)
-            messages.error(e)
+            messages.error(request, e)
             return redirect('dashboard')
         
 class ImprestDetail(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SOAPMixin, View):
@@ -143,15 +143,15 @@ class ImprestDetail(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, 
             destinations = [x for x in destinations]
             lines = [x for x in getLines if x["AuxiliaryIndex1"] == pk]
             divisions = [x for x in DimensionValues if x["Global_Dimension_No_"] == 2]
-            print(divisions)
+            print(imprest)
             ctx = {
-                "res": imprest,
+                "res": imprest[0],
                 "Approvers": approvals
             }
             return render(request, "imprest/ImprestDetail.html", ctx)
         except Exception as e:
             print(e)
-            messages.error(e)
+            messages.error(request, e)
             return redirect('ImprestRequisition')
 
 class ImprestSurrender(
@@ -164,10 +164,10 @@ class ImprestSurrender(
 ):
     async def get(self, request):
         try:
-            return render(request, 'ImprestSurrender.html')
+            return render(request, 'surrender/ImprestSurrender.html')
         except Exception as e:
             print(e)
-            messages.error(e)
+            messages.error(request, e)
             return redirect('dashboard')
         
     async def post(self, request):
@@ -176,7 +176,7 @@ class ImprestSurrender(
             user_id = session.get("User_ID")
         except Exception as e:
             print(e)
-            messages.error(e)
+            messages.error(request, e)
             return redirect('dashboard')
         
 class StaffClaim(
@@ -192,10 +192,10 @@ class StaffClaim(
             session = self.get_session_context(request)
             user_id = session.get("User_ID")
             employee_no = session.get("Employee_No_")
-            return render(request, 'StaffClaim.html')
+            return render(request, 'claim/StaffClaim.html')
         except Exception as e:
             print(e)
-            messages.error(e)
+            messages.error(request, e)
             return redirect('dashboard')
         
     async def post(self, request):
@@ -204,5 +204,5 @@ class StaffClaim(
             user_id = session.get("User_ID")
         except Exception as e:
             print(e)
-            messages.error(e)
+            messages.error(request, e)
             return redirect('dashboard')

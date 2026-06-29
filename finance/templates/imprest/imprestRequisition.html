@@ -1,6 +1,6 @@
 {% extends 'layout.html' %}
 {% load static %}
-{% block title %}Leave Management{% endblock %}
+{% block title %}Imprest Requisition{% endblock %}
 
 {% block content %}
 <div class="content-wrapper">
@@ -23,21 +23,21 @@
                         <li class="nav-item">
                             <a class="nav-link active ps-0" data-bs-toggle="tab" href="#open-requests">
                                 Open Requests
-                                <span class="badge bg-info ms-2 open_leave_count">0</span>
+                                <span class="badge bg-info ms-2 open_imprest_count">0</span>
                             </a>
                         </li>
 
                         <li class="nav-item">
                             <a class="nav-link" data-bs-toggle="tab" href="#pending-requests">
                                 Pending Approval
-                                <span class="badge bg-warning ms-2 pending_leave_count">0</span>
+                                <span class="badge bg-warning ms-2 pending_imprest_count">0</span>
                             </a>
                         </li>
 
                         <li class="nav-item">
                             <a class="nav-link" data-bs-toggle="tab" href="#approved-requests">
                                 Approved Requests
-                                <span class="badge bg-success ms-2 approved_leave_count">0</span>
+                                <span class="badge bg-success ms-2 approved_imprest_count">0</span>
                             </a>
                         </li>
 
@@ -55,7 +55,7 @@
                                 <div class="card-body">
                                     <h4 class="card-title mb-3">Open Leave Requests</h4>
                                     <div class="table-responsive">
-                                        <table class="table table-striped table-hover align-middle" id="open_leave_table">
+                                        <table class="table table-striped table-hover align-middle" id="open_imprest_table">
                                             <thead class="table-light">
                                                 <tr>
                                                     <th>Imprest No.</th>
@@ -170,9 +170,9 @@
                     console.log(data)
                     let open = 0, pending = 0, approved = 0;
 
-                    const openBody = $("#open_leave_table tbody");
-                    const pendingBody = $("#pending_leave_table tbody");
-                    const approvedBody = $("#approved_leave_table tbody");
+                    const openBody = $("#open_imprest_table tbody");
+                    const pendingBody = $("#pending_imprest_table tbody");
+                    const approvedBody = $("#approved_imprest_table tbody");
 
                     openBody.empty(); pendingBody.empty(); approvedBody.empty();
                     data.divisions.forEach(div => {
@@ -214,9 +214,9 @@
                         }
                     });
 
-                    $(".open_leave_count").text(open);
-                    $(".pending_leave_count").text(pending);
-                    $(".approved_leave_count").text(approved);
+                    $(".open_imprest_count").text(open);
+                    $(".pending_imprest_count").text(pending);
+                    $(".approved_imprest_count").text(approved);
                 }
             });
         }
@@ -294,89 +294,6 @@
                 }
             });
         });
-
-        // ================= ATTACHMENTS =================
-        $("#leave_attachment_form").on("submit", function (e) {
-            e.preventDefault();
-
-            let formData = new FormData(this);
-
-            $.ajax({
-                url: "/LeaveAttachments/" + leaveCode + "/",
-                type: "POST",
-                data: formData,
-                processData: false,
-                contentType: false,
-                headers: { "X-CSRFToken": "{{ csrf_token }}" },
-                success: function () {
-                    LoadAttachments();
-                }
-            });
-        });
-
-        function LoadAttachments() {
-            $.get("/LeaveAttachments/" + leaveCode + "/", function (data) {
-
-                let container = $("#attachments-container");
-                container.empty();
-
-                data.forEach(file => {
-
-                    container.append(`
-                    <div class="col-md-3">
-                        <div class="card p-2">
-                            ${file.File_Name}.${file.File_Extension}
-                        </div>
-                    </div>
-                `);
-
-                });
-            });
-        }
-
-        // ================= APPROVAL =================
-        $("#approvalForm").on("submit", function (e) {
-            e.preventDefault();
-
-            $.post("/LeaveApprovalRequest/", {
-                leaveCode: leaveCode,
-                csrfmiddlewaretoken: "{{ csrf_token }}"
-            }, function () {
-                Leave_Approvers_Data();
-            });
-        });
-
-        function Leave_Approvers_Data() {
-            $.get("/LeaveApproversData/" + leaveCode + "/", function (data) {
-
-                let body = $("#leave_approvers_table tbody");
-                body.empty();
-
-                data.forEach(a => {
-                    body.append(`
-                    <tr>
-                        <td>${a.Entry_No_}</td>
-                        <td>${a.Approver_ID}</td>
-                        <td>${a.Sequence_No_}</td>
-                        <td>${a.Status}</td>
-                        <td>${a.Last_Modified_By_User_ID}</td>
-                        <td>${a.Last_Date_Time_Modified}</td>
-                    </tr>
-                `);
-                });
-            });
-        }
-
-        // ================= DIRECTOR =================
-        function get_director() {
-            $.get("/get_director/", function (res) {
-                if (res === true) {
-                    $("#directorRelieverRow").show();
-                    $("#directorReliever").prop("disabled", false);
-                }
-            });
-        }
-
     });
 </script>
 
