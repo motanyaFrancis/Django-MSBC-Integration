@@ -11,7 +11,7 @@
                 <!-- HEADER -->
                 <div class="d-flex justify-content-between align-items-center border-bottom py-3">
                     <div>
-                        <h4 class="card-title card-title-dash mb-0">Imprest Surrender</h4>
+                        <h4 class="card-title card-title-dash mb-0">Staff Claim</h4>
                         <p class="text-muted small mt-1">Apply for leave, track your requests, and manage approvals</p>
                     </div>
                 </div>
@@ -44,7 +44,7 @@
                     </ul>
 
                     <button class="btn btn-primary text-white" data-bs-toggle="modal" data-bs-target="#raise_leave">
-                        <i class="mdi mdi-plus-circle-outline"></i> Apply for Leave
+                        <i class="mdi mdi-plus-circle-outline"></i> Apply for Staff Claim
                     </button>
                 </div>
 
@@ -162,7 +162,6 @@
 
         // ================= INIT =================
         Leave_Data();
-        get_director();
 
         // ================= LOAD LIST =================
         function Leave_Data() {
@@ -300,49 +299,6 @@
                 `);
 
                 });
-            });
-        }
-
-        // ================= APPROVAL =================
-        $("#approvalForm").on("submit", function (e) {
-            e.preventDefault();
-
-            $.post("/LeaveApprovalRequest/", {
-                leaveCode: leaveCode,
-                csrfmiddlewaretoken: "{{ csrf_token }}"
-            }, function () {
-                Leave_Approvers_Data();
-            });
-        });
-
-        function Leave_Approvers_Data() {
-            $.get("/LeaveApproversData/" + leaveCode + "/", function (data) {
-
-                let body = $("#leave_approvers_table tbody");
-                body.empty();
-
-                data.forEach(a => {
-                    body.append(`
-                    <tr>
-                        <td>${a.Entry_No_}</td>
-                        <td>${a.Approver_ID}</td>
-                        <td>${a.Sequence_No_}</td>
-                        <td>${a.Status}</td>
-                        <td>${a.Last_Modified_By_User_ID}</td>
-                        <td>${a.Last_Date_Time_Modified}</td>
-                    </tr>
-                `);
-                });
-            });
-        }
-
-        // ================= DIRECTOR =================
-        function get_director() {
-            $.get("/get_director/", function (res) {
-                if (res === true) {
-                    $("#directorRelieverRow").show();
-                    $("#directorReliever").prop("disabled", false);
-                }
             });
         }
 
