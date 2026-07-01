@@ -171,7 +171,7 @@
                                 </form>
                                 {% endif %}
                                 {% if res.Status == "Pending Approval" %}
-                                <form action="#" method="POST">
+                                <form action="{% url 'cancelImprestApproval' res.No_ %}" method="POST">
                                     {% csrf_token %}
                                     <input type="hidden" name="myAction" value="cancelApproval">
                                     <button class="btn btn-outline-danger w-100 py-3"><i class="las la-times-circle me-2"></i>Cancel Approval Request</button>
@@ -414,6 +414,12 @@
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <i class="mdi mdi-file-pdf-box me-2 fs-5"></i>
+                                                <form action="{% url 'GetDocumentAttachment' res.No_ %}" method="post">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="attachmentID" value="{{attachment.Line_No_}}">
+                                                    <input type="hidden" name="tableId" value="{{attachment.Table_ID}}">
+                                                    <button class="btn btn-sm mx-2 btn-primary text-white">View</button>
+                                                </form>
                                                 <span class="fw-semibold">{{ attachment.File_Name }}.{{ attachment.File_Type }}</span>
                                             </div>
                                         </td>
