@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 {% load static %}
 
-{% block title %}Leave Request Details{% endblock %}
+{% block title %}Leave Request - {{ res.Application_No }}{% endblock %}
 
 {% block content %}
 
@@ -36,31 +36,38 @@
                         </nav>
 
                         <h3 class="fw-bold mb-1">
-                            Leave Request Details
+                            Leave Request 
                         </h3>
 
                         <p class="text-muted mb-0">
-                            View and manage leave request information
+                            View, modify and manage leave request information
                         </p>
                     </div>
 
                     <div class="d-flex flex-wrap gap-2">
+                        
 
                         {% if res.Status == "Open" %}
-                        <button class="btn btn-primary text-white" data-bs-toggle="modal" data-bs-target="#Attachment">
+                        <button
+                            class="btn btn-primary text-white"
+                            data-bs-toggle="modal"
+                            data-bs-target="#attachmentModal"
+                            data-upload-url="{% url 'Leave_Attachments' res.Application_No %}"
+                            data-doc-no="{{ res.Application_No }}"
+                            data-table-name="Leave">
                             <i class="mdi mdi-paperclip me-1"></i>
                             Upload Attachment
                         </button>
                         {% endif %}
 
                         {% if res.Status == "Released" %}
-                        <form action="{% url 'FnGenerateLeaveReport' res.Application_No %}" method="post">
+                        <!-- <form action="" method="post">
                             {% csrf_token %}
                             <button class="btn btn-success">
                                 <i class="mdi mdi-download me-1"></i>
                                 Preview Report
                             </button>
-                        </form>
+                        </form> -->
                         {% endif %}
 
                     </div>
@@ -178,39 +185,53 @@
                         <div class="card border-0 shadow-sm rounded-4 mb-4">
 
                             <div class="card-header bg-white border-0 pt-4 px-4">
-                                <div class="d-flex align-items-center">
+                                <div class="d-flex justify-content-between flex-wrap g-3">
 
-                                    <div class="bg-primary-subtle timeline-icon p-3 me-3">
-                                        <i class="mdi mdi-file-document text-primary fs-4"></i>
+                                    <div class="d-flex align-items-center mb-3">
+    
+                                        <div class="bg-primary-subtle timeline-icon p-3 me-3">
+                                            <i class="mdi mdi-file-document text-primary fs-4"></i>
+                                        </div>
+    
+                                        <div>
+                                            <h5 class="fw-bold mb-1">Leave Information</h5>
+                                            <small class="text-muted">Detailed leave request information</small>
+                                        </div>
+    
+                                        
                                     </div>
-
                                     <div>
-                                        <h5 class="fw-bold mb-1">Leave Information</h5>
-                                        <small class="text-muted">Detailed leave request information</small>
+                                        {% if res.Status == "Open" %}
+                                        <button id="editLeaveBtn" class="btn btn-outline-primary text-dark">
+                                            <i class="mdi mdi-pencil me-1"></i>
+                                            Edit Request
+                                        </button>
+                                        {% endif %}
                                     </div>
-
                                 </div>
                             </div>
 
                             <div class="card-body px-4 pb-4">
 
-                                <form action="{% url 'leave' %}" method="post">
+                                <form action="{% url 'leave' %}" method="post" id="modifyLeaveForm">
                                     {% csrf_token %}
-
+                                
                                     <input type="hidden" name="applicationNo" value="{{ res.Application_No }}">
                                     <input type="hidden" name="myAction" value="modify">
-
+                                    <input type="hidden" name="dimension3" value="{{ res.Dimension3|default:'' }}">
+                                
                                     <div class="row g-4">
-
+                                
                                         <div class="col-md-6">
                                             <label class="form-label fw-semibold">Leave Period</label>
-                                            <input type="text" class="form-control"
-                                                value="{{ res.Leave_Period|default:'-' }}" disabled>
+                                            <input type="text" class="form-control" value="{{ res.Leave_Period|default:'-' }}" disabled>
                                         </div>
-
+                                
                                         <div class="col-md-6">
-                                            <label class="form-label fw-semibold">Leave Type</label>
-                                            <select class="form-select" disabled>
+                                            <label class="form-label fw-semibold">
+                                                Leave Type <span class="text-danger edit-only d-none">*</span>
+                                            </label>
+                                            <select class="form-select detail-field" name="leaveType" disabled>
                                                 {% for type in leave %}
                                                 <option value="{{ type.Code }}" {% if type.Code == res.Leave_Code %}selected{% endif %}>
                                                     {{ type.Description }}
@@ -218,53 +239,53 @@
                                                 {% endfor %}
                                             </select>
                                         </div>
-
+                                
                                         <div class="col-md-6">
-                                            <label class="form-label fw-semibold">Start Date</label>
-                                            <input type="date" class="form-control" id="start_date"
+                                            <label class="form-label fw-semibold">
+                                                Start Date <span class="text-danger edit-only d-none">*</span>
+                                            </label>
+                                            <input type="date" class="form-control detail-field" name="plannerStartDate" id="mod_start_date"
                                                 value="{{ res.Start_Date }}" disabled>
                                         </div>
-
+                                
                                         <div class="col-md-6">
-                                            <label class="form-label fw-semibold">Return Same Day</label>
-                                            <select class="form-select" disabled>
-                                                <option value="True" {% if res.Return_same_day %}selected{% endif %}>
-                                                    Yes
-                                                </option>
-                                                <option value="False" {% if not res.Return_same_day %}selected{% endif  %}>
-                                                    No
-                                                </option>
+                                            <label class="form-label fw-semibold">
+                                                Return Same Day <span class="text-danger edit-only d-none">*</span>
+                                            </label>
+                                            <select class="form-select detail-field" id="mod_isReturnSameDay" name="isReturnSameDay" disabled>
+                                                <option value="True" {% if res.Return_same_day %}selected{% endif %}>Yes</option>
+                                                <option value="False" {% if not res.Return_same_day %}selected{% endif %}>No</option>
                                             </select>
                                         </div>
-
+                                
                                         <div class="col-md-6">
                                             <label class="form-label fw-semibold">Days Applied</label>
-                                            <input type="number" class="form-control"
-                                                value="{{ res.Days_Applied|default:'0' }}" disabled>
+                                            <input type="number" class="form-control detail-field" name="daysApplied" id="mod_daysApplied"
+                                                value="{{ res.Days_Applied|default:'0' }}" min="0" step="0.5" disabled>
                                         </div>
-
+                                
                                         <div class="col-md-6">
                                             <label class="form-label fw-semibold">End Date</label>
-                                            <input type="text" class="form-control" id="end_date"
-                                                value="{{ res.End_Date }}" disabled>
+                                            <input type="text" class="form-control" value="{{ res.End_Date }}" disabled>
                                         </div>
-
+                                
                                         <div class="col-md-6">
                                             <label class="form-label fw-semibold">Resumption Date</label>
-                                            <input type="text" class="form-control" id="resumption_date"
-                                                value="{{ res.Resumption_Date}}" disabled>
+                                            <input type="text" class="form-control" value="{{ res.Resumption_Date }}" disabled>
                                         </div>
-
+                                
                                         <div class="col-md-6">
                                             <label class="form-label fw-semibold">Application Date</label>
-                                            <input type="text" class="form-control" id="application_date"
-                                                value="{{ res.Application_Date}}" disabled>
+                                            <input type="text" class="form-control" value="{{ res.Application_Date }}" disabled>
                                         </div>
-
+                                
                                         {% if HOD_User %}
                                         <div class="col-md-12">
-                                            <label class="form-label fw-semibold">Reliever</label>
-                                            <select class="form-select" disabled>
+                                            <label class="form-label fw-semibold">
+                                                Reliever <span class="text-danger edit-only d-none">*</span>
+                                            </label>
+                                            <select class="form-select detail-field" name="directorReliever" id="mod_directorReliever" disabled>
+                                                <option value="">— Select Reliever —</option>
                                                 {% for reliever in directorReliever %}
                                                 <option value="{{ reliever.No_ }}" {% if reliever.No_ == res.Staff_No_Relievers %}selected{% endif %}>
                                                     {{ reliever.First_Name }} {{ reliever.Last_Name }}
@@ -273,202 +294,221 @@
                                             </select>
                                         </div>
                                         {% endif %}
-
+                                
                                     </div>
-
+                                
+                                    <!-- Edit mode action bar — hidden until Edit is clicked -->
+                                    <div id="modifyActionBar" class="d-none mt-4 pt-3 border-top d-flex gap-2 justify-content-end">
+                                        <button type="button" id="cancelEditBtn" class="btn btn-outline-danger px-4">
+                                            <i class="mdi mdi-close me-1"></i> Cancel
+                                        </button>
+                                        <button type="submit" class="btn btn-primary px-5" id="saveModifyBtn">
+                                            <i class="mdi mdi-content-save me-1"></i> Save Changes
+                                        </button>
+                                    </div>
+                                
                                 </form>
 
                             </div>
                         </div>
 
-                        <!-- ATTACHMENTS + COMMENTS unchanged UI -->
-                        <!-- (kept exactly as you provided) -->
+                       
 
                     </div>
                     <!-- RIGHT SIDE -->
                     <div class="col-lg-4">
-
-                        <!-- ACTIONS -->
+                
+                          <!-- ATTACHMENTS SECTION -->
                         <div class="card border-0 shadow-sm rounded-4 mb-4">
-
-                            <div class="card-body p-4">
-
-                                <h5 class="fw-bold mb-4">
-                                    Request Actions
-                                </h5>
-
-                                {% if res.Status == "Open" %}
-                                <form action="#"
-                                      method="POST">
-
-                                    {% csrf_token %}
-
-                                    <input type="hidden"
-                                           name="myAction"
-                                           value="requestApproval">
-
-                                    <button class="btn btn-info w-100 py-3 mb-3">
-
-                                        <i class="las la-paper-plane me-2"></i>
-                                        Request For Approval
-
-                                    </button>
-
-                                </form>
-                                {% endif %}
-
-                                {% if res.Status == "Pending Approval" %}
-                                <form action="#"
-                                      method="POST">
-
-                                    {% csrf_token %}
-
-                                    <input type="hidden"
-                                           name="myAction"
-                                           value="cancelApproval">
-
-                                    <button class="btn btn-outline-danger w-100 py-3">
-
-                                        <i class="las la-times-circle me-2"></i>
-                                        Cancel Approval Request
-
-                                    </button>
-
-                                </form>
-                                {% endif %}
-
+                            <div class="card-header bg-white border-0 pt-4 px-4">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-info-subtle timeline-icon p-3 me-3">
+                                            <i class="mdi mdi-paperclip text-info fs-4"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="fw-bold mb-1">Attachments</h5>
+                                            <small class="text-muted">
+                                                Document files and references
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-info">
+                                        {{ attachments|length }} File(s)
+                                    </span>
+                                </div>
                             </div>
 
+                            <div class="card-body px-4 pb-4">
+                                {% if attachments %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>File Name</th>
+                                                <!-- <th>Type</th> -->
+                                                {% if res.Status == "Open" %}
+                                                <th class="text-center">Action</th>
+                                                {% endif %}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for attachment in attachments %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="mdi mdi-file-pdf-box me-2 fs-5"></i>
+                                                        <span class="fw-semibold">{{ attachment.File_Name }}.{{ attachment.File_Type }}</span>
+                                                    </div>
+                                                </td>
+                                                <!-- <td>
+                                                    <span class="badge bg-light text-dark">
+                                                        {{ attachment.File_Type }}
+                                                    </span>
+                                                </td> -->
+
+                                                {% if res.Status == "Open" %}
+                                                <td class="text-center">
+                                                    <!-- Download Button -->
+                                                    <!-- <a href="{{ attachment.file.url }}"
+                                                        class="btn btn-sm btn-outline-success"
+                                                        download="{{ attachment.file_name }}" title="Download">
+                                                        <i class="mdi mdi-download"></i>
+                                                    </a> -->
+
+                                                    <!-- Delete Button -->
+                                                    <form action="{% url 'delete_leave_attachments' res.Application_No %}" method="POST" class="attachmentDeleteForm"
+                                                        novalidate>
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="docID" value="{{attachment.AuxiliaryIndex2}}">
+                                                        <input type="hidden" name="tableID" value="{{attachment.Table_ID}}">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger delete-attachment rounded-1" title="Delete">
+                                                            <i class="mdi mdi-trash-can"></i>
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                                {% endif %}
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% else %}
+                                <div class="alert alert-light border-1 text-center py-5" role="alert">
+                                    <i class="mdi mdi-file-document-outline fs-1 text-muted mb-3 d-block"></i>
+                                    <h6 class="text-muted">No attachments yet</h6>
+                                    <p class="text-muted mb-0">
+                                        {% if res.Status == "Open" %}
+                                        Click the "Upload Attachment" button to add files
+                                        {% else %}
+                                        No files have been attached to this request
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                {% endif %}
+                            </div>
                         </div>
+                        
 
                         <!-- TIMELINE -->
-                        <div class="card border-0 shadow-sm rounded-4">
-
+                        <div class="card border-0 shadow-sm rounded-4 mb-4">
                             <div class="card-body p-4">
-
                                 <h5 class="fw-bold mb-4">
                                     Request Timeline
                                 </h5>
 
                                 <div class="timeline-wrapper">
-
                                     <div class="timeline-item mb-4">
-
                                         <div class="d-flex">
-
                                             <div class="timeline-icon bg-primary me-3">
                                                 <i class="mdi mdi-file-document text-white"></i>
                                             </div>
 
                                             <div>
-
                                                 <h6 class="fw-semibold mb-1">
                                                     Request Created
                                                 </h6>
-
                                                 <small class="text-muted" id="application_date">
                                                     {{res.Application_Date}}
                                                 </small>
-
                                             </div>
-
                                         </div>
-
                                     </div>
 
                                     <div class="timeline-item mb-4">
-
                                         <div class="d-flex">
-
                                             <div class="timeline-icon bg-warning me-3">
                                                 <i class="mdi mdi-clock text-white"></i>
                                             </div>
 
                                             <div>
-
-                                                <h6 class="fw-semibold mb-1">
-                                                    Current Status
-                                                </h6>
-
-                                                <small class="text-muted">
-                                                    {{res.Status}}
-                                                </small>
-
+                                                <h6 class="fw-semibold mb-1"> Current Status </h6>
+                                                <small class="text-muted"> {{res.Status}} </small>
                                             </div>
-
                                         </div>
-
                                     </div>
 
                                     <div class="timeline-item">
-
                                         <div class="d-flex">
-
                                             <div class="timeline-icon bg-success me-3">
                                                 <i class="mdi mdi-calendar-check text-white"></i>
                                             </div>
-
                                             <div>
-
-                                                <h6 class="fw-semibold mb-1">
-                                                    Planned leave Date
-                                                </h6>
-
+                                                <h6 class="fw-semibold mb-1"> Planned leave Date </h6>
                                                 <small class="text-muted">
                                                     {{res.Start_Date}}
                                                 </small>
-
                                             </div>
-
                                         </div>
-
                                     </div>
-
                                 </div>
-
                             </div>
-
                         </div>
 
+                        <!-- ACTIONS -->
+                        <div class="card border-0 shadow-sm rounded-4 mb-4">
+                            <div class="card-body p-4">
+                                <h5 class="fw-bold mb-4"> Request Actions </h5>
+                                {% if res.Status == "Open" %}
+                                <button id="requestApprovalBtn" class="btn btn-primary w-100 py-3 mb-3"
+                                    data-url="{% url 'leave_approval' res.Application_No %}">
+                                    <i class="mdi mdi-send me-2"></i>
+                                    Request For Approval
+                                </button>
+                                {% endif %}
+                        
+                                {% if res.Status == "Pending Approval" %}
+                                <button id="cancelApprovalBtn" class="btn btn-outline-danger w-100 py-3"
+                                    data-url="{% url 'cancel_leave_approval' res.Application_No %}">
+                                    <i class="mdi-close-circle-outline me-2"></i>
+                                    Cancel Approval Request
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- APPROVERS -->
                 {% if res.Status == "Pending Approval" %}
                 <div class="card border-0 shadow-sm rounded-4 mt-4">
-
                     <div class="card-header bg-white border-0 pt-4 px-4">
-
                         <div class="d-flex align-items-center">
-
                             <div class="bg-info-subtle timeline-icon p-3 me-3">
                                 <i class="mdi mdi-account-group text-info fs-4"></i>
                             </div>
-
                             <div>
-
-                                <h5 class="fw-bold mb-1">
-                                    Document Approvers
-                                </h5>
-
+                                <h5 class="fw-bold mb-1"> Document Approvers </h5>
                                 <small class="text-muted">
                                     Approval workflow details
                                 </small>
-
                             </div>
-
                         </div>
-
                     </div>
-
                     <div class="card-body px-4 pb-4">
-
                         <div class="table-responsive">
-
                             <table class="table table-hover align-middle">
-
                                 <thead class="table-light">
-
                                     <tr>
                                         <th>Entry No.</th>
                                         <th>Name</th>
@@ -477,103 +517,408 @@
                                         <th>Modified By</th>
                                         <th>Modified Date</th>
                                     </tr>
-
                                 </thead>
 
                                 <tbody>
 
                                     {% for Approvers in Approvers %}
                                     <tr>
-
                                         <td>{{Approvers.Entry_No_}}</td>
-
                                         <td>{{Approvers.Approver_ID}}</td>
-
                                         <td>{{Approvers.Sequence_No_}}</td>
-
                                         <td>
-
                                             {% if Approvers.Status == "Approved" %}
                                             <span class="badge bg-success">
                                                 {{Approvers.Status}}
                                             </span>
-
                                             {% elif Approvers.Status == "Pending" %}
                                             <span class="badge bg-warning">
                                                 {{Approvers.Status}}
                                             </span>
-
                                             {% else %}
                                             <span class="badge bg-secondary">
                                                 {{Approvers.Status}}
                                             </span>
                                             {% endif %}
-
                                         </td>
-
                                         <td>
                                             {{Approvers.Last_Modified_By_User_ID}}
                                         </td>
-
                                         <td id="ModifiedDate{{Approvers.Entry_No_}}">
                                             {{Approvers.Last_Date_Time_Modified}}
                                         </td>
-
                                     </tr>
-
                                     {% endfor %}
-
                                 </tbody>
-
                             </table>
-
                         </div>
-
                     </div>
-
                 </div>
                 {% endif %}
-
             </div>
         </div>
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
 <script>
-
     $(document).ready(function () {
+        /* ── CSRF token from cookie ───────────────────────────────────── */
+        function csrf() {
+            var match = document.cookie.match(/csrftoken=([^;]+)/);
+            return match ? match[1] : '';
+        }
 
-        $("#application_date").val(
-            moment('{{res.Application_Date}}', "YYYY-MM-DD")
-            .format('Do MMM YYYY')
-        );
+        /* ── Toast helpers matching your message templates ────────────── */
+        function toastOk(msg) {
+            iziToast.success({
+                title: 'Success',
+                message: msg,
+                position: 'topCenter',
+                timeout: 4000,
+                theme: 'dark',
+                progressBarColor: '#ffffff',
+                backgroundColor: '#198754',
+                titleColor: '#fff',
+                messageColor: '#fff',
+                maxWidth: '400px',
+                transitionIn: 'fadeInDown',
+                transitionOut: 'fadeOutUp'
+            });
+        }
 
-        $("#start_date").val(
-            moment('{{res.Start_Date}}', "YYYY-MM-DD")
-            .format('Do MMM YYYY')
-        );
+        function toastErr(msg) {
+            iziToast.error({
+                title: 'Error',
+                message: msg,
+                position: 'topCenter',
+                timeout: 5000,
+                theme: 'dark',
+                progressBarColor: '#ffffff',
+                backgroundColor: '#dc3545',
+                titleColor: '#fff',
+                messageColor: '#fff',
+                maxWidth: '400px',
+                transitionIn: 'fadeInDown',
+                transitionOut: 'fadeOutUp'
+            });
+        }
 
-        $("#end_date").val(
-            moment('{{res.End_Date}}', "YYYY-MM-DD")
-            .format('Do MMM YYYY')
-        );
-        $("#resumption_date").val(
-            moment('{{res.Resumption_Date}}', "YYYY-MM-DD")
-            .format('Do MMM YYYY')
-        );
+        function toastInfo(msg) {
+            iziToast.info({
+                title: 'Info',
+                message: msg,
+                position: 'topCenter',
+                timeout: 4000,
+                theme: 'dark',
+                progressBarColor: '#ffffff',
+                backgroundColor: '#0dcaf0',
+                titleColor: '#fff',
+                messageColor: '#fff',
+                maxWidth: '400px',
+                transitionIn: 'fadeInDown',
+                transitionOut: 'fadeOutUp'
+            });
+        }
 
-        // {% for Approvers in Approvers %}
-        // $("#ModifiedDate{{Approvers.Entry_No_}}")
-        //     .empty()
-        //     .append(
-        //         moment(
-        //             '{{Approvers.Last_Date_Time_Modified}}',
-        //             "YYYY-MM-DD"
-        //         ).format('Do MMM YYYY')
-        //     );
-        // {% endfor %}
+        /* ── Reload after delay ───────────────────────────────────────── */
+        function reloadAfter(ms) {
+            setTimeout(function () { location.reload(); }, ms || 1500);
+        }
 
+        /* ── REQUEST FOR APPROVAL ─────────────────────────────────────── */
+        $(document).on('click', '#requestApprovalBtn', function () {
+            var url = $(this).data('url');
+            var $btn = $(this);
+            
+            console.log('URL:', url); // Debug: Check if URL is populated
+
+            if (!url) {
+                console.error('data-url is empty!');
+                return;
+            }
+
+            $btn.prop('disabled', true)
+                .html('<span class="spinner-border spinner-border-sm me-2"></span>Sending...');
+
+            $.ajax({
+                type: 'POST',
+                url: url,
+                headers: { 'X-CSRFToken': csrf() },
+                data: {},
+
+                success: function (data) {
+                    if (data.success === true) {
+                        toastOk(data.message);
+                        reloadAfter(1600);
+                    } else {
+                        toastErr(data.error);
+                        $btn.prop('disabled', false)
+                            .html('<i class="mdi mdi-send me-2"></i>Request For Approval');
+                    }
+                },
+                error: function (xhr) {
+                    var msg = 'An unexpected error occurred';
+                    try { msg = xhr.responseJSON.error || msg; } catch (e) { }
+                    toastErr(msg);
+                    $btn.prop('disabled', false)
+                        .html('<i class="mdi mdi-send me-2"></i>Request For Approval');
+                }
+            });
+        });
+
+        /* ── CANCEL APPROVAL ──────────────────────────────────────────── */
+        $(document).on('click', '#cancelApprovalBtn', function () {
+            var url = $(this).data('url');
+            var $btn = $(this);
+
+            if (!confirm('Are you sure you want to cancel this approval request?')) return;
+
+            $btn.prop('disabled', true)
+                .html('<span class="spinner-border spinner-border-sm me-2"></span>Cancelling...');
+
+            $.ajax({
+                type: 'POST',
+                url: url,
+                headers: { 'X-CSRFToken': csrf() },
+                data: {},
+                success: function (data) {
+                    if (data.success === true) {
+                        toastOk(data.message);
+                        reloadAfter(1600);
+                    } else {
+                        toastErr(data.error);
+                        $btn.prop('disabled', false)
+                            .html('<i class="mdi-close-circle-outline me-2"></i>Cancel Approval Request');
+                    }
+                },
+                error: function (xhr) {
+                    var msg = 'An unexpected error occurred';
+                    try { msg = xhr.responseJSON.error || msg; } catch (e) { }
+                    toastErr(msg);
+                    $btn.prop('disabled', false)
+                        .html('<i class="mdi-close-circle-outline me-2"></i>Cancel Approval Request');
+                }
+            });
+        });
+
+        /* ── ATTACHMENT UPLOAD ────────────────────────────────────────── */
+        $(document).on('submit', '#Attachment form', function (e) {
+            e.preventDefault();
+
+            var files = $('#fileInput')[0].files;
+            if (!files.length) {
+                toastErr('Please select at least one file');
+                return;
+            }
+
+            var $form = $(this);
+            var $btn = $('#uploadBtn');
+            var $progress = $('#uploadProgress');
+            var $bar = $('#progressBar');
+            var $text = $('#progressText');
+
+            $btn.prop('disabled', true).text('Uploading...');
+            $progress.removeClass('d-none');
+            $bar.css('width', '0%');
+            $text.text('Uploading...');
+
+            var formData = new FormData();
+            for (var i = 0; i < files.length; i++) {
+                formData.append('attachments', files[i]);
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: $form.attr('action'),
+                headers: { 'X-CSRFToken': csrf() },
+                data: formData,
+                processData: false,
+                contentType: false,
+                xhr: function () {
+                    var xhr = new window.XMLHttpRequest();
+                    xhr.upload.addEventListener('progress', function (e) {
+                        if (e.lengthComputable) {
+                            var pct = Math.round((e.loaded / e.total) * 100);
+                            $bar.css('width', pct + '%');
+                            $text.text(pct + '%');
+                        }
+                    }, false);
+                    return xhr;
+                },
+                success: function (data) {
+                    $btn.prop('disabled', false).text('Upload');
+                    $progress.addClass('d-none');
+                    $('#fileInput').val('');
+
+                    if (data.success === true) {
+                        toastOk(data.message);
+                        $('#Attachment').modal('hide');
+                        reloadAfter(1200);
+                    } else {
+                        toastErr(data.error);
+                    }
+                },
+                error: function (xhr) {
+                    $btn.prop('disabled', false).text('Upload');
+                    $progress.addClass('d-none');
+                    var msg = 'Upload failed. Please try again.';
+                    try { msg = xhr.responseJSON.error || msg; } catch (e) { }
+                    toastErr(msg);
+                }
+            });
+        });
+
+        /* ── ATTACHMENT DELETE ────────────────────────────────────────── */
+        $(document).on('submit', '.attachmentDeleteForm', function (e) {
+            e.preventDefault();
+
+            if (!confirm('Are you sure you want to delete this attachment?')) return;
+
+            var $form = $(this);
+            var $btn = $form.find('button[type=submit]');
+            $btn.prop('disabled', true);
+
+            $.ajax({
+                type: 'POST',
+                url: $form.attr('action'),
+                headers: { 'X-CSRFToken': csrf() },
+                data: {
+                    docID: $form.find('[name=docID]').val(),
+                    tableID: $form.find('[name=tableID]').val(),
+                },
+                success: function (data) {
+                    if (data.success === true) {
+                        toastOk(data.message);
+                        reloadAfter(1200);
+                    } else {
+                        toastErr(data.error);
+                        $btn.prop('disabled', false);
+                    }
+                },
+                error: function (xhr) {
+                    var msg = 'Delete failed. Please try again.';
+                    try { msg = xhr.responseJSON.error || msg; } catch (e) { }
+                    toastErr(msg);
+                    $btn.prop('disabled', false);
+                }
+            });
+        });
+        
+        /* ── MODIFY LEAVE ──────────────────────────────────────────────── */
+
+        var editMode = false;
+
+        /* Fields that become editable — note: read-only display fields stay disabled */
+        var $editableFields = $('.detail-field');
+
+        $('#editLeaveBtn').on('click', function () {
+            editMode = true;
+
+            /* Unlock all editable detail fields */
+            $editableFields.prop('disabled', false);
+
+            /* Show required asterisks */
+            $('.edit-only').removeClass('d-none');
+
+            /* Show the save/cancel action bar */
+            $('#modifyActionBar').removeClass('d-none');
+
+            /* Change Edit button to indicate active edit state */
+            $(this)
+                .addClass('btn-warning')
+                .removeClass('btn-outline-danger')
+                .html('<i class="mdi mdi-pencil-off me-1"></i> Editing…')
+                .prop('disabled', true);
+
+            /* Sync daysApplied visibility with current Return Same Day value */
+            syncDaysField();
+        });
+
+        /* Return Same Day toggle while in edit mode */
+        $(document).on('change', '#mod_isReturnSameDay', function () {
+            syncDaysField();
+        });
+
+        function syncDaysField() {
+            var val = $('#mod_isReturnSameDay').val();
+            var $daysInput = $('#mod_daysApplied');
+            if (val === 'True') {
+                $daysInput.val(1).prop('disabled', true);
+            } else {
+                if (editMode) $daysInput.prop('disabled', false);
+            }
+        }
+
+        /* Cancel edit — restore all fields to disabled, hide bar */
+        $('#cancelEditBtn').on('click', function () {
+            editMode = false;
+            $editableFields.prop('disabled', true);
+            $('.edit-only').addClass('d-none');
+            $('#modifyActionBar').addClass('d-none');
+            $('#editLeaveBtn')
+                .removeClass('btn-warning')
+                .addClass('btn-outline-primary')
+                .html('<i class="mdi mdi-pencil me-1"></i> Edit Request')
+                .prop('disabled', false);
+        });
+
+        /* Submit modify via AJAX */
+        $('#modifyLeaveForm').on('submit', function (e) {
+            e.preventDefault();
+
+            /* Basic validation */
+            if (!$('select[name=leaveType]').val()) {
+                return toastErr('Please select a leave type.');
+            }
+            if (!$('#mod_start_date').val()) {
+                return toastErr('Please select a start date.');
+            }
+            if (!$('#mod_isReturnSameDay').val()) {
+                return toastErr('Please indicate if you return the same day.');
+            }
+
+            var $btn = $('#saveModifyBtn');
+            $btn.prop('disabled', true)
+                .html('<span class="spinner-border spinner-border-sm me-2"></span>Saving…');
+
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'leave' %}",
+                headers: { 'X-CSRFToken': csrf() },
+                data: {
+                    applicationNo: $('input[name=applicationNo]').val(),
+                    myAction: 'modify',
+                    dimension3: $('input[name=dimension3]').val(),
+                    leaveType: $('select[name=leaveType]').val(),
+                    plannerStartDate: $('#mod_start_date').val(),
+                    daysApplied: $('#mod_daysApplied').val() || 1,
+                    isReturnSameDay: $('#mod_isReturnSameDay').val(),
+                    directorReliever: $('#mod_directorReliever').val() || '',
+                },
+                success: function (data) {
+                    $btn.prop('disabled', false)
+                        .html('<i class="mdi mdi-content-save me-1"></i> Save Changes');
+
+                    if (data.response) {
+                        toastOk('Leave request updated successfully.');
+                        /* Exit edit mode then reload to reflect server-side recalculations */
+                        $('#cancelEditBtn').trigger('click');
+                        reloadAfter(1600);
+                    } else {
+                        toastErr(data.error || 'Could not save changes. Please try again.');
+                    }
+                },
+                error: function (xhr) {
+                    $btn.prop('disabled', false)
+                        .html('<i class="mdi mdi-content-save me-1"></i> Save Changes');
+                    var msg = 'An unexpected error occurred.';
+                    try { msg = xhr.responseJSON.error || msg; } catch (e) { }
+                    toastErr(msg);
+                }
+            });
+        });
     });
 </script>
-
 {% endblock %}

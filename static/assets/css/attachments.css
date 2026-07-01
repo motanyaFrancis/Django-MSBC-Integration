@@ -1,0 +1,259 @@
+/* ============================================================
+   GLOBAL ATTACHMENT UPLOAD — attachments.css
+   Drop-zone modal used across all document detail pages.
+   ============================================================ */
+
+/* ── Drop-zone container ──────────────────────────────────── */
+.dz-zone {
+    border: 2px dashed #c8cfd8;
+    border-radius: 16px;
+    background: #f8f9fb;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+    position: relative;
+    outline: none;
+}
+
+.dz-zone:hover,
+.dz-zone:focus-visible {
+    border-color: #0d6efd;
+    background: #eef3ff;
+}
+
+.dz-zone.dz-over {
+    border-color: #0d6efd;
+    background: #dde8ff;
+}
+
+.dz-zone.dz-has-files {
+    border-style: solid;
+    border-color: #0d6efd;
+    background: #f0f4ff;
+}
+
+.dz-zone-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #e8edff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    transition: transform 0.2s ease;
+}
+
+.dz-zone:hover .dz-zone-icon,
+.dz-zone.dz-over .dz-zone-icon {
+    transform: translateY(-3px);
+}
+
+.dz-zone-icon i {
+    font-size: 1.6rem;
+    color: #0d6efd;
+}
+
+.dz-zone-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1a1f36;
+    margin-bottom: 0.25rem;
+}
+
+.dz-zone-sub {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-bottom: 0.75rem;
+}
+
+.dz-browse-btn {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #0d6efd;
+    border: 1.5px solid #0d6efd;
+    border-radius: 6px;
+    padding: 0.3rem 0.9rem;
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+    user-select: none;
+}
+
+.dz-browse-btn:hover {
+    background: #0d6efd;
+    color: #fff;
+}
+
+/* ── File list ────────────────────────────────────────────── */
+.dz-file-list {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dz-file-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    border: 1px solid #e2e6ea;
+    border-radius: 10px;
+    padding: 0.55rem 0.85rem;
+    font-size: 0.82rem;
+    animation: dz-slide-in 0.18s ease;
+}
+
+@keyframes dz-slide-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.dz-file-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1rem;
+}
+
+/* Icon colour by extension group */
+.dz-file-icon.dz-pdf   { background: #fde8e8; color: #c0392b; }
+.dz-file-icon.dz-doc   { background: #dce9fb; color: #1a56db; }
+.dz-file-icon.dz-sheet { background: #dcfce7; color: #15803d; }
+.dz-file-icon.dz-img   { background: #fef9c3; color: #a16207; }
+.dz-file-icon.dz-ppt   { background: #ffe4d6; color: #c2410c; }
+.dz-file-icon.dz-txt   { background: #f3f4f6; color: #374151; }
+.dz-file-icon.dz-other { background: #f3f4f6; color: #6b7280; }
+
+.dz-file-meta {
+    flex: 1;
+    min-width: 0;
+}
+
+.dz-file-name {
+    font-weight: 500;
+    color: #1a1f36;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 220px;
+}
+
+.dz-file-size {
+    color: #9ca3af;
+    font-size: 0.75rem;
+    margin-top: 1px;
+}
+
+.dz-file-remove {
+    background: none;
+    border: none;
+    padding: 4px 6px;
+    border-radius: 6px;
+    color: #9ca3af;
+    cursor: pointer;
+    flex-shrink: 0;
+    line-height: 1;
+    transition: background 0.15s, color 0.15s;
+}
+
+.dz-file-remove:hover {
+    background: #fde8e8;
+    color: #c0392b;
+}
+
+/* ── Progress bar ─────────────────────────────────────────── */
+.dz-progress-wrap {
+    margin-top: 1rem;
+}
+
+.dz-progress-wrap .progress {
+    height: 6px;
+    border-radius: 99px;
+    background: #e9ecef;
+}
+
+.dz-progress-wrap .progress-bar {
+    background: #0d6efd;
+    border-radius: 99px;
+    transition: width 0.2s ease;
+}
+
+.dz-progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin-top: 4px;
+}
+
+/* ── Upload result badge ──────────────────────────────────── */
+.dz-result {
+    font-size: 0.82rem;
+    padding: 0.5rem 0.85rem;
+    border-radius: 8px;
+    margin-top: 0.75rem;
+    display: none;
+}
+
+.dz-result.dz-ok   { background: #dcfce7; color: #15803d; }
+.dz-result.dz-fail { background: #fde8e8; color: #c0392b; }
+
+/* ── Modal header accent ──────────────────────────────────── */
+.dz-modal-header {
+    background: linear-gradient(135deg, #0d6efd 0%, #3b82f6 100%);
+    border-radius: 0;
+    padding: 1rem 1.25rem;
+}
+
+.dz-modal-header .modal-title {
+    color: #fff;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.dz-modal-header .btn-close {
+    filter: invert(1) brightness(2);
+}
+
+/* ── Accepted types hint chips ────────────────────────────── */
+.dz-type-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: center;
+    margin-top: 0.6rem;
+}
+
+.dz-type-chip {
+    font-size: 0.7rem;
+    font-weight: 500;
+    padding: 2px 7px;
+    border-radius: 5px;
+    background: #e8edff;
+    color: #3b5bdb;
+    letter-spacing: 0.02em;
+}
+
+/* ── Empty state in file list ─────────────────────────────── */
+.dz-empty-hint {
+    font-size: 0.78rem;
+    color: #adb5bd;
+    text-align: center;
+    padding: 0.5rem 0;
+    display: none;
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 480px) {
+    .dz-file-name { max-width: 140px; }
+}

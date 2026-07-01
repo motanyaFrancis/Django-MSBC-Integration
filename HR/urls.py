@@ -8,9 +8,13 @@ urlpatterns = [
     # Leave URLs
     path("leave/", views.LeaveRequest.as_view(), name="leave"),
     path('Leave_Data/', views.Leave_Data.as_view(), name='Leave_Data'),
-    path("leave/<str:pk>/", views.LeaveDetail.as_view(), name="LeaveDetail"),
-    path("LeaveAttachments/", views.LeaveAttachments.as_view(), name="LeaveAttachments"),
+    path("leave/<str:pk>/", views.LeaveDetail.as_view(), name="leave_detail"),
+    path("leave-attachments/<str:pk>/", views.LeaveAttachments.as_view(), name="Leave_Attachments"),
+    path("delete-leave-attachments/<str:pk>/", views.DeleteLeaveAttachments.as_view(), name="delete_leave_attachments"),
     path("Leave_Approvers_Data/", views.Leave_Approvers_Data.as_view(), name="Leave_Approvers_Data"),
+    path("leave-approval/<str:pk>/", views.LeaveApproval.as_view(), name="leave_approval"),
+    path("cancel-leave-approval/<str:pk>/", views.CancelLeaveApproval.as_view(), name="cancel_leave_approval"),
+    path("get-director/", views.GetDirector.as_view(), name="get_director"),
 
     # Training URLs
     path("training/", views.TrainingRequest.as_view(), name="training"),
@@ -18,9 +22,15 @@ urlpatterns = [
     path("training/<str:pk>", views.TrainingDetailsView.as_view(), name="training_details"),
     path("training-lines/<str:pk>/", views.TrainingLines.as_view(), name="training-lines"
     ),
-    
+
     # Salary Advance
 
+    path("salary-advance/", views.SalaryAdvance.as_view(), name="salary_advance"),
+    path("salary-advance/<str:pk>", views.SalaryAdvanceDetail.as_view(), name="advance_details"),
+    path("request-salary-advance-approval/<str:pk>/", views.LeaveApproval.as_view(), name="request_salary_advance_approval"),
+    path("cancel-salary-advance-approval/<str:pk>/", views.CancelLeaveApproval.as_view(), name="cancel_salary_advance_approval"),
+    
+    
     
     # Employee transfers
     path('transfer/', views.TransferRequestView.as_view(), name="transfer"),

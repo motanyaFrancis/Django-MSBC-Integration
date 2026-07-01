@@ -101,12 +101,13 @@ class LoginView(
                     password=self.soap_password,
                     params=[username],
                 )
-                
+
                 if response is True:
                     request.session["reset_id"] = username
                     next_url = request.POST.get("next", "")
                     reset_url = f"/reset/?next={next_url}" if next_url else "/reset/"
-                    messages.warning(request, "Default password detected. Reset required.")
+                    messages.warning(
+                        request, "Default password detected. Reset required.")
                     return redirect(reset_url)
 
                 messages.error(request, "Password reset failed")
@@ -225,7 +226,6 @@ class LoginView(
         except Exception:
             logging.exception("Device tracking failed")
 
-
     def _redirect_auth(self, next_url="", route="auth"):
         from django.urls import reverse
         base = reverse(route)
@@ -233,15 +233,16 @@ class LoginView(
             return redirect(f"{base}?next={next_url}")
         return redirect(base)
 
-
     # =========================================================
     # PROFILE PHOTO LOADER
     # =========================================================
+
     def load_profile_photo(self, employee_no):
         try:
             image = self.call_soap(
                 soap_method="FnGetEmployeePicture",
-                params=[employee_no],  # remove username/password — SOAPMixin handles auth
+                # remove username/password — SOAPMixin handles auth
+                params=[employee_no],
             )
 
             if not image:
@@ -252,7 +253,8 @@ class LoginView(
 
             # Scoped keys — not global
             cache.set(profile_image_key(employee_no), image, timeout=60 * 60)
-            cache.set(profile_image_format_key(employee_no), kind.extension if kind else "jpg", timeout=60 * 60)
+            cache.set(profile_image_format_key(employee_no),
+                      kind.extension if kind else "jpg", timeout=60 * 60)
 
         except Exception:
             logging.exception("Profile photo load failed")
@@ -288,6 +290,7 @@ class ProfileView(
     AuthRequiredMixin,
     SessionMixin,
     ODataMixin,
+    SOAPMixin,
     View,
 ):
 
@@ -365,7 +368,7 @@ class ProfileView(
             email = request.POST.get("email")
 
             response = self.call_soap(
-                soap_method="FnEmployeeProfileUpdateRequest",
+                soap_method="FnEmployeeDetailsUpdateRequest",
                 params=[
                     docNo,
                     employee_no,
@@ -378,6 +381,8 @@ class ProfileView(
                     email
                 ],
             )
+
+            print(response)
 
             if response is True:
                 messages.success(
@@ -455,6 +460,7 @@ class ResetPasswordView(
             token = request.POST.get("token")
             password = request.POST.get("password")
             confirm_password = request.POST.get("confirm_password")
+
             print(
                 f"Reset Password POST - User: {user_id}, Token: {token}, Password: {'*' * len(password)}, Confirm: {'*' * len(confirm_password)}")
 
@@ -515,18 +521,6 @@ class ChangePortalPasswordView(
             new_password = request.POST.get("new_password")
             confirm_password = request.POST.get("confirm_password")
 
-            print('Portal_Password:', Portal_Password)
-
-            print('current_password:', current_password)
-            print('new_password:', new_password)
-            print('confirm_password:', confirm_password)
-
-            encrypted_current = self.encrypt_password(current_password)
-            encrypted_new = self.encrypt_password(new_password)
-
-            print('encrypted_current:', encrypted_current)
-            print('encrypted_new:', encrypted_new)
-
             if not current_password or not new_password or not confirm_password:
                 messages.error(request, "All fields are required.")
                 return redirect("profile")
@@ -539,7 +533,9 @@ class ChangePortalPasswordView(
                 messages.error(request, "Current password is incorrect.")
                 return redirect("profile")
 
-            if encrypted_current == encrypted_new:
+            encrypted_new = self.encrypt_password(new_password)
+
+            if self.encrypt_password(current_password) == encrypted_new:
                 messages.error(
                     request, "New password cannot be the same as current password.")
                 return redirect("profile")
@@ -550,46 +546,95 @@ class ChangePortalPasswordView(
             )
 
             if response is True:
+                # =====================================================
+                # UPDATE SESSION WITH NEW PASSWORD
+                # =====================================================
+                self.update_session(
+                    request,
+                    Portal_Password=new_password,
+                    password=encrypted_new,
+                )
                 messages.success(request, "Password changed successfully.")
             else:
-                messages.error(request, "Current password is incorrect.")
+                messages.error(request, "Password change failed on server.")
 
             return redirect("profile")
 
         except Exception as e:
             logging.exception(e)
-            print(str(e))
             messages.error(
                 request, "An error occurred while changing password.")
             return redirect("profile")
 
 
+class UpdateProfilePicture(AuthRequiredMixin, SOAPMixin, EncryptionMixin, SessionMixin, View):
 
-class LoadProfilePicture(AuthRequiredMixin, SOAPMixin, EncryptionMixin, SessionMixin, View):
-
-    def get(self, request):
+    def post(self, request):
         try:
             session = self.get_session_context(request)
             employee_no = session.get("Employee_No_")
+            user_id = session.get("User_ID")
 
-            image = self.call_soap(
+            profile_picture = request.FILES.get("profile_picture")
+            if not profile_picture:
+                messages.error(request, "No file selected.")
+                return redirect("profile")
+
+            encoded_string = base64.b64encode(
+                profile_picture.read()).decode("utf-8")
+
+            # =====================================================
+            # STEP 1: UPDATE — returns True/False, not image data
+            # =====================================================
+            response = self.call_soap(
+                soap_method="FnUpdateEmployeePicture",
+                params=[
+                    employee_no,
+                    encoded_string,
+                    user_id,
+                ],
+            )
+
+            if response is not True:
+                messages.error(request, "Failed to update profile picture.")
+                return redirect("profile")
+
+            # =====================================================
+            # STEP 2: FETCH the newly updated picture
+            # =====================================================
+            new_image = self.call_soap(
                 soap_method="FnGetEmployeePicture",
                 params=[employee_no],
             )
-            if not image:
-                messages.error(request, "Profile picture not found.")
+
+            if not new_image:
+                messages.warning(
+                    request,
+                    "Profile picture updated, but could not refresh preview."
+                )
                 return redirect("profile")
 
-            binary_data = base64.b64decode(image)
+            binary_data = base64.b64decode(new_image)
             kind = filetype.guess(binary_data)
 
-            # Scoped to this employee — no cross-user bleed
-            cache.set(profile_image_key(employee_no), image, timeout=60 * 60)
-            cache.set(profile_image_format_key(employee_no), kind.extension if kind else "jpg", timeout=60 * 60)
+            # =====================================================
+            # STEP 3: REFRESH SCOPED CACHE (clear old, set new)
+            # =====================================================
+            cache.delete(profile_image_key(employee_no))
+            cache.delete(profile_image_format_key(employee_no))
 
-            messages.success(request, "Profile picture loaded successfully.")
+            cache.set(profile_image_key(employee_no),
+                      new_image, timeout=60 * 60)
+            cache.set(
+                profile_image_format_key(employee_no),
+                kind.extension if kind else "jpg",
+                timeout=60 * 60
+            )
+
+            messages.success(request, "Profile picture updated successfully.")
             return redirect("profile")
+
         except Exception as e:
             logging.exception(e)
-            messages.error(request, "Failed to load profile picture.")
+            messages.error(request, "Failed to update profile picture.")
             return redirect("profile")

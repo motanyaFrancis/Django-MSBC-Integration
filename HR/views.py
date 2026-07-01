@@ -71,9 +71,9 @@ class LeaveRequest(
 
             ctx = {
                 **session,
-                "res": open_leave,
-                "response": approved_leave,
-                "pending": pending_leave,
+                "open_requests": open_leave,
+                "approved_requests": approved_leave,
+                "pending_requests": pending_leave,
                 "leave": leave_types,
                 "directorReliever": [
                     x for x in employees if x.get("User_ID") != user_id
@@ -86,6 +86,91 @@ class LeaveRequest(
             logging.exception(e)
             messages.error(request, "Failed to load leave requests")
             return redirect("auth")
+
+    async def post(self, request):
+        try:
+            session = self.get_session_context(request)
+            # requisitionNo = pk
+            applicationNo = request.POST.get("applicationNo")
+            usersId = session.get("User_ID")
+            employeeNo = session.get("Employee_No_")
+            dimension3 = request.POST.get("dimension3")
+            leaveType = request.POST.get("leaveType")
+            plannerStartDate = request.POST.get("plannerStartDate")
+            daysApplied = request.POST.get("daysApplied")
+            isReturnSameDay = eval(request.POST.get("isReturnSameDay"))
+            myAction = request.POST.get("myAction")
+            directorReliever = request.POST.get("directorReliever")
+
+            if not daysApplied or isReturnSameDay == True:
+                daysApplied = 1
+
+            if not directorReliever:
+                directorReliever = ""
+
+            print("applicationNo", applicationNo)
+            print("usersId", usersId)
+            print("employeeNo", employeeNo)
+            print("dimension3", dimension3)
+            print("leaveType", leaveType)
+            print("plannerStartDate", plannerStartDate)
+            print("daysApplied", daysApplied)
+            print("isReturnSameDay", isReturnSameDay)
+            print("myAction", myAction)
+            print("directorReliever", directorReliever)
+
+            response = self.call_soap(
+                soap_method="FnLeaveApplication",
+                params=[
+                    applicationNo,
+                    employeeNo,
+                    usersId,
+                    dimension3,
+                    leaveType,
+                    plannerStartDate,
+                    int(daysApplied),
+                    isReturnSameDay,
+                    myAction,
+                    directorReliever,
+                ],
+            )
+            print("SOAP Response:", response)
+            if request.META.get("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest":
+                if response != "0" and response != None and response != "":
+                    return JsonResponse({"response": str(response)}, safe=False)
+                return JsonResponse({"error": str(response)}, safe=False)
+            else:
+                if response != "0" and response != None and response != "":
+                    messages.success(request, "Success")
+                    return redirect("leave_detail", pk=response)
+                else:
+                    messages.error(request, f"{response}")
+                    return redirect("leave_detail", pk=applicationNo)
+
+        except Exception as e:
+            logging.exception(e)
+            if request.META.get("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest":
+                return JsonResponse({"error": str(e)}, safe=False)
+            else:
+                messages.error(request, f"{e}")
+                return redirect("leave")
+
+
+class GetDirector(
+    AuthRequiredMixin,
+    SessionMixin,
+    View,
+):
+    def get(self, request):
+        try:
+            session = self.get_session_context(request)
+            HOD_User = session.get("HOD_User")
+
+            return JsonResponse(HOD_User, safe=False)
+
+        except Exception as e:
+            logging.exception(e)
+            return JsonResponse({"error": str(e)}, safe=False)
 
 
 class Leave_Data(
@@ -114,23 +199,18 @@ class Leave_Data(
             return JsonResponse({"error": str(e)}, safe=False)
 
 
-class Leave_Approvers_Data(View):
-
+class Leave_Approvers_Data(AuthRequiredMixin, SessionMixin, ODataMixin, View):
     async def get(self, request, pk):
         try:
             async with aiohttp.ClientSession() as client:
-
                 response = await self.filter_data(
                     endpoint="/QyApprovalEntries",
                     field="Document_No_",
                     operator="eq",
                     value=pk
                 )
-
             approvers = [x for x in response if x.get("Status") == "Open"]
-
             return JsonResponse(approvers, safe=False)
-
         except Exception as e:
             logging.exception(e)
             return JsonResponse({"error": str(e)}, safe=False)
@@ -190,7 +270,7 @@ class LeaveDetail(
                                     "value": pk,
                                 }
                             ],
-                            "alias": "file",
+                            "alias": "attachments",
                         },
                         {
                             "endpoint": "/QyApprovalCommentLines",
@@ -209,7 +289,7 @@ class LeaveDetail(
                         },
                         {
                             "endpoint": "/QyEmployees",
-                            "alias": "employees",
+                            "alias": "directorReliever",
                         },
                     ]
                 )
@@ -247,9 +327,6 @@ class LeaveDetail(
                 # "file": attachments,
                 # "Comments": comments,
                 # "leave": leave_types,
-                # "directorReliever": [
-                #     x for x in employees if x.get("User_ID") != user_id
-                # ],
             }
 
             return self.render_response(request, "leave/leave_detail.html", ctx)
@@ -280,7 +357,13 @@ class FnLeaveBalances(AuthRequiredMixin, View):
             return JsonResponse(0, safe=False)
 
 
-class LeaveAttachments(AuthRequiredMixin, View):
+class LeaveAttachments(
+        AuthRequiredMixin,
+        SessionMixin,
+        ODataMixin,
+        SOAPMixin,
+        ResponseMixin,
+        View):
 
     async def get(self, request, pk):
         try:
@@ -291,7 +374,6 @@ class LeaveAttachments(AuthRequiredMixin, View):
                     operator="eq",
                     value=pk
                 )
-
             return JsonResponse(data, safe=False)
 
         except Exception as e:
@@ -300,63 +382,105 @@ class LeaveAttachments(AuthRequiredMixin, View):
 
     async def post(self, request, pk):
         try:
-            soap_headers = request.session.get("soap_headers")
-            user_id = request.session.get("User_ID")
+            attachments = request.FILES.getlist("attachments")
 
-            files = request.FILES.getlist("attachment")
+            if not attachments:
+                return JsonResponse({"success": False, "error": "No files were received"})
 
+            table_id = 52177494
+            user_id = request.session["User_ID"]
             results = []
 
-            for file in files:
-                encoded = base64.b64encode(file.read())
-
-                res = self.upload_attachment(
-                    soap_headers,
+            for file in attachments:
+                response = self.upload_attachment(
+                    "FnUploadAttachedDocument",
                     pk,
-                    file.name,
-                    encoded,
-                    52177494,
+                    file,
+                    table_id,
                     user_id,
                 )
+                results.append(response)
 
-                results.append(res)
-
-            return JsonResponse(
-                {"success": True, "uploaded": len(files)},
-                safe=False,
-            )
+            return JsonResponse({
+                "success": True,
+                "message": f"{len(attachments)} file(s) uploaded successfully",
+            })
 
         except Exception as e:
             logging.exception(e)
             return JsonResponse({"success": False, "error": str(e)})
 
 
-class LeaveApproval(AuthRequiredMixin, View):
-
-    def post(self, request, pk):
+class DeleteLeaveAttachments(
+    AuthRequiredMixin,
+    SessionMixin,
+    ODataMixin,
+    SOAPMixin,
+    ResponseMixin,
+    View,
+):
+    async def post(self, request, pk):
         try:
-            soap_headers = request.session.get("soap_headers")
-            employee_no = request.session.get("Employee_No_")
-            application_no = request.POST.get("applicationNo")
+            session = self.get_session_context(request)
+            docID = int(request.POST.get("docID"))
+            tableID = int(request.POST.get("tableID"))
 
-            response = self.make_soap_request(
-                soap_headers,
-                "FnRequestLeaveApproval",
-                employee_no,
-                application_no,
+            response = self.call_soap(
+                soap_method="FnDeleteDocumentAttachment",
+                params=[pk, docID, tableID],
             )
 
-            if response:
-                messages.success(request, "Approval request sent")
-            else:
-                messages.error(request, "Approval failed")
+            if response is True:
+                return JsonResponse({
+                    "success": True,
+                    "message": "Attachment deleted successfully",
+                })
 
-            return redirect("LeaveDetail", pk=pk)
+            return JsonResponse({
+                "success": False,
+                "error": str(response),
+            })
 
         except Exception as e:
             logging.exception(e)
-            messages.error(request, str(e))
-            return redirect("LeaveDetail", pk=pk)
+            return JsonResponse({
+                "success": False,
+                "error": f"Failed to delete attachment: {e}",
+            })
+
+
+class LeaveApproval(AuthRequiredMixin, SessionMixin, ODataMixin, SOAPMixin, ResponseMixin, View):
+    def post(self, request, pk):
+        try:
+            session = self.get_session_context(request)
+            Employee_No_ = session.get("Employee_No_")
+            response = self.call_soap(
+                soap_method="FnRequestLeaveApproval",
+                params=[Employee_No_, pk]
+            )
+            if response is True:
+                return JsonResponse({"success": True, "message": "Approval requested successfully"})
+            return JsonResponse({"success": False, "error": str(response)})
+        except Exception as e:
+            logging.exception(e)
+            return JsonResponse({"success": False, "error": str(e)})
+
+
+class CancelLeaveApproval(AuthRequiredMixin, SessionMixin, ODataMixin, SOAPMixin, ResponseMixin, View):
+    def post(self, request, pk):
+        try:
+            session = self.get_session_context(request)
+            Employee_No_ = session.get("Employee_No_")
+            response = self.call_soap(
+                soap_method="FnCancelLeaveApproval",
+                params=[Employee_No_, pk]
+            )
+            if response is True:
+                return JsonResponse({"success": True, "message": "Approval cancelled successfully"})
+            return JsonResponse({"success": False, "error": str(response)})
+        except Exception as e:
+            logging.exception(e)
+            return JsonResponse({"success": False, "error": str(e)})
 
 
 """
@@ -373,6 +497,7 @@ class TrainingRequest(
     SessionMixin,
     ODataMixin,
     ResponseMixin,
+    SOAPMixin,
     View,
 ):
 
@@ -428,6 +553,14 @@ class TrainingRequest(
 
             if not training_need:
                 training_need = "none"
+
+            print(
+                employee_no,
+                request_no,
+                is_adhoc,
+                training_need,
+                my_action,
+            )
 
             response = self.call_soap(
                 soap_method="FnTrainingRequest",
@@ -762,37 +895,236 @@ capturing requested amount, repayment period, reason, and application date.
 Supports workflow-based review and approval processing.
 """
 
+
 class SalaryAdvance(
     AuthRequiredMixin,
     ODataMixin,
     SessionMixin,
+    SOAPMixin,
     View,
 ):
     async def get(self, request):
         try:
-            session = await self.get_session_context(request)
-            employee_no = await request.session['Employee_No_']
+            session = self.get_session_context(request)
+            employee_no = session.get('Employee_No_')
 
-            response = await self.filter_data(
-                endpoint="/QySalaryAdvances",
-                field="Employee_No",
-                operator="eq",
-                value=employee_no
-            )
+            async with aiohttp.ClientSession() as client:
+                (
+                    salary_advance,
+                    salary_products,
+                    employees,
 
-            salary_products = await self.all_data(
-                 endpoint="/QyLoanProductTypes",
-            )
+                ) = await asyncio.gather(
+
+                    self.filter_data(
+                        endpoint="/QySalaryAdvances",
+                        field="Employee_No",
+                        operator="eq",
+                        value=employee_no,
+                    ),
+
+                    self.all_data(endpoint="/QyLoanProductTypes"),
+
+                    self.all_data(endpoint="/QyEmployees"),
+                )
+
+                open_requests = [
+                    x for x in salary_advance if x.get("Loan_Status") == "Application"]
+                pending_requests = [x for x in salary_advance if x.get(
+                    "Loan_Status") == "Being Processed"]
+                approved_requests = [
+                    x for x in salary_advance if x.get("Loan_Status") == "Approved"]
+
+                print('open_requests: ', open_requests)
+                print(employee_no)
+                print('salary_advance: ', salary_advance)
 
             ctx = {
                 **session,
-
+                'open_requests': open_requests,
+                'pending_requests': pending_requests,
+                'approved_requests': approved_requests,
+                'salary_products': salary_products,
             }
 
             return render(request, 'advance/advance.html', ctx)
         except Exception as e:
             logging.exception(e)
             return JsonResponse({"error": str(e)}, safe=False)
+
+    async def post(self, request):
+
+        try:
+            session = self.get_session_context(request)
+            user_id = session.get("User_ID")
+            employee_no = session.get("Employee_No_")
+            loanNo = request.POST.get('loanNo')
+            productType = request.POST.get('productType')
+            amountRequested = float(request.POST.get('amountRequested'))
+            installments = int(request.POST.get('installments'))
+            myAction = request.POST.get('myAction')
+
+            print("user_id: ", user_id)
+            print("employee_no: ", employee_no)
+            print("loanNo: ", loanNo)
+            print("productType: ", productType)
+            print("amountRequested: ", amountRequested)
+            print("installments: ", installments)
+            print("myAction: ", myAction)
+
+            if installments <= 0 or installments > 12:
+                messages.info(
+                    request, "Installments cannot be less than 1 or more than 12")
+                return redirect('advance')
+
+            response = self.call_soap(
+                soap_method='FnSalaryAdvanceApplication',
+                params=[
+                    loanNo,
+                    employee_no,
+                    productType,
+                    amountRequested,
+                    user_id,
+                    installments,
+                    myAction
+                ],
+            )
+
+            if response:
+                messages.success(request, "Request sent successfully")
+                return redirect('advance_detail', pk=response)
+            else:
+                messages.error(
+                    request, f'An error occure kindly try again later: {response}')
+                return redirect('salary_advance')
+
+        except Exception as e:
+            messages.error(
+                request, f'Failed to submit Salary Advance Request: {e}')
+            logging.exception(e)
+        return redirect('salary_advance')
+
+class SalaryAdvanceDetail(
+    AuthRequiredMixin,
+    SessionMixin,
+    ODataMixin,
+    ResponseMixin,
+    View,
+):
+
+    async def get(self, request, pk):
+        try:
+            session = self.get_session_context(request)
+            user_id = session.get("User_ID")
+
+            async with aiohttp.ClientSession() as client:
+
+                document = await self.fetch_one(
+                    endpoint="/QySalaryAdvances",
+                    field="Loan_No",
+                    value=pk,
+                )
+                if not document:
+                    messages.error(request, "Advance application not found")
+                    return redirect("leave")
+
+                
+                related = await self.fetch_related(
+                    queries=[
+                        {
+                            "endpoint": "/QyApprovalEntries",
+                            "filters": [
+                                {
+                                    "field": "Document_No_",
+                                    "operator": "eq",
+                                    "value": pk,
+                                }
+                            ],
+                            "alias": "Approvers",
+                        },
+                        {
+                            "endpoint": "/QyDocumentAttachments",
+                            "filters": [
+                                {
+                                    "field": "No_",
+                                    "operator": "eq",
+                                    "value": pk,
+                                }
+                            ],
+                            "alias": "attachments",
+                        },
+                        {
+                            "endpoint": "/QyApprovalCommentLines",
+                            "filters": [
+                                {
+                                    "field": "Document_No_",
+                                    "operator": "eq",
+                                    "value": pk,
+                                }
+                            ],
+                            "alias": "Comments",
+                        },
+                        {
+                            "endpoint": "/QyLeaveTypes",
+                            "alias": "leave",
+                        },
+                        {
+                            "endpoint": "/QyEmployees",
+                            "alias": "directorReliever",
+                        },
+                    ]
+                )
+
+            ctx = {
+                **session,
+                "res": document,
+                **related,
+                # "Approvers": approvals,
+                # "file": attachments,
+                # "Comments": comments,
+                # "leave": leave_types,
+            }
+
+            return self.render_response(request, "advance/advance_details.html", ctx)
+
+        except Exception as e:
+            logging.exception(e)
+            messages.error(request, "Failed to load leave details")
+            return redirect("leave")
+
+class RequestAdvanceApproval(AuthRequiredMixin, SessionMixin, ODataMixin, SOAPMixin, ResponseMixin, View):
+    def post(self, request, pk):
+        try:
+            session = self.get_session_context(request)
+            Employee_No_ = session.get("Employee_No_")
+            response = self.call_soap(
+                soap_method="FnRequestSalaryAdvanceApproval",
+                params=[Employee_No_, pk]
+            )
+            if response is True:
+                return JsonResponse({"success": True, "message": "Approval requested successfully"})
+            return JsonResponse({"success": False, "error": str(response)})
+        except Exception as e:
+            logging.exception(e)
+            return JsonResponse({"success": False, "error": str(e)})
+
+
+class CancelAdvanceApproval(AuthRequiredMixin, SessionMixin, ODataMixin, SOAPMixin, ResponseMixin, View):
+    def post(self, request, pk):
+        try:
+            session = self.get_session_context(request)
+            Employee_No_ = session.get("Employee_No_")
+            response = self.call_soap(
+                soap_method="FnCancelSalaryAdvanceApproval",
+                params=[Employee_No_, pk]
+            )
+            if response is True:
+                return JsonResponse({"success": True, "message": "Approval cancelled successfully"})
+            return JsonResponse({"success": False, "error": str(response)})
+        except Exception as e:
+            logging.exception(e)
+            return JsonResponse({"success": False, "error": str(e)})
+
 
 """
 Employee Transfer Process:

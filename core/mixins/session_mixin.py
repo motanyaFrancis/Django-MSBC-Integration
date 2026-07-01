@@ -24,3 +24,16 @@ class SessionMixin:
             "password": request.session.get("password"),
             "leave_balance": request.session.get("leave_balance"),
         }
+
+    def update_session(self, request, **kwargs):
+        """
+        Update specific session values.
+        Usage: self.update_session(request, Portal_Password=new_password, password=encrypted_new)
+        """
+        for key, value in kwargs.items():
+            request.session[key] = value
+        request.session.modified = True
+
+    def clear_session(self, request):
+        """Clear all session data on logout"""
+        request.session.flush()
