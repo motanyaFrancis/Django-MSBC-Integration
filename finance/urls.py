@@ -8,5 +8,7 @@ urlpatterns = [
     path("ImprestSurrender/", views.ImprestSurrender.as_view(), name="ImprestSurrender"),
     path("StaffClaim/", views.StaffClaim.as_view(), name="StaffClaim"),
     path("UploadFinaceAttachment/<str:pk>", views.UploadFinaceAttachment.as_view(), name="UploadFinaceAttachment"),
+    path("GetDocumentAttachment/<str:pk>", views.GetDocumentAttachment.as_view(), name="GetDocumentAttachment"),
     path("imprestApproval/<str:pk>", views.imprestApproval.as_view(), name="imprestApproval"),
+    path("cancelImprestApproval/<str:pk>", views.cancelImprestApproval.as_view(), name="cancelImprestApproval"),
 ]

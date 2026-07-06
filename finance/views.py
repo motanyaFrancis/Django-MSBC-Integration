@@ -216,9 +216,11 @@ class ImprestDetail(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, 
                 ]
             )
             print(response)
+            messages.success(request, response)
             return redirect("ImprestDetail", pk)
         except Exception as e:
             print(e)
+            messages.error(request, e)
             return redirect("ImprestDetail", pk)
         
 class imprestApproval(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SOAPMixin, View):
@@ -226,7 +228,6 @@ class imprestApproval(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin
         try:
             print("approve imprest")
             session = self.get_session_context(request)
-            user_id = session.get("User_ID")
             employeeNo = session.get("Employee_No_")
             response = self.call_soap(
                 # soap_headers,
@@ -237,11 +238,34 @@ class imprestApproval(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin
                 ]
             )
             print(response)
+            messages.success(request, response)
             return redirect("ImprestDetail", pk)
         except Exception as e:
             print(e)
+            messages.error(request, e)
             return redirect("ImprestDetail", pk)
-
+        
+class cancelImprestApproval(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SOAPMixin, View):
+    async def post(self, request, pk):
+        try:
+            print("Cancel approve imprest")
+            session = self.get_session_context(request)
+            employeeNo = session.get("Employee_No_")
+            response = self.call_soap(
+                # soap_headers,
+                soap_method="FnCancelPaymentApproval",
+                params=[
+                    employeeNo,
+                    pk
+                ]
+            )
+            print(response)
+            messages.success(request, response)
+            return redirect("ImprestDetail", pk)
+        except Exception as e:
+            print(e)
+            messages.error(request, e)
+            return redirect("ImprestDetail", pk)
 
 class ImprestSurrender(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SOAPMixin, View):
     async def get(self, request):
@@ -312,8 +336,35 @@ class UploadFinaceAttachment(AuthRequiredMixin, SessionMixin, ODataMixin, Respon
                     ]
                 )
                 print(response)
+                messages.success(request, response)
             return redirect(redirectTo, pk)
     
         except Exception as e:
             print(e)
+            messages.success(request, e)
             return redirect(redirectTo, pk)
+        
+class GetDocumentAttachment(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SOAPMixin, View):
+    async def post(self, request, pk):
+        try:
+            print("view document")
+            attachmentID = request.POST.get("attachmentID")
+            tableId = int(request.POST.get("tableId"))
+            print(attachmentID, tableId)
+            response = self.call_soap(
+                # soap_headers,
+                soap_method="FnUploadAttachedDocument",
+                params=[
+                    pk,
+                    attachmentID,
+                    tableId
+                ]
+            )
+            print(response)
+            return redirect("ImprestDetail", pk)
+            # return redirect("viewFile")
+
+        except Exception as e:
+            print(e)
+            return redirect("ImprestDetail", pk)
+            # return redirect("viewFile")
