@@ -213,6 +213,22 @@ class ImprestDetail(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, 
             print(e)
             messages.error(request, e)
             return redirect("ImprestDetail", pk)
+
+class RequestImprestApproval(AuthRequiredMixin, SessionMixin, ODataMixin, SOAPMixin, ResponseMixin, View):
+    def post(self, request, pk):
+        try:
+            session = self.get_session_context(request)
+            Employee_No_ = session.get("Employee_No_")
+            response = self.call_soap(
+                soap_method="FnRequestPaymentApproval",
+                params=[Employee_No_, pk]
+            )
+            if response is True:
+                return JsonResponse({"success": True, "message": "Approval requested successfully"})
+            return JsonResponse({"success": False, "error": str(response)})
+        except Exception as e:
+            logging.exception(e)
+            return JsonResponse({"success": False, "error": str(e)})
         
 class imprestApproval(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SOAPMixin, View):
     async def post(self, request, pk):
@@ -235,6 +251,22 @@ class imprestApproval(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin
             print(e)
             messages.error(request, e)
             return redirect("ImprestDetail", pk)
+
+class CancelImprestApproval(AuthRequiredMixin, SessionMixin, ODataMixin, SOAPMixin, ResponseMixin, View):
+    def post(self, request, pk):
+        try:
+            session = self.get_session_context(request)
+            Employee_No_ = session.get("Employee_No_")
+            response = self.call_soap(
+                soap_method="FnCancelPaymentApproval",
+                params=[Employee_No_, pk]
+            )
+            if response is True:
+                return JsonResponse({"success": True, "message": "Approval cancelled successfully"})
+            return JsonResponse({"success": False, "error": str(response)})
+        except Exception as e:
+            logging.exception(e)
+            return JsonResponse({"success": False, "error": str(e)})
         
 class cancelImprestApproval(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SOAPMixin, View):
     async def post(self, request, pk):
@@ -567,3 +599,78 @@ class GetDocumentAttachment(AuthRequiredMixin, SessionMixin, ODataMixin, Respons
             print(e)
             return redirect(redirectTo, pk)
             # return redirect("viewFile")
+
+
+# Finance attachments
+
+class UploadFinanceAttachment(
+    AuthRequiredMixin,
+    SessionMixin,
+    ODataMixin,
+    SOAPMixin,
+    ResponseMixin,
+    View,
+):
+
+    async def post(self, request, pk):
+        try:
+            attachments = request.FILES.getlist("attachments")
+
+            table_id = 52177430
+            user_id = request.session["User_ID"]
+
+            responses = []
+
+            for file in attachments:
+                response = self.upload_attachment(
+                    "FnUploadAttachedDocument",
+                    pk,
+                    file,
+                    table_id,
+                    user_id,
+                )
+                responses.append(response)
+
+                print(responses)
+            return JsonResponse({
+                "success": True,
+                "message": f"{len(attachments)} file(s) uploaded successfully",
+            })
+
+        except Exception as e:
+            logging.exception(e)
+            return JsonResponse({"success": False, "error": str(e)})
+
+
+class DeleteFinanceAttachment(
+    AuthRequiredMixin,
+        SessionMixin,
+        ODataMixin,
+        SOAPMixin,
+        ResponseMixin,
+        View,
+):
+
+    async def post(self, request, pk):
+        try:
+            session = self.get_session_context(request)
+            user_id = session.get("User_ID")
+            docID = int(request.POST.get("docID"))
+            tableID = int(request.POST.get("tableID"))
+
+            response = self.call_soap(
+                soap_method="FnDeleteDocumentAttachment",
+                params=[pk, docID, tableID,],
+            )
+            if response is True:
+                return JsonResponse({"success": True, "message": "Attachment deleted successfully", })
+
+            return JsonResponse({"success": False, "error": str(response), })
+
+        except Exception as e:
+            logging.exception(e)
+            return JsonResponse({
+                "success": False,
+                "error": f"Failed to delete attachment: {e}",
+            })
+

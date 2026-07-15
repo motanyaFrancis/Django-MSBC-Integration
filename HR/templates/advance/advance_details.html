@@ -15,40 +15,32 @@ Salary Advance - {{res.Loan_No}}
             <div class="home-tab">
 
                 <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
-
                     <div>
-
                         <nav aria-label="breadcrumb border-0">
                             <ol class="breadcrumb border-0 mb-2 px-0">
-
                                 <li class="breadcrumb-item">
                                     <a href="{% url 'dashboard' %}">
                                         <i class="mdi mdi-view-dashboard-variant me-1"></i>
                                         Dashboard
                                     </a>
                                 </li>
-
                                 <li class="breadcrumb-item">
                                     <a href="{% url 'salary_advance' %}">
                                         Salary Advance
                                     </a>
                                 </li>
-
                                 <li class="breadcrumb-item active">
                                     {{res.Loan_No}}
                                 </li>
-
                             </ol>
                         </nav>
 
                         <h3 class="fw-bold mb-1">
                             Salary Advance Request
                         </h3>
-
                         <p class="text-muted mb-0">
                             View and manage advance request information
                         </p>
-
                     </div>
 
                     <div class="d-flex flex-wrap gap-2">
@@ -65,9 +57,7 @@ Salary Advance - {{res.Loan_No}}
                         {% if res.Status == "Released" %}
                         
                         {% endif %}
-
                     </div>
-
                 </div>
 
                 <!-- SUMMARY CARDS -->
@@ -330,6 +320,7 @@ Salary Advance - {{res.Loan_No}}
                                 </div>
                             </div>
                         </div>
+                        
                         <!-- ACTIONS -->
                         <div class="card border-0 shadow-sm rounded-4 mb-4">
                             <div class="card-body p-4">
