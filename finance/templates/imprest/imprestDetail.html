@@ -418,6 +418,7 @@
                                                     {% csrf_token %}
                                                     <input type="hidden" name="attachmentID" value="{{attachment.Line_No_}}">
                                                     <input type="hidden" name="tableId" value="{{attachment.Table_ID}}">
+                                                    <input type="hidden" name="redirectTo" value="ImprestDetail">
                                                     <button class="btn btn-sm mx-2 btn-primary text-white">View</button>
                                                 </form>
                                                 <span class="fw-semibold">{{ attachment.File_Name }}.{{ attachment.File_Type }}</span>
@@ -488,7 +489,7 @@
 
             <!-- BODY -->
             <div class="modal-body bg-light p-4">
-                <form enctype="multipart/form-data" class="myForm" action="{% url 'UploadFinaceAttachment' res.No_ %}" id="uploadAttachmentForm" method="post" novalidate>
+                <form enctype="multipart/form-data" class="myForm" action="{% url 'UploadFinaceAttachment' res.No_ %}" id="uploadAttachmentForm" method="post">
                     {% csrf_token %}
                     <input type="hidden" name="documentNo" value="{{res.No_}}">
                     <input type="hidden" name="redirectTo" value="ImprestDetail">

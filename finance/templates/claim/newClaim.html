@@ -1,0 +1,55 @@
+<div class="modal fade" id="addNewClaim" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header bg-primary text-white border-0 px-4 py-3">
+                <div>
+                    <h4 class="modal-title fw-bold mb-1"><i class="las la-calendar-plus me-2"></i>New Claim</h4>
+                    <small class="opacity-75">Complete the steps below to submit your Claim request</small>
+                </div>
+                <button type="button" class="btn-close btn-close-white" id="leave_close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- BODY -->
+            <div class="modal-body bg-light p-4">
+                <form class="myForm needs-validation" id="newClaimForm" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="claimNo" id="claimNo" value="">
+                    <input type="hidden" name="myAction" value="insert">
+
+                    <div class="row my-3">
+                        <div class="col-md-12">
+                            <label class="form-label">Claim Type <span class="text-danger">*</span></label>
+                            <select class="form-select claimType" name="claimType" id="claimType" required>
+                                <option selected disabled value="">Select Claim Type</option>
+                                <option value="1">General Claim</option>
+                                <option value="2">Medical Claim</option>
+                                <option value="3">Imprest Claim</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row imprestSurrDocNoRow my-3" style="display:none">
+                        <div class="col-md-12">
+                            <label class="form-label">Imprest Surrender No</label>
+                            <select class="form-select imprestSurrDocNo" name="imprestSurrDocNo" id="imprestSurrDocNo" disabled>
+                                <option selected disabled value="">Select Imprest Surrender No</option>
+                                {% for res in surrenders %}
+                                <option value="{{res.No_}}">{{res.No_}} - {{res.Payment_Narration}}</option>
+                                {% endfor %}
+                            </select>
+
+                        </div>
+                    </div>
+                    <div class="row my-3">
+                        <div class="col-md-12">
+                            <label for="purpose" class="form-label">Purpose <span class="text-danger">*</span></label>
+                            <textarea class="form-control" name="purpose" id="purpose" rows="3" required></textarea>
+                        </div>
+                    </div>
+                    <p id="sendingClaim" style="display: none;">Sending...</p>
+                    <button type="submit" class="btn btn-primary text-white">Submit</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>

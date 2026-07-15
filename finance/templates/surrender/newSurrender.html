@@ -1,0 +1,40 @@
+<div class="modal fade" id="addNewImprest" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header bg-primary text-white border-0 px-4 py-3">
+                <div>
+                    <h4 class="modal-title fw-bold mb-1"><i class="las la-calendar-plus me-2"></i>New Surrender Request</h4>
+                    <small class="opacity-75">Complete the steps below to submit your surrender request</small>
+                </div>
+                <button type="button" class="btn-close btn-close-white" id="leave_close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- BODY -->
+            <div class="modal-body bg-light p-4">
+                <form class="newSurrenderForm" id="newSurrenderForm" action="{% url 'ImprestSurrender' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="myAction" id="myAction" value="insert">
+                    <input type="hidden" name="surrenderNo" id="surrenderNo" value="">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="" class="form-label">Imprest Issue Document No.
+                            </label>
+                            <select class="form-select" name="imprestIssueDocNo" id="imprestIssueDocNo" required>
+                                <option selected disabled value="">Select Imprest Issue Document No.</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label class="form-label">Purpose</label>
+                            <textarea class="form-control" name="purpose" id="purpose" rows="3" required></textarea>
+                        </div>
+                    </div>
+                    <p id="sendingImprest" style="display: none;">Sending...</p>
+                    <button type="submit" class="btn btn-primary text-white">Submit</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>

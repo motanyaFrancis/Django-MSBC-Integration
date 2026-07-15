@@ -71,8 +71,7 @@
     {% include 'attachment_modal.html' %}
   </div>
 
-  <div id="idle-warning-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
-            background:rgba(0,0,0,0.6); z-index:9999;" class="modal-xl ">
+  <div id="idle-warning-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999;" class="modal-xl ">
 
     <div style="background:white; width:400px; margin:15% auto; padding:20px; border-radius:10px; text-align:center;"
       class="d-flex align-items-center justify-content-center gap-3 flex-column p-8">
@@ -135,8 +134,8 @@
     (function () {
 
       // ===== CONFIG =====
-      const WARNING_TIME = 9 * 60 * 1000; // 9 minutes (warn at 1 min left if 10 min session)
-      const LOGOUT_TIME = 10 * 60 * 1000; // 10 minutes
+      const WARNING_TIME = 19 * 60 * 1000; // 9 minutes (warn at 1 min left if 10 min session)
+      const LOGOUT_TIME = 20 * 60 * 1000; // 10 minutes
 
       let warningTimer;
       let logoutTimer;

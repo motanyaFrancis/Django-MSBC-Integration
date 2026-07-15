@@ -42,7 +42,6 @@
                         </li>
 
                     </ul>
-
                     <button class="btn btn-primary text-white" data-bs-toggle="modal" data-bs-target="#addNewImprest"><i class="mdi mdi-plus-circle-outline"></i> New Imprest</button>
                 </div>
 
@@ -55,15 +54,13 @@
                                 <div class="card-body">
                                     <h4 class="card-title mb-3">Open Surrender Requests</h4>
                                     <div class="table-responsive">
-                                        <table class="table table-striped table-hover align-middle" id="open_leave_table">
+                                        <table class="table table-striped table-hover align-middle" id="open_imprest_table">
                                             <thead class="table-light">
                                                 <tr>
-                                                    <th>Imprest No.</th>
-                                                    <th>Date Created</th>
-                                                    <th>Account Name</th>
-                                                    <th>Travel Type</th>
-                                                    <th>Payee</th>
-                                                    <th>Applied on Behalf</th>
+                                                    <th id="long">Imprest No.</th>
+                                                    <th>Date</th>
+                                                    <th>Created By</th>
+                                                    <th>Status</th>
                                                     <th>Action</th>
                                                 </tr>
                                             </thead>
@@ -86,15 +83,13 @@
                                 <div class="card-body">
                                     <h4 class="card-title mb-3">Pending Surrender Requests</h4>
                                     <div class="table-responsive">
-                                        <table class="table table-striped table-hover align-middle" id="pending_leave_table">
+                                        <table class="table table-striped table-hover align-middle" id="pending_imprest_table">
                                             <thead class="table-light">
                                                 <tr>
-                                                    <th>Imprest No.</th>
-                                                    <th>Date Created</th>
-                                                    <th>Account Name</th>
-                                                    <th>Travel Type</th>
-                                                    <th>Payee</th>
-                                                    <th>Applied on Behalf</th>
+                                                    <th id="long">Imprest No.</th>
+                                                    <th>Date</th>
+                                                    <th>Created By</th>
+                                                    <th>Status</th>
                                                     <th>Action</th>
                                                 </tr>
                                             </thead>
@@ -117,15 +112,13 @@
                                         <div class="card-body">
                                             <h4 class="card-title mb-3">Approved Surrender Requests</h4>
                                             <div class="table-responsive">
-                                                <table class="table table-striped table-hover align-middle" id="approved_leave_table">
+                                                <table class="table table-striped table-hover align-middle" id="approved_imprest_table">
                                                     <thead class="table-light">
                                                         <tr>
-                                                            <th>Imprest No.</th>
-                                                            <th>Date Created</th>
-                                                            <th>Account Name</th>
-                                                            <th>Travel Type</th>
-                                                            <th>Payee</th>
-                                                            <th>Applied on Behalf</th>
+                                                            <th id="long">Imprest No.</th>
+                                                            <th>Date</th>
+                                                            <th>Created By</th>
+                                                            <th>Status</th>
                                                             <th>Action</th>
                                                         </tr>
                                                     </thead>
@@ -148,7 +141,7 @@
     </div>
 </div>
 <!-- ================= MODAL (UNCHANGED UI) ================= -->
-{% include "imprest/newImprest.html" %}
+{% include "surrender/newSurrender.html" %}
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
@@ -159,24 +152,24 @@
 
         // ================= INIT =================
         loadImprests();
-        get_director();
+        // get_director();
 
         // ================= LOAD LIST =================
         function loadImprests() {
             $.ajax({
-                url: "{% url 'ImprestRequisitionData' %}",
+                url: "{% url 'ImprestSurrenderData' %}",
                 type: "GET",
                 success: function (data) {
                     console.log(data)
                     let open = 0, pending = 0, approved = 0;
 
-                    const openBody = $("#open_leave_table tbody");
-                    const pendingBody = $("#pending_leave_table tbody");
-                    const approvedBody = $("#approved_leave_table tbody");
+                    const openBody = $("#open_imprest_table tbody");
+                    const pendingBody = $("#pending_imprest_table tbody");
+                    const approvedBody = $("#approved_imprest_table tbody");
 
                     openBody.empty(); pendingBody.empty(); approvedBody.empty();
-                    data.divisions.forEach(div => {
-                        $("#divisionCode").append(`<option value="${div.Code}">${div.Name}</option>`)
+                    data.imprests.forEach(div => {
+                        $("#imprestIssueDocNo").append(`<option value="${div.No_}">${div.No_}-${div.Payment_Narration}</option>`)
                     })
                     
                     let imprests = []
@@ -190,12 +183,10 @@
                             <tr>
                                 <td>${row.No_}</td>
                                 <td>${row.Date}</td>
-                                <td>${row.Account_Name}</td>
-                                <td>${row.Travel_Type}</td>
-                                <td>${row.Payee}</td>
-                                <td>${row.Apply_on_behalf === "True" ? "Yes" : "No"}</td>
+                                <td>${row.User_Id}</td>
+                                <td>${row.Status}</td>
                                 <td>
-                                    <a class="btn btn-primary text-white" href="/ImprestDetail/${row.No_}"><i class="mdi mdi-folder-eye"></i>View</a>
+                                    <a href="/surrenderDetail/${row.No_}" class="btn btn-success btn-icon-text" type="button" data-toggle="tooltip" data-placement="top" title="Click to View"> View <i class="far fa-eye"></i></a>
                                 </td>
                             </tr>
                         `;
@@ -214,9 +205,9 @@
                         }
                     });
 
-                    $(".open_leave_count").text(open);
-                    $(".pending_leave_count").text(pending);
-                    $(".approved_leave_count").text(approved);
+                    $(".open_imprest_count").text(open);
+                    $(".pending_imprest_count").text(pending);
+                    $(".approved_imprest_count").text(approved);
                 }
             });
         }
@@ -240,19 +231,17 @@
         // });
 
         // ================= SUBMIT IMPREST =================
-        $("#ImprestForm").on("submit", function (e) {
+        $("#newSurrenderForm").on("submit", function (e) {
             e.preventDefault();
             $("#sendingImprest").show()
             $.ajax({
-                url: "{% url 'ImprestRequisition' %}",
+                url: "{% url 'ImprestSurrender' %}",
                 type: "POST",
                 data: {
-                    imprestNo: $("#imprestNo").val(),
+                    imprestIssueDocNo: $("#imprestIssueDocNo").val(),
                     purpose: $("#purpose").val(),
                     myAction: "insert",
-                    budget_memo: $("#budget_memo").val(),
-                    isOnBehalf: $("#isOnBehalf").val(),
-                    divisionCode: $("#divisionCode").val(),
+                    surrenderNo: $("#surrenderNo").val(),
                     csrfmiddlewaretoken: "{{ csrf_token }}"
                 },
                 success: function (res) {
@@ -368,14 +357,14 @@
         }
 
         // ================= DIRECTOR =================
-        function get_director() {
-            $.get("/get_director/", function (res) {
-                if (res === true) {
-                    $("#directorRelieverRow").show();
-                    $("#directorReliever").prop("disabled", false);
-                }
-            });
-        }
+        // function get_director() {
+        //     $.get("/get_director/", function (res) {
+        //         if (res === true) {
+        //             $("#directorRelieverRow").show();
+        //             $("#directorReliever").prop("disabled", false);
+        //         }
+        //     });
+        // }
 
     });
 </script>
