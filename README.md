@@ -40,35 +40,35 @@ Follow these steps to set up the project:
    cd enterprise-django
 
 
-2. **Create and activate a virtual environment
+2. **Create and activate a virtual environment**
 
     ```bash
     python3 -m venv venv
     source venv/bin/activate   # On Linux/Mac
     venv\Scripts\activate      # On Windows
 
-3. **Install dependencies
+3. **Install dependencies**
 
     ```bash
     pip install -r requirements.txt
 
-4. **Configure environment variables
+4. **Configure environment variables**
 
 - Copy .env.example to .env
 
 - Set database credentials, secret keys, and SOAP/OData endpoints
 
-5. **Run migrations
+5. **Run migrations**
 
     ```bash
     python manage.py migrate
 
-6. **Create a superuser
+6. **Create a superuser**
 
     ```bash
     python manage.py createsuperuser
 
-7. **Start the development server
+7. **Start the development server**
 
     ```bash
     python manage.py runserver
