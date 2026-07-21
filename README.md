@@ -165,6 +165,3 @@ Follow these steps to set up the project:
 ## 📜 License
 
 This project is licensed under the MIT License.
-
-    ```bash
-    ---  👉 Just copy everything above into a file named `README.md` and save it. You’ll then have a **ready-to-download Markdown file** in your project root.    Do you also want me to prepare a **second file (`INSTALL.md`)** with deeper technical setup instructions (SOAP/OData endpoints, PostgreSQL config, environment variables), so your README stays clean while developers get a detailed installation guide?
