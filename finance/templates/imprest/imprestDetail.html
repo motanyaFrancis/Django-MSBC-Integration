@@ -50,7 +50,7 @@
                             class="btn btn-primary text-white"
                             data-bs-toggle="modal"
                             data-bs-target="#attachmentModal"
-                            data-upload-url="{% url 'Upload_Finance_Attacment' res.No_ %}"
+                            data-upload-url="{% url 'Finance_Attachments' res.No_ %}"
                             data-doc-no="{{ res.No_ }}"
                             data-table-name="Imprest Request">
                             <i class="mdi mdi-paperclip me-1"></i>
@@ -372,21 +372,15 @@
                         <div class="card border-0 shadow-sm rounded-4 mb-4">
                             <div class="card-body p-4">
                                 <h5 class="fw-bold mb-4"> Request Actions </h5>
-
+                            
                                 {% if res.Status == "Open" %}
                                 <button id="requestApprovalBtn" class="btn btn-primary w-100 py-3 mb-3"
-                                    data-url="{% url 'imprestApproval' res.No_ %}">
-                                    <i class="mdi mdi-send me-2"></i>
-                                    Request For Approval
-                                </button>
+                                    data-url="{% url 'ImprestApproval' res.No_ %}"><i class="mdi mdi-send me-2"></i> Request For Approval</button>
                                 {% endif %}
-
+                            
                                 {% if res.Status == "Pending Approval"%}
                                 <button id="cancelApprovalBtn" class="btn btn-outline-danger w-100 py-3"
-                                    data-url="{% url 'cancelImprestApproval' res.No_ %}">
-                                    <i class="mdi mdi-close-circle-outline me-2"></i>
-                                    Cancel Approval Request
-                                </button>
+                                    data-url="{% url 'CancelImprestApproval' res.No_ %}"><i class="mdi-close-circle-outline me-2"></i> Cancel Approval Request</button>
                                 {% endif %}
                             </div>
                         </div>
@@ -627,7 +621,7 @@
 
             <!-- BODY -->
             <div class="modal-body bg-light p-4">
-                <form enctype="multipart/form-data" class="myForm" action="{% url 'UploadFinaceAttachment' res.No_ %}"
+                <form enctype="multipart/form-data" class="myForm" action="{% url 'Finance_Attachments' res.No_ %}"
                     id="uploadAttachmentForm" method="post">
                     {% csrf_token %}
                     <input type="hidden" name="documentNo" value="{{res.No_}}">

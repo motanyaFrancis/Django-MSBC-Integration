@@ -1,15 +1,12 @@
-from django.shortcuts import redirect, render
 import asyncio
-from datetime import datetime
-import aiohttp
 import logging
-import base64
-import enum
+from datetime import datetime
 
-from attrs import field
-from django.views import View
+import aiohttp
 from django.contrib import messages
 from django.http import JsonResponse
+from django.shortcuts import redirect
+from django.views import View
 
 from core.mixins.auth_mixin import AuthRequiredMixin
 from core.mixins.session_mixin import SessionMixin
@@ -18,50 +15,97 @@ from core.mixins.ResponseMixin import ResponseMixin
 from core.mixins.soap_mixin import SOAPMixin
 
 
+"""
+Finance Self-Service Module
+============================
+
+Handles three related employee finance workflows, each following the same
+request -> approval -> posting lifecycle against the Business Central SOAP
+layer:
+
+  1. Imprest Requisition   - advance cash request for travel/expenses
+  2. Imprest Surrender     - reconciling/returning an issued imprest
+  3. Staff Claim           - expense reimbursement claim, optionally linked
+                              to a surrendered imprest
+
+Shared conventions:
+  - `self.get_session_context(request)` supplies the logged-in user's BC
+    identity (User_ID, Employee_No_, Customer_No_, etc.) and is spread
+    directly into every template context via `**session`.
+  - `self.fetch_one` / `self.fetch_related` (ODataMixin) replace manual
+    `asyncio.gather` + list-filtering for detail views.
+  - POST handlers branch on the `X-Requested-With` header so the same view
+    serves both the AJAX modal flow and a plain-form fallback.
+  - All document tables (Imprest, Surrender, Claim) share the same
+    attachment/approval infrastructure, exposed as generic views at the
+    bottom of this file.
+"""
+
+
+# ======================================================================
+# IMPREST REQUISITION
+# ======================================================================
+
 class ImprestRequisition(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SOAPMixin, View):
+    """List the user's imprest requests (by status) and create new ones."""
+
     async def get(self, request):
         try:
-            # return render(request, 'imprest/imprestRequisition.html')
             session = self.get_session_context(request)
-            accountNo = session.get('Customer_No_')
-            responsibilityCenter = session.get("User_Responsibility_Center")
-            print(accountNo, responsibilityCenter)
-            return self.render_response(request, "imprest/imprestRequisition.html")
+            user_id = session.get("User_ID")
+
+            async with aiohttp.ClientSession() as client:
+                (
+                    imprests,
+                    budget_memos,
+                    dimension_values,
+                ) = await asyncio.gather(
+                    self.filter_data(
+                        endpoint="/QyImprests", field="User_ID", operator="eq", value=user_id,
+                    ),
+                    self.filter_data(
+                        endpoint="/QyBudgetMemos", field="CreatedBy", operator="eq", value=user_id,
+                    ),
+                    self.all_data(endpoint="/QyDimensionValues"),
+                )
+
+            ctx = {
+                **session,
+                "open_requests": [x for x in imprests if x.get("Status") == "Open"],
+                "pending_requests": [x for x in imprests if x.get("Status") == "Pending Approval"],
+                "approved_requests": [x for x in imprests if x.get("Status") == "Released"],
+                "memos": [x for x in budget_memos if x.get("Status") == "Approved"],
+                "divisions": [x for x in dimension_values if x.get("Global_Dimension_No_") == 2],
+            }
+
+            return self.render_response(request, "imprest/imprestRequisition.html", ctx)
+
         except Exception as e:
-            print(e)
-            messages.error(request, e)
-            return redirect('dashboard')
+            logging.exception(e)
+            messages.error(request, "Failed to load imprest requests")
+            return redirect("dashboard")
 
     async def post(self, request):
+        is_ajax = request.META.get("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest"
         try:
             session = self.get_session_context(request)
-            usersId = session.get("User_ID")
-            print("new imprest")
-            # soap_headers = session.get("soap_headers")
             imprestNo = request.POST.get("imprestNo")
-            # accountNo = session.get("Customer_No_")
-            accountNo = session.get('Customer_No_')
+            accountNo = session.get("Customer_No_")
             responsibilityCenter = session.get("User_Responsibility_Center")
             purpose = request.POST.get("purpose")
+            usersId = session.get("User_ID")
             personalNo = session.get("Employee_No_")
             myAction = request.POST.get("myAction")
-            budget_memo = request.POST.get("budget_memo")
-            isOnBehalf = eval(request.POST.get("isOnBehalf"))
+            budget_memo = request.POST.get("budget_memo") or ""
+            isOnBehalf = request.POST.get("isOnBehalf") == "True"
             divisionCode = request.POST.get("divisionCode")
-            print(accountNo, imprestNo, purpose, usersId, personalNo,
-                  myAction, budget_memo, isOnBehalf, divisionCode)
-            if not budget_memo or budget_memo == "":
-                budget_memo = ""
 
             response = self.call_soap(
-                # soap_headers,
                 soap_method="FnImprestHeader",
                 params=[
                     imprestNo,
                     accountNo,
                     responsibilityCenter,
-                    # "IMPC0001"
-                    # "GEN",
                     purpose,
                     usersId,
                     personalNo,
@@ -69,129 +113,137 @@ class ImprestRequisition(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMi
                     budget_memo,
                     isOnBehalf,
                     divisionCode,
-                ]
+                ],
             )
-            print(response)
+            print("SOAP Response:", response)
 
-            if response != "0":
+            if response and response != "0":
                 messages.success(request, "Request Successful")
-                return JsonResponse({"status": "success"})
-            elif response == "0":
-                messages.error(request, f"error, {response}")
-                return JsonResponse({"status": "error"})
+                if is_ajax:
+                    return JsonResponse({"response": str(response)}, safe=False)
+                return redirect("ImprestDetail", pk=response)
+
+            messages.error(request, f"{response}")
+            if is_ajax:
+                return JsonResponse({"error": str(response)}, safe=False)
+            return redirect("ImprestRequisition")
+
         except Exception as e:
-            messages.error(request, e)
-            print(e)
-            return JsonResponse({"status": "error"})
-        except Exception as e:
-            print(e)
+            logging.exception(e)
+            if is_ajax:
+                return JsonResponse({"error": str(e)}, safe=False)
             messages.error(request, f"{e}")
-            # logging.exception(e)
-            return JsonResponse({"status": "error"})
+            return redirect("ImprestRequisition")
 
 
-class ImprestRequisitionData(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SOAPMixin, View):
+class ImprestRequisitionData(AuthRequiredMixin, SessionMixin, ODataMixin, View):
+    """
+    Polling endpoint used by imprestRequisition.html's loadImprests().
+
+    NOTE: the JS reads named keys off the response (data.divisions,
+    data.openImprest, data.pendingImprest, data.approvedImprest) rather
+    than a flat array, so this must return an object with that exact
+    shape, not JsonResponse(list, safe=False).
+    """
+
     async def get(self, request):
         try:
             session = self.get_session_context(request)
             user_id = session.get("User_ID")
-            employee_no = session.get("Employee_No_")
+
             async with aiohttp.ClientSession() as client:
-                (imprest, BudgetMemos, DimensionValues) = await asyncio.gather(
+                (imprests, dimension_values) = await asyncio.gather(
                     self.filter_data(
-                        endpoint="/QyImprests", field="User_ID", operator="eq", value=user_id,),
-                    self.filter_data(
-                        endpoint="/QyBudgetMemos", field="CreatedBy", operator="eq", value=user_id),
-                    self.all_data(endpoint="/QyDimensionValues")
+                        endpoint="/QyImprests", field="User_ID", operator="eq", value=user_id,
+                    ),
+                    self.all_data(endpoint="/QyDimensionValues"),
                 )
-            openImprest = [x for x in imprest if x["Status"] == "Open"]
-            pendingImprest = [x for x in imprest if x["Status"] == "Pending Approval"]
-            approvedImprest = [x for x in imprest if x["Status"] == "Released"]
-            memos = [x for x in BudgetMemos if x["Status"] == "Approved"]
-            divisions = [x for x in DimensionValues if x["Global_Dimension_No_"] == 2]
+
             ctx = {
-                "openImprest": openImprest,
-                "pendingImprest": pendingImprest,
-                "approvedImprest": approvedImprest,
-                "memos": memos,
-                "divisions": divisions
+                "openImprest": [x for x in imprests if x.get("Status") == "Open"],
+                "pendingImprest": [x for x in imprests if x.get("Status") == "Pending Approval"],
+                "approvedImprest": [x for x in imprests if x.get("Status") == "Released"],
+                "divisions": [x for x in dimension_values if x.get("Global_Dimension_No_") == 2],
             }
             return JsonResponse(ctx)
+
         except Exception as e:
-            print(e)
-            messages.error(request, e)
-            return redirect('dashboard')
+            logging.exception(e)
+            return JsonResponse({"error": str(e)}, safe=False)
 
 
 class ImprestDetail(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SOAPMixin, View):
+    """Detail page for a single imprest, and the line-item submission form."""
+
     async def get(self, request, pk):
         try:
             session = self.get_session_context(request)
-            user_id = session.get("User_ID")
-            print(user_id)
-            employee_no = session.get("Employee_No_")
-            async with aiohttp.ClientSession() as client:
-                (imprest, receiptsAndPaymentTypes, DimensionValues, destinations, approvals, getLines, internalAccounts, files) = await asyncio.gather(
-                    self.filter_data(endpoint="/QyImprests", field="No_", operator="eq", value=pk),
-                    self.filter_data(endpoint="/QyReceiptsAndPaymentTypes", field="Type", operator="eq", value="Imprest"),
-                    self.all_data(endpoint="/QyDimensionValues"),
-                    self.all_data(endpoint="/QyDestinations"),
-                    self.filter_data(endpoint="/QyApprovalEntries", field="Document_No_", operator="eq", value=pk),
-                    self.all_data(endpoint="/QyImprestLines"),
-                    self.all_data(endpoint="/QyInternalCustomers"),
-                    self.filter_data(endpoint="/QyDocumentAttachments", field="No_", operator="eq", value=pk),
-                )
-            attachments = [x for x in files]
-            local = [x for x in destinations if x["Destination_Type"] == "Local"]
-            foreign = [x for x in destinations if x["Destination_Type"] == "Foreign"]
 
-            lines = [x for x in getLines if x["AuxiliaryIndex1"] == pk]
-            divisions = [x for x in DimensionValues if x["Global_Dimension_No_"] == 2]
-            accounts = [x for x in internalAccounts]
-            types = [x for x in receiptsAndPaymentTypes]
+            document = await self.fetch_one(endpoint="/QyImprests", field="No_", value=pk)
+            if not document:
+                messages.error(request, "Imprest request not found")
+                return redirect("ImprestRequisition")
+
+            related = await self.fetch_related(
+                queries=[
+                    {
+                        "endpoint": "/QyApprovalEntries",
+                        "filters": [{"field": "Document_No_", "operator": "eq", "value": pk}],
+                        "alias": "Approvers",
+                    },
+                    {
+                        "endpoint": "/QyDocumentAttachments",
+                        "filters": [{"field": "No_", "operator": "eq", "value": pk}],
+                        "alias": "attachments",
+                    },
+                    {
+                        "endpoint": "/QyImprestLines",
+                        "filters": [{"field": "AuxiliaryIndex1", "operator": "eq", "value": pk}],
+                        "alias": "lines",
+                    },
+                    {
+                        "endpoint": "/QyReceiptsAndPaymentTypes",
+                        "filters": [{"field": "Type", "operator": "eq", "value": "Imprest"}],
+                        "alias": "types",
+                    },
+                    {"endpoint": "/QyDestinations", "alias": "destinations"},
+                    {"endpoint": "/QyDimensionValues", "alias": "dimension_values"},
+                    {"endpoint": "/QyInternalCustomers", "alias": "accounts"},
+                ]
+            )
+
+            destinations = related.pop("destinations", [])
+            dimension_values = related.pop("dimension_values", [])
+
             ctx = {
-                "res": imprest[0],
-                "Approvers": approvals,
-                "attachments": attachments,
-                "foreign": foreign,
-                "local": local,
-                "types": types,
-                "accounts": accounts,
-                "lines": lines
+                **session,
+                "res": document,
+                **related,
+                "local": [x for x in destinations if x.get("Destination_Type") == "Local"],
+                "foreign": [x for x in destinations if x.get("Destination_Type") == "Foreign"],
+                "divisions": [x for x in dimension_values if x.get("Global_Dimension_No_") == 2],
             }
-            return render(request, "imprest/ImprestDetail.html", ctx)
+
+            return self.render_response(request, "imprest/ImprestDetail.html", ctx)
+
         except Exception as e:
-            print(e)
-            messages.error(request, e)
-            return redirect('ImprestRequisition')
-    
+            logging.exception(e)
+            messages.error(request, "Failed to load imprest details")
+            return redirect("ImprestRequisition")
+
     async def post(self, request, pk):
         try:
-            session = self.get_session_context(request)
-            user_id = session.get("User_ID")
-            lineNo = int(request.POST.get("lineNo"))
-            imprestTypes = request.POST.get("imprestType")
+            imprestType = request.POST.get("imprestType")
             destination = request.POST.get("destination")
             travelDate = datetime.strptime(request.POST.get("travel"), "%Y-%m-%d").date()
             returnDate = datetime.strptime(request.POST.get("returnDate"), "%Y-%m-%d").date()
             requisitionType = request.POST.get("requisitionType")
-            amount = request.POST.get("amount")
+            amount = request.POST.get("amount") or 0
             myAction = request.POST.get("myAction")
-            accountNo = request.POST.get("accountNo")
+            accountNo = request.POST.get("accountNo") or ""
+            lineNo = int(request.POST.get("lineNo"))
 
-            if not accountNo:
-                accountNo = ""
-
-            class Data(enum.Enum):
-                values = imprestTypes
-
-            imprestType = (Data.values).value
-
-            if not amount:
-                amount = 0
-            
             response = self.call_soap(
-                # soap_headers,
                 soap_method="FnImprestLine",
                 params=[
                     lineNo,
@@ -204,113 +256,64 @@ class ImprestDetail(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, 
                     float(amount),
                     myAction,
                     accountNo,
-                ]
+                ],
             )
-            print(response)
+            print("SOAP Response:", response)
             messages.success(request, response)
-            return redirect("ImprestDetail", pk)
-        except Exception as e:
-            print(e)
-            messages.error(request, e)
-            return redirect("ImprestDetail", pk)
+            return redirect("ImprestDetail", pk=pk)
 
-class RequestImprestApproval(AuthRequiredMixin, SessionMixin, ODataMixin, SOAPMixin, ResponseMixin, View):
-    def post(self, request, pk):
-        try:
-            session = self.get_session_context(request)
-            Employee_No_ = session.get("Employee_No_")
-            response = self.call_soap(
-                soap_method="FnRequestPaymentApproval",
-                params=[Employee_No_, pk]
-            )
-            if response is True:
-                return JsonResponse({"success": True, "message": "Approval requested successfully"})
-            return JsonResponse({"success": False, "error": str(response)})
         except Exception as e:
             logging.exception(e)
-            return JsonResponse({"success": False, "error": str(e)})
-        
-class imprestApproval(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SOAPMixin, View):
-    async def post(self, request, pk):
-        try:
-            print("approve imprest")
-            session = self.get_session_context(request)
-            employeeNo = session.get("Employee_No_")
-            response = self.call_soap(
-                # soap_headers,
-                soap_method="FnRequestPaymentApproval",
-                params=[
-                    employeeNo,
-                    pk
-                ]
-            )
-            print(response)
-            messages.success(request, response)
-            return redirect("ImprestDetail", pk)
-        except Exception as e:
-            print(e)
-            messages.error(request, e)
-            return redirect("ImprestDetail", pk)
+            messages.error(request, f"{e}")
+            return redirect("ImprestDetail", pk=pk)
 
-class CancelImprestApproval(AuthRequiredMixin, SessionMixin, ODataMixin, SOAPMixin, ResponseMixin, View):
-    def post(self, request, pk):
-        try:
-            session = self.get_session_context(request)
-            Employee_No_ = session.get("Employee_No_")
-            response = self.call_soap(
-                soap_method="FnCancelPaymentApproval",
-                params=[Employee_No_, pk]
-            )
-            if response is True:
-                return JsonResponse({"success": True, "message": "Approval cancelled successfully"})
-            return JsonResponse({"success": False, "error": str(response)})
-        except Exception as e:
-            logging.exception(e)
-            return JsonResponse({"success": False, "error": str(e)})
-        
-class cancelImprestApproval(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SOAPMixin, View):
-    async def post(self, request, pk):
-        try:
-            print("Cancel approve imprest")
-            session = self.get_session_context(request)
-            employeeNo = session.get("Employee_No_")
-            response = self.call_soap(
-                # soap_headers,
-                soap_method="FnCancelPaymentApproval",
-                params=[
-                    employeeNo,
-                    pk
-                ]
-            )
-            print(response)
-            messages.success(request, response)
-            return redirect("ImprestDetail", pk)
-        except Exception as e:
-            print(e)
-            messages.error(request, e)
-            return redirect("ImprestDetail", pk)
+
+# ======================================================================
+# IMPREST SURRENDER
+# ======================================================================
 
 class ImprestSurrender(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SOAPMixin, View):
+    """List the user's surrenders and create new ones against a posted imprest."""
+
     async def get(self, request):
         try:
-            return render(request, 'surrender/ImprestSurrender.html')
+            session = self.get_session_context(request)
+            user_id = session.get("User_ID")
+
+            async with aiohttp.ClientSession() as client:
+                (imprests, surrenders) = await asyncio.gather(
+                    self.filter_data(endpoint="/QyImprests", field="User_ID", operator="eq", value=user_id),
+                    self.filter_data(endpoint="/QyImprestSurrenders", field="User_Id", operator="eq", value=user_id),
+                )
+
+            ctx = {
+                **session,
+                "open_requests": [x for x in surrenders if x.get("Status") == "Open"],
+                "pending_requests": [x for x in surrenders if x.get("Status") == "Pending Approval"],
+                "approved_requests": [x for x in surrenders if x.get("Status") == "Released"],
+                "imprests": [x for x in imprests if x.get("Status") == "Released" and x.get("Posted") is True],
+            }
+
+            return self.render_response(request, "surrender/ImprestSurrender.html", ctx)
+
         except Exception as e:
-            print(e)
-            messages.error(request, e)
-            return redirect('dashboard')
+            logging.exception(e)
+            messages.error(request, "Failed to load surrender requests")
+            return redirect("dashboard")
 
     async def post(self, request):
+        is_ajax = request.META.get("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest"
         try:
-            print("new surrender")
             session = self.get_session_context(request)
             user_id = session.get("User_ID")
             employeeNo = session.get("Employee_No_")
-            accountNo = session.get('Customer_No_')
+            accountNo = session.get("Customer_No_")
             staffNo = session.get("Customer_No_")
             surrenderNo = request.POST.get("surrenderNo")
             myAction = request.POST.get("myAction")
             purpose = request.POST.get("purpose")
             imprestIssueDocNo = request.POST.get("imprestIssueDocNo")
+
             response = self.call_soap(
                 soap_method="FnImprestSurrenderHeader",
                 params=[
@@ -320,81 +323,138 @@ class ImprestSurrender(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixi
                     purpose,
                     user_id,
                     staffNo,
-                    myAction
-                ]
+                    myAction,
+                ],
             )
-            print(response)
-            if response != "0":
-                messages.success(request, response)
-                return JsonResponse({"status": "SUCCESS"})
-            else:
-                messages.error(request, response)
-                return JsonResponse({"status": "ERROR"})
+            print("SOAP Response:", response)
+
+            if response and response != "0":
+                messages.success(request, "Request Successful")
+                if is_ajax:
+                    return JsonResponse({"response": str(response)}, safe=False)
+                return redirect("SurrenderDetail", pk=response)
+
+            messages.error(request, f"{response}")
+            if is_ajax:
+                return JsonResponse({"error": str(response)}, safe=False)
+            return redirect("ImprestSurrender")
+
         except Exception as e:
-            print(e)
-            messages.error(request, e)
-            return JsonResponse({"status": "ERROR"})
-        
-class ImprestSurrenderData(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SOAPMixin, View):
+            logging.exception(e)
+            if is_ajax:
+                return JsonResponse({"error": str(e)}, safe=False)
+            messages.error(request, f"{e}")
+            return redirect("ImprestSurrender")
+
+
+class ImprestSurrenderData(AuthRequiredMixin, SessionMixin, ODataMixin, View):
+
     async def get(self, request):
         try:
             session = self.get_session_context(request)
             user_id = session.get("User_ID")
-            employee_no = session.get("Employee_No_")
             async with aiohttp.ClientSession() as client:
-                (imprests, surrenders) = await asyncio.gather(
-                    self.filter_data(endpoint="/QyImprests", field="User_ID", operator="eq", value=user_id),
-                    self.filter_data(endpoint="/QyImprestSurrenders", field="User_Id", operator="eq", value=user_id),
+                surrenders = await self.filter_data(
+                    endpoint="/QyImprestSurrenders", field="User_Id", operator="eq", value=user_id,
                 )
-            openSurrender = [x for x in surrenders if x["Status"] == "Open"]
-            pendingSurrender = [x for x in surrenders if x["Status"] == "Pending Approval"]
-            approvedSurrender = [x for x in surrenders if x["Status"] == "Released"]
-            postedImprests = [x for x in imprests if x["Status"] == "Released" and x["Posted"] == True]
-            ctx = {
-                "openImprest": openSurrender,
-                "pendingImprest": pendingSurrender,
-                "approvedImprest": approvedSurrender,
-                "imprests": postedImprests
-            }
-            return JsonResponse(ctx)
+            return JsonResponse(surrenders, safe=False)
         except Exception as e:
-            print(e)
-            messages.error(request, e)
-            return redirect('dashboard')
-        
-class surrenderDetail(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SOAPMixin, View):
+            logging.exception(e)
+            return JsonResponse({"error": str(e)}, safe=False)
+
+
+class SurrenderDetail(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SOAPMixin, View):
+    """Detail page for a single surrender."""
+
     async def get(self, request, pk):
         try:
             session = self.get_session_context(request)
-            user_id = session.get("User_ID")
-            return render(request, "surrenderDetail.html")
+
+            document = await self.fetch_one(endpoint="/QyImprestSurrenders", field="No_", value=pk)
+            if not document:
+                messages.error(request, "Surrender not found")
+                return redirect("ImprestSurrender")
+
+            related = await self.fetch_related(
+                queries=[
+                    {
+                        "endpoint": "/QyApprovalEntries",
+                        "filters": [{"field": "Document_No_", "operator": "eq", "value": pk}],
+                        "alias": "Approvers",
+                    },
+                    {
+                        "endpoint": "/QyDocumentAttachments",
+                        "filters": [{"field": "No_", "operator": "eq", "value": pk}],
+                        "alias": "attachments",
+                    },
+                    {
+                        "endpoint": "/QyReceiptsAndPaymentTypes",
+                        "filters": [{"field": "Type", "operator": "eq", "value": "Imprest"}],
+                        "alias": "types",
+                    },
+                ]
+            )
+
+            ctx = {
+                **session,
+                "res": document,
+                **related,
+            }
+
+            return self.render_response(request, "surrender/SurrenderDetail.html", ctx)
+
         except Exception as e:
-            print(e)
-            messages.error(request, e)
+            logging.exception(e)
+            messages.error(request, "Failed to load surrender details")
             return redirect("ImprestSurrender")
 
+
+# ======================================================================
+# STAFF CLAIM
+# ======================================================================
+
 class StaffClaim(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SOAPMixin, View):
+    """List the user's claims and create new ones, optionally linked to a surrender."""
+
     async def get(self, request):
         try:
-            return render(request, 'claim/StaffClaim.html')
+            session = self.get_session_context(request)
+            user_id = session.get("User_ID")
+
+            async with aiohttp.ClientSession() as client:
+                (claims, surrenders) = await asyncio.gather(
+                    self.filter_data(endpoint="/QyStaffClaims", field="User_Id", operator="eq", value=user_id),
+                    self.filter_data(endpoint="/QyImprestSurrenders", field="User_Id", operator="eq", value=user_id),
+                )
+
+            ctx = {
+                **session,
+                "open_requests": [x for x in claims if x.get("Status") == "Open"],
+                "pending_requests": [x for x in claims if x.get("Status") == "Pending Approval"],
+                "approved_requests": [x for x in claims if x.get("Status") == "Released"],
+                "surrenders": surrenders,
+            }
+
+            return self.render_response(request, "claim/StaffClaim.html", ctx)
+
         except Exception as e:
-            print(e)
-            messages.error(request, e)
-            return redirect('dashboard')
+            logging.exception(e)
+            messages.error(request, "Failed to load staff claims")
+            return redirect("dashboard")
 
     async def post(self, request):
+        is_ajax = request.META.get("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest"
         try:
-            print("new claim")
             session = self.get_session_context(request)
             user_id = session.get("User_ID")
             employee_no = session.get("Employee_No_")
             staffNo = session.get("Customer_No_")
             claimNo = request.POST.get("claimNo")
             claimType = int(request.POST.get("claimType"))
-            imprestSurrDocNo = request.POST.get("imprestSurrDocNo")
-            # imprestSurrDocNo = ""
+            imprestSurrDocNo = request.POST.get("imprestSurrDocNo") or ""
             purpose = request.POST.get("purpose")
             myAction = request.POST.get("myAction")
+
             response = self.call_soap(
                 soap_method="FnStaffClaimHeader",
                 params=[
@@ -405,80 +465,105 @@ class StaffClaim(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SOA
                     user_id,
                     employee_no,
                     imprestSurrDocNo,
-                    myAction
-                ]
+                    myAction,
+                ],
             )
-            print(response)
-            messages.error(request, response)
-            return JsonResponse({"status": "SUCCESS", "message": response})
-        except Exception as e:
-            print(e)
-            messages.error(request, e)
-            return JsonResponse({"status": "ERROR", "message": f"{e}"})
+            print("SOAP Response:", response)
 
-class StaffClaimData(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SOAPMixin, View):
+            if response and response != "0":
+                messages.success(request, "Request Successful")
+                if is_ajax:
+                    return JsonResponse({"response": str(response)}, safe=False)
+                return redirect("ClaimDetail", pk=response)
+
+            messages.error(request, f"{response}")
+            if is_ajax:
+                return JsonResponse({"error": str(response)}, safe=False)
+            return redirect("StaffClaim")
+
+        except Exception as e:
+            logging.exception(e)
+            if is_ajax:
+                return JsonResponse({"error": str(e)}, safe=False)
+            messages.error(request, f"{e}")
+            return redirect("StaffClaim")
+
+
+class StaffClaimData(AuthRequiredMixin, SessionMixin, ODataMixin, View):
+
     async def get(self, request):
         try:
             session = self.get_session_context(request)
             user_id = session.get("User_ID")
-            employee_no = session.get("Employee_No_")
             async with aiohttp.ClientSession() as client:
-                (claims, surrenders) = await asyncio.gather(
-                    self.filter_data(endpoint="/QyStaffClaims", field="User_Id", operator="eq", value=user_id),
-                    self.filter_data(endpoint="/QyImprestSurrenders", field="User_Id", operator="eq", value=user_id),
+                claims = await self.filter_data(
+                    endpoint="/QyStaffClaims", field="User_Id", operator="eq", value=user_id,
                 )
-            openClaim = [x for x in claims if x["Status"] == "Open"]
-            pendingClaim = [x for x in claims if x["Status"] == "Pending Approval"]
-            approvedClaim = [x for x in claims if x["Status"] == "Released"]
-            ctx = {
-                "openClaim": openClaim,
-                "pendingClaim": pendingClaim,
-                "approvedClaim": approvedClaim,
-                "surrenders": surrenders
-            }
-            return JsonResponse(ctx)
+            return JsonResponse(claims, safe=False)
         except Exception as e:
-            print(e)
-            messages.error(request, e)
-            return JsonResponse({"status": "ERROR"})
-        
+            logging.exception(e)
+            return JsonResponse({"error": str(e)}, safe=False)
+
+
 class ClaimDetail(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SOAPMixin, View):
+    """Detail page for a single claim, and the line-item submission form."""
+
     async def get(self, request, pk):
         try:
             session = self.get_session_context(request)
             user_id = session.get("User_ID")
-            async with aiohttp.ClientSession() as client:
-                (claim, lines, receiptsAndPaymentTypes, imprestSurrenders, approvalEntries, documentAttachments) = await asyncio.gather(
-                    self.filter_data(endpoint="/QyStaffClaims", field="No_", operator="eq", value=pk),
-                    self.filter_data(endpoint="/QyStaffClaimLines", field="No", operator="eq", value=pk),
-                    self.filter_data(endpoint="/QyReceiptsAndPaymentTypes", field="Type", operator="eq", value="Claim"),
-                    self.filter_data(endpoint="/QyImprestSurrenders", field="User_Id", operator="eq", value=user_id),
-                    self.filter_data(endpoint="/QyApprovalEntries", field="Document_No_", operator="eq", value=pk),
-                    self.filter_data(endpoint="/QyDocumentAttachments", field="No_", operator="eq", value=pk),
-                )
-            attachments = [x for x in documentAttachments]
-            lines = [x for x in lines]
-            approvals = [x for x in approvalEntries]
-            imprests = [x for x in imprestSurrenders]
-            rnp = [x for x in receiptsAndPaymentTypes]
+
+            document = await self.fetch_one(endpoint="/QyStaffClaims", field="No_", value=pk)
+            if not document:
+                messages.error(request, "Claim not found")
+                return redirect("StaffClaim")
+
+            related = await self.fetch_related(
+                queries=[
+                    {
+                        "endpoint": "/QyStaffClaimLines",
+                        "filters": [{"field": "No", "operator": "eq", "value": pk}],
+                        "alias": "lines",
+                    },
+                    {
+                        "endpoint": "/QyReceiptsAndPaymentTypes",
+                        "filters": [{"field": "Type", "operator": "eq", "value": "Claim"}],
+                        "alias": "claimtypes",
+                    },
+                    {
+                        "endpoint": "/QyImprestSurrenders",
+                        "filters": [{"field": "User_Id", "operator": "eq", "value": user_id}],
+                        "alias": "imprests",
+                    },
+                    {
+                        "endpoint": "/QyApprovalEntries",
+                        "filters": [{"field": "Document_No_", "operator": "eq", "value": pk}],
+                        "alias": "Approvers",
+                    },
+                    {
+                        "endpoint": "/QyDocumentAttachments",
+                        "filters": [{"field": "No_", "operator": "eq", "value": pk}],
+                        "alias": "attachments",
+                    },
+                ]
+            )
+
             ctx = {
-                "res": claim[0],
-                "lines": lines,
-                "attachments": attachments,
-                "Approvers": approvals,
-                "claimtypes": rnp
+                **session,
+                "res": document,
+                **related,
             }
-            return render(request, "claim/claimDetail.html", ctx)
+
+            return self.render_response(request, "claim/claimDetail.html", ctx)
+
         except Exception as e:
-            print(e)
-            messages.error(request, e)
+            logging.exception(e)
+            messages.error(request, "Failed to load claim details")
             return redirect("StaffClaim")
-    
+
     async def post(self, request, pk):
         try:
-            print("claim line")
             session = self.get_session_context(request)
-            claimNo = pk
             accountNo = session.get("Customer_No_")
             lineNo = int(request.POST.get("lineNo"))
             claimType = request.POST.get("claimType")
@@ -486,16 +571,14 @@ class ClaimDetail(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SO
             expenditureDate = datetime.strptime(request.POST.get("expenditureDate"), "%Y-%m-%d").date()
             expenditureDescription = request.POST.get("expenditureDescription")
             myAction = request.POST.get("myAction")
-            tableID = 52177431
             claimReceiptNo = ""
             dimension3 = ""
 
             response = self.call_soap(
-                # soap_headers,
                 soap_method="FnStaffClaimLine",
                 params=[
                     lineNo,
-                    claimNo,
+                    pk,
                     claimType,
                     accountNo,
                     amount,
@@ -504,134 +587,131 @@ class ClaimDetail(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SO
                     expenditureDate,
                     expenditureDescription,
                     myAction,
-                ]
+                ],
             )
-            print(response)
+            print("SOAP Response:", response)
             messages.success(request, response)
-            return redirect("ClaimDetail", pk)
+            return redirect("ClaimDetail", pk=pk)
+
         except Exception as e:
-            print(e)
-            messages.error(request, e)
-            return redirect("ClaimDetail", pk)
-        
-class claimApproval(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SOAPMixin, View):
-    async def post(self, request, pk):
+            logging.exception(e)
+            messages.error(request, f"{e}")
+            return redirect("ClaimDetail", pk=pk)
+
+
+# ======================================================================
+# APPROVALS (shared payment-approval workflow: Imprest + Claim)
+# ======================================================================
+
+class ImprestApproval(AuthRequiredMixin, SessionMixin, ODataMixin, SOAPMixin, ResponseMixin, View):
+    """Send an imprest for payment approval."""
+
+    def post(self, request, pk):
         try:
-            print("approve claim")
             session = self.get_session_context(request)
-            employeeNo = session.get("Employee_No_")
+            employee_no = session.get("Employee_No_")
             response = self.call_soap(
-                # soap_headers,
                 soap_method="FnRequestPaymentApproval",
-                params=[
-                    employeeNo,
-                    pk
-                ]
+                params=[employee_no, pk],
             )
-            print(response)
-            messages.success(request, response)
-            return redirect("ClaimDetail", pk)
+            if response is True:
+                return JsonResponse({"success": True, "message": "Approval requested successfully"})
+            return JsonResponse({"success": False, "error": str(response)})
         except Exception as e:
-            print(e)
-            messages.error(request, e)
-            return redirect("ClaimDetail", pk)
+            logging.exception(e)
+            return JsonResponse({"success": False, "error": str(e)})
 
-class UploadFinaceAttachment(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SOAPMixin, View):
-    async def post(self, request, pk):
-        print("Upload attachment")
-        redirectTo = request.POST.get("redirectTo")
+
+class CancelImprestApproval(AuthRequiredMixin, SessionMixin, ODataMixin, SOAPMixin, ResponseMixin, View):
+    """Withdraw a pending imprest approval request."""
+
+    def post(self, request, pk):
         try:
             session = self.get_session_context(request)
-            user_id = session.get("User_ID")
-            documentNo = request.POST.get("documentNo")
-            # fileName = request.POST.get("fileName")
-            attachments = request.FILES.getlist("attachment")
-            # tableId = request.POST.get("tableId")
-            tableId = 52177430
-            response = None
-            print(attachments)
-            for file in attachments:
-                fileName = file.name
-                attachment = base64.b64encode(file.read())
-                response = self.call_soap(
-                    # soap_headers,
-                    soap_method="FnUploadAttachedDocument",
-                    params=[
-                        documentNo,
-                        fileName,
-                        attachment,
-                        tableId,
-                        user_id
-                    ]
-                )
-                print(response)
-                messages.success(request, response)
-            return redirect(redirectTo, pk)
-    
-        except Exception as e:
-            print(e)
-            messages.success(request, e)
-            return redirect(redirectTo, pk)
-        
-class GetDocumentAttachment(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SOAPMixin, View):
-    async def post(self, request, pk):
-        redirectTo = request.POST.get("redirectTo")
-        try:
-            print("view document")
-            attachmentID = request.POST.get("attachmentID")
-            # tableId = int(request.POST.get("tableId"))
-            tableId = 52177430
-            print(attachmentID, tableId)
+            employee_no = session.get("Employee_No_")
             response = self.call_soap(
-                # soap_headers,
-                soap_method="FnUploadAttachedDocument",
-                params=[
-                    pk,
-                    attachmentID,
-                    tableId
-                ]
+                soap_method="FnCancelPaymentApproval",
+                params=[employee_no, pk],
             )
-            print(response)
-            return redirect(redirectTo, pk)
-            # return redirect("viewFile")
-
+            if response is True:
+                return JsonResponse({"success": True, "message": "Approval cancelled successfully"})
+            return JsonResponse({"success": False, "error": str(response)})
         except Exception as e:
-            print(e)
-            return redirect(redirectTo, pk)
-            # return redirect("viewFile")
+            logging.exception(e)
+            return JsonResponse({"success": False, "error": str(e)})
 
 
-# Finance attachments
+class ClaimApproval(AuthRequiredMixin, SessionMixin, ODataMixin, SOAPMixin, ResponseMixin, View):
+    """Send a staff claim for payment approval (same BC workflow as imprest)."""
 
-class UploadFinanceAttachment(
-    AuthRequiredMixin,
-    SessionMixin,
-    ODataMixin,
-    SOAPMixin,
-    ResponseMixin,
-    View,
-):
+    def post(self, request, pk):
+        try:
+            session = self.get_session_context(request)
+            employee_no = session.get("Employee_No_")
+            response = self.call_soap(
+                soap_method="FnRequestPaymentApproval",
+                params=[employee_no, pk],
+            )
+            if response is True:
+                return JsonResponse({"success": True, "message": "Approval requested successfully"})
+            return JsonResponse({"success": False, "error": str(response)})
+        except Exception as e:
+            logging.exception(e)
+            return JsonResponse({"success": False, "error": str(e)})
+
+
+# NOTE: No cancel-approval or surrender-approval SOAP method names were
+# present in the source views for Claim or Surrender. If BC exposes
+# equivalents (e.g. FnCancelClaimApproval / FnRequestSurrenderApproval),
+# add CancelClaimApproval / SurrenderApproval / CancelSurrenderApproval
+# here following the same two patterns above.
+
+
+# ======================================================================
+# ATTACHMENTS (shared across Imprest / Surrender / Claim)
+# ======================================================================
+
+class FinanceAttachments(AuthRequiredMixin, SessionMixin, ODataMixin, SOAPMixin, ResponseMixin, View):
+    """
+    Generic attachment list + upload for any finance document (Imprest,
+    Surrender, or Claim) identified by `pk` (the document No_).
+
+    table_id defaults to 52177430 (the value hardcoded in the original
+    finance-attachment views). Pass a different `tableID` in POST data if
+    Surrender/Claim attachments live under a different BC table.
+    """
+
+    DEFAULT_TABLE_ID = 52177430
+
+    async def get(self, request, pk):
+        try:
+            async with aiohttp.ClientSession() as client:
+                data = await self.filter_data(
+                    endpoint="/QyDocumentAttachments", field="No_", operator="eq", value=pk,
+                )
+            return JsonResponse(data, safe=False)
+        except Exception as e:
+            logging.exception(e)
+            return JsonResponse({"error": str(e)}, safe=False)
 
     async def post(self, request, pk):
         try:
             attachments = request.FILES.getlist("attachments")
+            if not attachments:
+                return JsonResponse({"success": False, "error": "No files were received"})
 
-            table_id = 52177430
+            table_id = int(request.POST.get("tableID") or self.DEFAULT_TABLE_ID)
             user_id = request.session["User_ID"]
 
-            responses = []
-
             for file in attachments:
-                response = self.upload_attachment(
+                self.upload_attachment(
                     "FnUploadAttachedDocument",
                     pk,
                     file,
                     table_id,
                     user_id,
                 )
-                responses.append(response)
 
-                print(responses)
             return JsonResponse({
                 "success": True,
                 "message": f"{len(attachments)} file(s) uploaded successfully",
@@ -642,30 +722,20 @@ class UploadFinanceAttachment(
             return JsonResponse({"success": False, "error": str(e)})
 
 
-class DeleteFinanceAttachment(
-    AuthRequiredMixin,
-        SessionMixin,
-        ODataMixin,
-        SOAPMixin,
-        ResponseMixin,
-        View,
-):
+class DeleteFinanceAttachment(AuthRequiredMixin, SessionMixin, ODataMixin, SOAPMixin, ResponseMixin, View):
 
     async def post(self, request, pk):
         try:
-            session = self.get_session_context(request)
-            user_id = session.get("User_ID")
             docID = int(request.POST.get("docID"))
-            tableID = int(request.POST.get("tableID"))
+            tableID = int(request.POST.get("tableID") or FinanceAttachments.DEFAULT_TABLE_ID)
 
             response = self.call_soap(
                 soap_method="FnDeleteDocumentAttachment",
-                params=[pk, docID, tableID,],
+                params=[pk, docID, tableID],
             )
             if response is True:
-                return JsonResponse({"success": True, "message": "Attachment deleted successfully", })
-
-            return JsonResponse({"success": False, "error": str(response), })
+                return JsonResponse({"success": True, "message": "Attachment deleted successfully"})
+            return JsonResponse({"success": False, "error": str(response)})
 
         except Exception as e:
             logging.exception(e)
@@ -674,3 +744,23 @@ class DeleteFinanceAttachment(
                 "error": f"Failed to delete attachment: {e}",
             })
 
+
+class GetDocumentAttachment(AuthRequiredMixin, SessionMixin, ODataMixin, SOAPMixin, ResponseMixin, View):
+    """Fetch a single attachment's content for preview/download."""
+
+    async def post(self, request, pk):
+        redirectTo = request.POST.get("redirectTo")
+        try:
+            attachmentID = request.POST.get("attachmentID")
+            table_id = int(request.POST.get("tableID") or FinanceAttachments.DEFAULT_TABLE_ID)
+
+            response = self.call_soap(
+                soap_method="FnUploadAttachedDocument",
+                params=[pk, attachmentID, table_id],
+            )
+            print("SOAP Response:", response)
+            return redirect(redirectTo, pk=pk)
+
+        except Exception as e:
+            logging.exception(e)
+            return redirect(redirectTo, pk=pk)

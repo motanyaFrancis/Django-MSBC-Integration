@@ -1,62 +1,108 @@
 <div class="modal fade" id="addNewImprest" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+
+            <!-- ───────────── HEADER ───────────── -->
             <div class="modal-header bg-primary text-white border-0 px-4 py-3">
                 <div>
-                    <h4 class="modal-title fw-bold mb-1"><i class="las la-calendar-plus me-2"></i>New Leave Request</h4>
-                    <small class="opacity-75">Complete the steps below to submit your leave request</small>
+                    <h4 class="modal-title fw-bold mb-1">
+                        <i class="mdi mdi-cash-plus me-2"></i>New Imprest Requisition
+                    </h4>
+                    <small class="opacity-75">Fill in the details below to raise a new imprest request</small>
                 </div>
-                <button type="button" class="btn-close btn-close-white" id="leave_close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" id="imprest_close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <!-- BODY -->
+            <!-- ───────────── BODY ───────────── -->
             <div class="modal-body bg-light p-4">
-                <form class="myForm" id="ImprestForm" method="post">
-                    {% csrf_token %}
-                    <input type="hidden" name="imprestNo" id="imprestNo" value="">
-                    <input type="hidden" name="myAction" id="myAction" value="insert">
-                    <div class="row my-3">
-                        <div class="col-md-4">
-                            <label class="form-label">Apply on Behalf<span class="text-danger">*</span></label>
-                            <select class="form-select" name="isOnBehalf" id="isOnBehalf" required>
-                                <option value="True">Yes</option>
-                                <option value="False" selected>No</option>
-                            </select>
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="bg-primary-subtle rounded-circle p-2 me-3">
+                                <i class="mdi mdi-file-document text-primary fs-5"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-1 fw-bold">Imprest Information</h5>
+                                <small class="text-muted">Provide the details of your imprest request</small>
+                            </div>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Use Budget Memo<span class="text-danger">*</span></label>
-                            <select class="form-select" name="use_memo" id="use_memo" required>
-                                <option value="True">Yes</option>
-                                <option value="False" selected>No</option>
-                            </select>
+
+                        <!-- SPINNER -->
+                        <div class="text-center py-5" id="imprest-spinner" style="display:none;">
+                            <div class="spinner-border text-primary" style="width:3.5rem;height:3.5rem;"></div>
+                            <p class="mt-3 text-muted">Submitting imprest request...</p>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Department <span class="text-danger">*</span></label>
-                            <select class="form-select" name="divisionCode" id="divisionCode">
-                                <option disabled value="0">--Select--</option>
-                            </select>
-                        </div>
+
+                        <!-- FORM -->
+                        <form id="ImprestForm" method="post" novalidate>
+                            {% csrf_token %}
+                            <input type="hidden" name="imprestNo" id="imprestNo" value="">
+                            <input type="hidden" name="myAction" id="myAction" value="insert">
+
+                            <div class="row g-3">
+
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">
+                                        Apply on Behalf <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select" name="isOnBehalf" id="isOnBehalf" required>
+                                        <option value="True">Yes</option>
+                                        <option value="False" selected>No</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">
+                                        Use Budget Memo <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select" name="use_memo" id="use_memo" required>
+                                        <option value="True">Yes</option>
+                                        <option value="False" selected>No</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">
+                                        Department <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select" name="divisionCode" id="divisionCode" required>
+                                        <option disabled selected value="0">— Select —</option>
+                                    </select>
+                                </div>
+
+                                <!-- Budget Memo (revealed when Use Budget Memo = Yes) -->
+                                <div class="col-12" id="budget_memo_row" style="display:none;">
+                                    <label class="form-label fw-semibold">
+                                        Budget Memo <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select" name="budget_memo" id="budget_memo" disabled>
+                                        <option selected disabled value="0">— Select Budget Memo —</option>
+                                        {% for memo in memos %}
+                                        <option value="{{ memo.No }}">{{ memo.SubJect }} ({{ memo.No }})</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="purpose" class="form-label fw-semibold">
+                                        Purpose <span class="text-danger">*</span>
+                                    </label>
+                                    <textarea class="form-control" name="purpose" id="purpose" rows="3" required
+                                        placeholder="Briefly describe the purpose of this imprest..."></textarea>
+                                </div>
+
+                            </div><!-- /row -->
+
+                            <div class="d-flex justify-content-end mt-4">
+                                <button type="submit" class="btn btn-primary px-5">
+                                    Submit Request <i class="mdi mdi-arrow-right ms-1"></i>
+                                </button>
+                            </div>
+
+                        </form>
                     </div>
-                    <div class="row" id="budget_memo_row" style="display: none;">
-                        <div class="col-md-12">
-                            <label class="form-label">Budget Memo <span class="text-danger">*</span></label>
-                            <select class="form-select" name="budget_memo" id="budget_memo" disabled>
-                                <option selected disabled value="0">--Select Option--</option>
-                                {% for memo in memos %}
-                                <option value="{{memo.No}}">{{memo.SubJect}} ({{memo.No}})</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row mt-3">
-                        <div class="col-md-12">
-                            <label for="purpose" class="form-label">Purpose <span class="text-danger">*</span></label>
-                            <textarea class="form-control" name="purpose" id="purpose" rows="3" required></textarea>
-                        </div>
-                    </div>
-                    <p id="sendingImprest" style="display: none;">Sending...</p>
-                    <button type="submit" id="sasa" class="btn btn-primary text-white mt-3">Submit <i class="las la-arrow-right submit-icon"></i></button>
-                </form>
+                </div>
             </div>
 
         </div>

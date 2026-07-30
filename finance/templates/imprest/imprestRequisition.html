@@ -178,7 +178,7 @@
                     data.divisions.forEach(div => {
                         $("#divisionCode").append(`<option value="${div.Code}">${div.Name}</option>`)
                     })
-                    
+
                     let imprests = []
                     imprests.push(...data.openImprest)
                     imprests.push(...data.pendingImprest)
@@ -240,57 +240,128 @@
         // });
 
         // ================= SUBMIT IMPREST =================
-        $("#ImprestForm").on("submit", function (e) {
+        // $("#ImprestForm").on("submit", function (e) {
+        //     e.preventDefault();
+        //     $("#sendingImprest").show()
+        //     $.ajax({
+        //         url: "{% url 'ImprestRequisition' %}",
+        //         type: "POST",
+        //         data: {
+        //             imprestNo: $("#imprestNo").val(),
+        //             purpose: $("#purpose").val(),
+        //             myAction: "insert",
+        //             budget_memo: $("#budget_memo").val(),
+        //             isOnBehalf: $("#isOnBehalf").val(),
+        //             divisionCode: $("#divisionCode").val(),
+        //             csrfmiddlewaretoken: "{{ csrf_token }}"
+        //         },
+        //         success: function (res) {
+        //             $("#sendingImprest").hide()
+        //             console.log(res)
+        //             loadImprests();
+        //             iziToast.success({
+        //                 title: 'Success',
+        //                 message: `${res.status}`,
+        //                 position: 'topCenter',
+        //                 timeout: 4000,
+        //                 theme: 'dark',
+        //                 progressBarColor: '#ffffff',
+        //                 backgroundColor: '#198754',
+        //                 titleColor: '#fff',
+        //                 messageColor: '#fff',
+        //                 maxWidth: '400px',
+        //                 transitionIn: 'fadeInDown',
+        //                 transitionOut: 'fadeOutUp'
+        //             });
+        //         },
+        //         error: function (error) {
+        //             $("#sendingImprest").hide()
+        //             console.log(error)
+        //             iziToast.success({
+        //                 title: 'Success',
+        //                 message: `${error.status}`,
+        //                 position: 'topCenter',
+        //                 timeout: 4000,
+        //                 theme: 'dark',
+        //                 progressBarColor: '#ffffff',
+        //                 backgroundColor: '#198754',
+        //                 titleColor: '#fff',
+        //                 messageColor: '#fff',
+        //                 maxWidth: '400px',
+        //                 transitionIn: 'fadeInDown',
+        //                 transitionOut: 'fadeOutUp'
+        //             });
+        //         }
+        //     });
+        // });
+
+        // toggle budget memo visibility
+        $('#use_memo').on('change', function () {
+            if (this.value === 'True') {
+                $('#budget_memo_row').show(300);
+                $('#budget_memo').prop('disabled', false);
+            } else {
+                $('#budget_memo_row').hide(300);
+                $('#budget_memo').prop('disabled', true).val('0');
+            }
+        });
+
+        $('#ImprestForm').on('submit', function (e) {
             e.preventDefault();
-            $("#sendingImprest").show()
+
+            if (!$('#divisionCode').val() || $('#divisionCode').val() === '0') {
+                return iziToast.show({
+                    theme: 'dark', icon: 'mdi mdi-exclamation', title: 'Validation',
+                    message: 'Please select a department.', position: 'topCenter', progressBarColor: '#ff0800'
+                });
+            }
+            if ($('#use_memo').val() === 'True' && (!$('#budget_memo').val() || $('#budget_memo').val() === '0')) {
+                return iziToast.show({
+                    theme: 'dark', icon: 'mdi mdi-exclamation', title: 'Validation',
+                    message: 'Please select a budget memo.', position: 'topCenter', progressBarColor: '#ff0800'
+                });
+            }
+            if (!$('#purpose').val().trim()) {
+                return iziToast.show({
+                    theme: 'dark', icon: 'mdi mdi-exclamation', title: 'Validation',
+                    message: 'Please enter a purpose.', position: 'topCenter', progressBarColor: '#ff0800'
+                });
+            }
+
+            $('#ImprestForm').hide();
+            $('#imprest-spinner').show(200);
+
             $.ajax({
                 url: "{% url 'ImprestRequisition' %}",
                 type: "POST",
                 data: {
                     imprestNo: $("#imprestNo").val(),
                     purpose: $("#purpose").val(),
-                    myAction: "insert",
+                    myAction: $("#myAction").val(),
                     budget_memo: $("#budget_memo").val(),
                     isOnBehalf: $("#isOnBehalf").val(),
                     divisionCode: $("#divisionCode").val(),
                     csrfmiddlewaretoken: "{{ csrf_token }}"
                 },
                 success: function (res) {
-                    $("#sendingImprest").hide()
-                    console.log(res)
-                    loadImprests();
-                    iziToast.success({
-                        title: 'Success',
-                        message: `${res.status}`,
-                        position: 'topCenter',
-                        timeout: 4000,
-                        theme: 'dark',
-                        progressBarColor: '#ffffff',
-                        backgroundColor: '#198754',
-                        titleColor: '#fff',
-                        messageColor: '#fff',
-                        maxWidth: '400px',
-                        transitionIn: 'fadeInDown',
-                        transitionOut: 'fadeOutUp'
-                    });
-                },
-                error: function (error) {
-                    $("#sendingImprest").hide()
-                    console.log(error)
-                    iziToast.success({
-                        title: 'Success',
-                        message: `${error.status}`,
-                        position: 'topCenter',
-                        timeout: 4000,
-                        theme: 'dark',
-                        progressBarColor: '#ffffff',
-                        backgroundColor: '#198754',
-                        titleColor: '#fff',
-                        messageColor: '#fff',
-                        maxWidth: '400px',
-                        transitionIn: 'fadeInDown',
-                        transitionOut: 'fadeOutUp'
-                    });
+                    $('#imprest-spinner').hide();
+                    $('#ImprestForm').show(200);
+
+                    if (res.response) {
+                        iziToast.show({
+                            theme: 'dark', backgroundColor: '#239B56',
+                            icon: 'mdi mdi-check-circle', title: 'Done',
+                            message: 'Imprest ' + res.response + ' created successfully',
+                            position: 'topCenter', progressBarColor: '#F4F6F7'
+                        });
+                        window.location.href = '/ImprestDetail/' + res.response;
+                    } else {
+                        iziToast.show({
+                            theme: 'dark', icon: 'mdi mdi-exclamation', title: 'Error',
+                            message: res.error || 'Unable to create imprest request.',
+                            position: 'topCenter', progressBarColor: '#ff0800'
+                        });
+                    }
                 }
             });
         });
