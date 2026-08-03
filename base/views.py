@@ -369,10 +369,9 @@ class Items(
 ):
 
     async def get(self, request):
-
         try:
-
             response = await self.all_data(endpoint="/QyItems")
+            print('Items: ', response)
             return JsonResponse(response, safe=False,)
 
         except Exception as e:

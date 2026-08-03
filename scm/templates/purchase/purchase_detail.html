@@ -64,20 +64,10 @@ Purchase Request - {{res.No_}}
                             <i class="mdi mdi-paperclip me-1"></i>
                             Upload Attachment
                         </button>
-                        <!-- <button class="btn btn-primary text-white" data-bs-toggle="modal" data-bs-target="#Attachment">
-                            <i class="mdi mdi-paperclip me-1"></i>
-                            Upload Attachment
-                        </button> -->
+                        
                         {% endif %}
 
-                        {% if res.Status == "Open" %}
-                        <button class="btn btn-primary text-white" data-bs-toggle="modal"
-                            data-bs-target="#employeeModal">
-
-                            <i class="mdi mdi-package-variant-plus me-1"></i>
-                            Add Purchase Items
-                        </button>
-                        {% endif %}
+                        
 
                         {% if res.Status == "Released" %}
                         
@@ -313,16 +303,24 @@ Purchase Request - {{res.No_}}
                         <!-- Purchase Lines -->
                         <div class="card border-0 shadow-sm rounded-4 mb-4">
                             <div class="card-header bg-white border-0 pt-4 px-4">
-                                <div class="d-flex align-items-center">
-                                    <div class="bg-success-subtle timeline-icon p-3 me-3">
-                                        <i class="mdi mdi-invoice-list text-success fs-4"></i>
+                                <div class="d-flex justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-success-subtle timeline-icon p-3 me-3">
+                                            <i class="mdi mdi-invoice-list text-success fs-4"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="fw-bold mb-1"> Request Items </h5>
+                                            <small class="text-muted">
+                                                Items included in this purchase request
+                                            </small>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h5 class="fw-bold mb-1"> Request Items </h5>
-                                        <small class="text-muted">
-                                            Items included in this purchase request
-                                        </small>
-                                    </div>
+                                    {% if res.Status == "Open" %}
+                                    <button class="btn btn-primary text-white" data-bs-toggle="modal" data-bs-target="#employeeModal">
+                                        <i class="mdi mdi-package-variant-plus me-1"></i>
+                                        Add Purchase Items
+                                    </button>
+                                    {% endif %}
                                 </div>
                             </div>
 
@@ -420,24 +418,16 @@ Purchase Request - {{res.No_}}
                                                 <td>
                                                     <div class="d-flex align-items-center">
                                                         <i class="mdi mdi-file-pdf-box me-2 fs-5"></i>
-                                                        <span class="fw-semibold">{{ attachment.File_Name }}{{ attachment.File_Type }}.</span>
+                                                        <span class="fw-semibold">
+                                                            {{ attachment.File_Name }}{{ attachment.File_Type|lower }}
+                                                        </span>
                                                     </div>
                                                 </td>
-                                                <!-- <td>
-                                                    <span class="badge bg-light text-dark">
-                                                        {{ attachment.File_Type }}
-                                                    </span>
-                                                </td> -->
+                                               
 
                                                 {% if res.Status == "Open" %}
                                                 <td class="text-center">
-                                                    <!-- Download Button -->
-                                                    <!-- <a href="{{ attachment.file.url }}"
-                                                        class="btn btn-sm btn-outline-success"
-                                                        download="{{ attachment.file_name }}" title="Download">
-                                                        <i class="mdi mdi-download"></i>
-                                                    </a> -->
-
+                                                
                                                     <!-- Delete Button -->
                                                     <form action="{% url 'delete_purchase_attachment' attachment.No_  %}"
                                                         method="POST" class="attachmentDeleteForm" novalidate>
@@ -636,7 +626,7 @@ Purchase Request - {{res.No_}}
             </div>
 
             <div class="modal-body p-4">
-                <form action="{% url 'TransportDetails' res.No_ %}" method="POST" id="itemForm" novalidate>
+                <form action="{% url 'purchase_details' res.No_ %}" method="POST" id="itemForm" novalidate>
                     {% csrf_token %}
                     <input type="hidden" name="lineNo" value="0">
                     <input type="hidden" name="myAction" value="insert">
@@ -653,15 +643,8 @@ Purchase Request - {{res.No_}}
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold"> unit of measure </label>
-                            <select class="form-select" name="Unit_of_Measure" required>
-                                <option value="" disabled selected>-- Select measure --</option>
-                            </select>
-                        </div>
-                        <div class="col-md-12">
-                            <label class="form-label fw-semibold"> Item Specification </label>
-                            <textarea class="form-control" name="specification" rows="5"
-                                placeholder="Enter item specifications"></textarea>
+                            <label class="form-label fw-semibold">Quantity</label>
+                            <input class="form-control" name="quantity" type="number">
                         </div>
                     </div>
 
@@ -675,7 +658,7 @@ Purchase Request - {{res.No_}}
 
                         <button type="submit" class="btn btn-primary px-5 py-2 shadow-sm">
 
-                            Submit Request
+                            Add Item
                             <i class="las la-arrow-right ms-2"></i>
 
                         </button>
@@ -932,194 +915,7 @@ Purchase Request - {{res.No_}}
                 }
             });
         });
-        
 
-
-        // $("#request_date").val(
-        //     moment('{{res.Order_Date}}', "YYYY-MM-DD")
-        //         .format('Do MMM YYYY')
-        // );
-
-        // $("#start_date").val(
-        //     moment('{{res.Trip_Planned_Start_Date}}', "YYYY-MM-DD")
-        //         .format('Do MMM YYYY')
-        // );
-
-        // $("#end_date").val(
-        //     moment('{{res.Trip_Planned_End_Date}}', "YYYY-MM-DD")
-        //         .format('Do MMM YYYY')
-        // );
-
-        // $('#procPlanItem').on('change', function (e) {
-        //     e.preventDefault();
-        //     var selectedOption = $(this).find('option:selected');
-        //     var itemNo = selectedOption.attr('itemNo');
-
-        //     if (itemNo != null) {
-        //         $("#itemForm select[name='Unit_of_Measure']").find('.after').nextAll().remove();
-        //         $.ajax({
-        //             url: "/get-units-of-measure/",
-        //             type: "GET",
-        //             dataType: "json",
-        //             data: {
-        //                 ItemNumber: ItemNumber
-        //             },
-        //             success: function (response) {
-        //                 let options = ''
-        //                 for (let i = 0; i < response.unita.length; i++) {
-        //                     if (response.value[i].Item_No_ == ItemNumber) {
-        //                         options += '<option value=' + response.value[i].Code + ' ' + '-' + ' ' +
-        //                             '(' + response.value[i].Qty__per_Unit_of_Measure + ")</option>";
-        //                     }
-
-        //                 }
-        //                 $("#itemForm select[name='Unit_of_Measure']").finnd('after').after(options);
-        //             },
-
-        //             error: function (xhr, status, error) {
-        //                 console.error("Error fetching units of measure:", error);
-        //             }
-        //         });
-        //     } else {
-        //         $("#itemForm select[name='Unit_of_Measure']").find('.after').nextAll().remove();
-        //     }
-
-
-        // });
-
-
-        // ====================================================================
-        // FILE UPLOAD HANDLING
-        // ====================================================================
-
-        // $('#attachmentForm').on('submit', function (e) {
-        //     e.preventDefault();
-
-        //     const fileInput = $('#fileInput')[0];
-        //     if (!fileInput.files[0]) {
-        //         alert('Please select a file');
-        //         return;
-        //     }
-
-        //     const formData = new FormData(this);
-        //     $('#uploadBtn').prop('disabled', true);
-        //     $('#uploadProgress').removeClass('d-none');
-        //     $('#progressBar').css('width', '0%');
-
-        //     $.ajax({
-        //         url: '{% url "upload_purchase_attachment" res.No_ %}',
-        //         type: 'POST',
-        //         data: formData,
-        //         contentType: false,
-        //         processData: false,
-        //         xhr: function () {
-        //             const xhr = new window.XMLHttpRequest();
-        //             xhr.upload.addEventListener('progress', function (e) {
-        //                 if (e.lengthComputable) {
-        //                     const pct = (e.loaded / e.total) * 100;
-        //                     $('#progressBar').css('width', pct + '%');
-        //                     $('#progressText').text('Uploading: ' + Math.round(pct) + '%');
-        //                 }
-        //             });
-        //             return xhr;
-        //         },
-        //         success: function (response) {
-        //             if (response.success) {
-        //                 showAlert('File uploaded successfully!', 'success');
-        //                 const modal = bootstrap.Modal.getInstance(document.getElementById('Attachment'));
-        //                 if (modal) modal.hide();
-        //                 setTimeout(() => location.reload(), 1000);
-        //             } else {
-        //                 showAlert(response.message || 'Upload failed', 'error');
-        //             }
-        //             $('#uploadBtn').prop('disabled', false);
-        //             $('#uploadProgress').addClass('d-none');
-        //         },
-        //         error: function (xhr) {
-        //             showAlert(xhr.responseJSON?.message || 'An error occurred', 'error');
-        //             $('#uploadBtn').prop('disabled', false);
-        //             $('#uploadProgress').addClass('d-none');
-        //         }
-        //     });
-        // });
-
-
-        // ====================================================================
-        // DELETE ATTACHMENT
-        // ====================================================================
-
-        // $('#attachmentDeleteForm').on('submit', function (e) {
-        //     e.preventDefault();
-
-        //     const $form = $(this);
-        //     const $submitBtn = $('#submitBtn');
-        //     const originalBtnHtml = $submitBtn.html();
-
-        //     $('.is-invalid').removeClass('is-invalid');
-        //     $('.invalid-feedback').remove();
-        //     $('#formAlert').remove();
-
-        //     $submitBtn.prop('disabled', true)
-        //         .html('<i class="fas fa-spinner fa-spin"></i> Submitting...');
-
-
-        //     $.ajax({
-        //         url: $form.attr('action') || window.location.href,
-        //         type: 'POST',
-        //         data: $form.serialize(),
-        //         headers: {
-        //             'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val()
-        //         },
-        //         dataType: 'json',
-
-        //         success: function (response) {
-        //             if (response.success) {
-        //                 showAlert('Attachment deleted successfully', 'success');
-        //                 setTimeout(() => {
-        //                     location.reload();
-        //                 }, 1000);
-        //             } else {
-        //                 showAlert(response.message || 'Deletion failed', 'error');
-        //             }
-        //         },
-        //         error: function () {
-        //             showAlert('An error occurred', 'error');
-        //         }
-        //     });
-
-        // })
-
-        // $(document).on('click', '.delete-attachment', function () {
-        //     if (confirm('Are you sure you want to delete this attachment?')) {
-        //         const attachmentId = $(this).data('attachment-id');
-        //         const attachmentTableId = $(this).data('attachment-table-id');
-        //         const requestNo = $(this).data('request-no');
-
-        //         $.ajax({
-        //             url: '{% url "delete_store_attachment" "0" %}'.replace('0', attachmentId),
-        //             type: 'POST',
-        //             data: {
-        //                 'csrfmiddlewaretoken': $('[name="csrfmiddlewaretoken"]').val(),
-        //                 'docID': requestNo,
-        //                 'docID': attachmentTableId,
-
-        //             },
-        //             success: function (response) {
-        //                 if (response.success) {
-        //                     showAlert('Attachment deleted successfully', 'success');
-        //                     setTimeout(() => {
-        //                         location.reload();
-        //                     }, 1000);
-        //                 } else {
-        //                     showAlert(response.message || 'Deletion failed', 'error');
-        //                 }
-        //             },
-        //             error: function () {
-        //                 showAlert('An error occurred', 'error');
-        //             }
-        //         });
-        //     }
-        // });
 
     });
 

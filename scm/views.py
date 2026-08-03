@@ -235,9 +235,9 @@ class PurchaseDetails(
             # employee_no = request.POST.get("employee_no")
             lineNo = int(request.POST.get("lineNo"))
             procPlanItem = request.POST.get("procPlanItem")
-            specification = request.POST.get("specification")
+            # specification = request.POST.get("specification")
             quantity = int(request.POST.get("quantity"))
-            Unit_of_Measure = request.POST.get("Unit_of_Measure")
+            # Unit_of_Measure = request.POST.get("Unit_of_Measure")
             my_action = request.POST.get("myAction")
             response = self.call_soap(
                 soap_method="FnPurchaseRequisitionLine",
@@ -245,11 +245,9 @@ class PurchaseDetails(
                     pk,
                     lineNo,
                     procPlanItem,
-                    specification,
                     quantity,
                     user_id,
                     my_action,
-                    Unit_of_Measure,
                 ],
             )
             # print("SOAP Response:", response)
@@ -555,16 +553,11 @@ class StoreDetails(
                         ],
                         "alias": "lines",
                     },
+                
                     {
-                        "endpoint": "/QyItemCategories",
-                        "alias": "item_categories",
+                        "endpoint": "/QyItems",
+                        "alias": "items",
                     },
-
-                    {
-                        "endpoint": "/QyLocations",
-                        "alias": "locations",
-                    },
-
                 ]
             )
 
@@ -586,12 +579,20 @@ class StoreDetails(
     async def post(self, request, pk):
         try:
             session = self.get_session_context(request)
-            # requisitionNo = pk
-            lineNo = int(request.POST.get("lineNo"))
+
+            lineNo = int(request.POST.get("lineNo", 0))
             itemCode = request.POST.get("itemCode")
-            quantity = int(request.POST.get("quantity"))
-            Unit_of_Measure = request.POST.get("Unit_of_Measure")
+            quantity_raw = request.POST.get("quantity")
             my_action = request.POST.get("myAction")
+
+            if not itemCode:
+                return JsonResponse({"success": False, "error": "Item is required"})
+
+            if not quantity_raw or int(quantity_raw) <= 0:
+                return JsonResponse({"success": False, "error": "Quantity must be greater than 0"})
+
+            quantity = int(quantity_raw)
+
             response = self.call_soap(
                 soap_method="FnStoreRequisitionLine",
                 params=[
@@ -600,21 +601,21 @@ class StoreDetails(
                     itemCode,
                     quantity,
                     my_action,
-                    Unit_of_Measure,
                 ],
             )
-            # print("SOAP Response:", response)
 
             if response is True:
-                messages.success(request, "Request sent successfully",)
-                return redirect("store_details", pk=pk,)
+                return JsonResponse({"success": True, "message": "Request line added successfully"})
 
-            messages.error(request, f"{response}",)
-            return redirect("store_details", pk=pk,)
+            return JsonResponse({"success": False, "error": str(response)})
+
+        except ValueError as e:
+            logging.exception(e)
+            return JsonResponse({"success": False, "error": f"Invalid input: {e}"})
+
         except Exception as e:
             logging.exception(e)
-            messages.error(request, "Failed to submit transport request",)
-            return redirect("store_details", pk=pk,)
+            return JsonResponse({"success": False, "error": f"Failed to add store request line: {e}"})
 
 
 class UploadStoreAttachment(
@@ -761,3 +762,391 @@ class CancelStoreApproval(AuthRequiredMixin, SessionMixin, SOAPMixin, View):
         except Exception as e:
             logging.exception(e)
             return JsonResponse({"success": False, "error": str(e)})
+
+
+"""
+Repair module views — converted from the legacy sync UserObjectMixins style
+to the same async convention used by PurchaseRequest / StoreRequest.
+
+Merge these classes into views.py (they use the same imports already at the
+top of that file: asyncio, base64, datetime, logging, aiohttp, messages,
+JsonResponse, redirect, render, View, and the core.mixins.* classes).
+
+Additional imports needed only for GenerateRepairReport:
+    import io
+    import secrets
+    import string
+    from django.http import HttpResponse
+"""
+
+
+class RepairRequest(
+    AuthRequiredMixin,
+    SessionMixin,
+    ODataMixin,
+    SOAPMixin,
+    ResponseMixin,
+    View,
+):
+    async def get(self, request):
+        session = self.get_session_context(request)
+
+        user_id = session.get("User_ID")
+
+        async with aiohttp.ClientSession() as client:
+
+            (
+                repair_requests,
+                assets,
+            ) = await asyncio.gather(
+
+                self.filter_data(
+                    endpoint="/QyRepairRequisitionHeaders",
+                    field="Requested_By",
+                    operator="eq",
+                    value=user_id,
+                ),
+
+                self.all_data(endpoint="/QyFixedAssets"),
+            )
+
+        open_requests = [
+            x for x in repair_requests if x.get("Status") == "Open"]
+        pending_requests = [
+            x for x in repair_requests if x.get("Status") == "Pending Approval"]
+        approved_requests = [
+            x for x in repair_requests if x.get("Status") == "Released"]
+
+        ctx = {
+            **session,
+            "open_requests": open_requests,
+            "pending_requests": pending_requests,
+            "approved_requests": approved_requests,
+            "assets": assets,
+        }
+
+        return self.render_response(request, "repair/repair_request.html", ctx)
+
+    async def post(self, request):
+        try:
+            session = self.get_session_context(request)
+            user_id = session.get("User_ID")
+            employee_no = session.get("Employee_No_")
+
+            requisitionNo = request.POST.get("requisitionNo")
+            orderDate = datetime.strptime(
+                request.POST.get("orderDate"), "%Y-%m-%d"
+            ).date()
+            Reason_Description = request.POST.get("reason")
+            myAction = request.POST.get("myAction")
+
+            response = self.call_soap(
+                soap_method="FnRepairRequisitionHeader",
+                params=[
+                    requisitionNo,
+                    orderDate,
+                    employee_no,
+                    Reason_Description,
+                    user_id,
+                    myAction,
+                ],
+            )
+
+            if response:
+                messages.success(request, "Request sent successfully",)
+                return redirect("repair_details", pk=response,)
+
+            messages.error(request, f"{response}",)
+            return redirect("repair")
+
+        except Exception as e:
+            logging.exception(e)
+            messages.error(request, "Failed to submit repair request",)
+            return redirect("repair")
+
+
+class RepairDetails(
+    AuthRequiredMixin,
+    SessionMixin,
+    ODataMixin,
+    SOAPMixin,
+    ResponseMixin,
+    View,
+):
+
+    async def get(self, request, pk):
+
+        try:
+            session = self.get_session_context(request)
+
+            # =================================================
+            # MAIN DOCUMENT
+            # =================================================
+            document = await self.fetch_one(
+                endpoint="/QyRepairRequisitionHeaders",
+                field="No_",
+                value=pk,
+            )
+            if not document:
+                messages.error(request, "Repair request not found")
+                return redirect("repair")
+
+            # =================================================
+            # RELATED DATA
+            # =================================================
+
+            related = await self.fetch_related(
+                queries=[
+                    {
+                        "endpoint": "/QyApprovalEntries",
+                        "filters": [
+                            {
+                                "field": "Document_No_",
+                                "operator": "eq",
+                                "value": pk,
+                            }
+                        ],
+                        "alias": "Approvers",
+                    },
+                    {
+                        "endpoint": "/QyApprovalCommentLines",
+                        "filters": [
+                            {
+                                "field": "Document_No_",
+                                "operator": "eq",
+                                "value": pk,
+                            }
+                        ],
+                        "alias": "ApprovalCommentLines",
+                    },
+                    {
+                        "endpoint": "/QyDocumentAttachments",
+                        "filters": [
+                            {
+                                "field": "No_",
+                                "operator": "eq",
+                                "value": pk,
+                            }
+                        ],
+                        "alias": "attachments",
+                    },
+                    {
+                        "endpoint": "/QyRepairRequisitionLines",
+                        "filters": [
+                            {
+                                "field": "AuxiliaryIndex1",
+                                "operator": "eq",
+                                "value": pk,
+                            }
+                        ],
+                        "alias": "lines",
+                    },
+                    {
+                        "endpoint": "/QyFixedAssets",
+                        "alias": "assets",
+                    },
+                ]
+            )
+
+            ctx = {
+                "res": document,
+                "full": session.get("full_name"),
+                **related,
+            }
+
+            return render(request, "repair/repair_detail.html", ctx,)
+
+        except Exception as e:
+            logging.exception(e)
+            messages.error(request, "Unable to load repair details",)
+            return redirect("repair")
+
+    async def post(self, request, pk):
+        try:
+            session = self.get_session_context(request)
+
+            lineNo = int(request.POST.get("lineNo", 0))
+            assetCode = request.POST.get("assetCode")
+            OtherAsset = request.POST.get("OtherAsset") or ""
+            description = request.POST.get("description")
+            my_action = request.POST.get("myAction")
+
+            if not assetCode and not OtherAsset:
+                return JsonResponse({
+                    "success": False,
+                    "error": "Select an asset or specify another asset",
+                })
+
+            if not description:
+                return JsonResponse({"success": False, "error": "Description is required"})
+
+            response = self.call_soap(
+                soap_method="FnRepairRequisitionLine",
+                params=[
+                    pk,
+                    lineNo,
+                    assetCode,
+                    description,
+                    my_action,
+                    OtherAsset,
+                ],
+            )
+
+            if response and response != 0:
+                return JsonResponse({"success": True, "message": "Request line added successfully"})
+
+            return JsonResponse({"success": False, "error": str(response)})
+
+        except ValueError as e:
+            logging.exception(e)
+            return JsonResponse({"success": False, "error": f"Invalid input: {e}"})
+
+        except Exception as e:
+            logging.exception(e)
+            return JsonResponse({"success": False, "error": f"Failed to add repair request line: {e}"})
+
+
+class UploadRepairAttachment(
+    AuthRequiredMixin,
+    SessionMixin,
+    ODataMixin,
+    SOAPMixin,
+    ResponseMixin,
+    View,
+):
+
+    async def post(self, request, pk):
+        try:
+            attachments = request.FILES.getlist("attachments")
+
+            table_id = 52177433
+            user_id = request.session["User_ID"]
+
+            responses = []
+
+            for file in attachments:
+                response = self.upload_attachment(
+                    "FnUploadAttachedDocument",
+                    pk,
+                    file,
+                    table_id,
+                    user_id,
+                )
+                responses.append(response)
+
+            return JsonResponse({
+                "success": True,
+                "message": f"{len(attachments)} file(s) uploaded successfully",
+            })
+
+        except Exception as e:
+            logging.exception(e)
+            return JsonResponse({"success": False, "error": str(e)})
+
+
+class DeleteRepairAttachment(
+    AuthRequiredMixin,
+    SessionMixin,
+    ODataMixin,
+    SOAPMixin,
+    ResponseMixin,
+    View,
+):
+
+    async def post(self, request, pk):
+        try:
+            session = self.get_session_context(request)
+            user_id = session.get("User_ID")
+            docID = int(request.POST.get("docID"))
+            tableID = int(request.POST.get("tableID"))
+
+            response = self.call_soap(
+                soap_method="FnDeleteDocumentAttachment",
+                params=[pk, docID, tableID,],
+            )
+            if response is True:
+                return JsonResponse({"success": True, "message": "Attachment deleted successfully", })
+
+            return JsonResponse({"success": False, "error": str(response), })
+
+        except Exception as e:
+            logging.exception(e)
+            return JsonResponse({
+                "success": False,
+                "error": f"Failed to delete attachment: {e}",
+            })
+
+
+class DeleteRepairLine(
+    AuthRequiredMixin,
+    SessionMixin,
+    ODataMixin,
+    SOAPMixin,
+    ResponseMixin,
+    View,
+):
+    async def post(self, request, pk):
+        try:
+            session = self.get_session_context(request)
+            user_id = session.get("User_ID")
+            lineNo = int(request.POST.get("lineNo"))
+
+            if not lineNo:
+                messages.error(request, "Failed to complete the action")
+                return redirect("repair_details", pk=pk,)
+
+            response = self.call_soap(
+                soap_method="FnDeleteRepairRequisitionLine",
+                params=[
+                    pk,
+                    lineNo,
+                ],
+            )
+
+            if response is True:
+                messages.success(request, "Action completed successfully",)
+                return redirect("repair_details", pk=pk,)
+
+            messages.error(request, f"{response}",)
+            return redirect("repair_details", pk=pk,)
+
+        except Exception as e:
+            logging.exception(e)
+            messages.error(request, f"Failed to delete the line: {e}",)
+            return redirect("repair_details", pk=pk,)
+
+
+class RepairApproval(AuthRequiredMixin, SessionMixin, ODataMixin, SOAPMixin, ResponseMixin, View):
+    async def post(self, request, pk):
+        try:
+            session = self.get_session_context(request)
+            user_id = session.get("User_ID")
+            response = self.call_soap(
+                soap_method="FnRequestInternalRequestApproval",
+                params=[user_id, pk,],
+            )
+            if response is True:
+                return JsonResponse({"success": True, "message": "Approval requested successfully"})
+            return JsonResponse({"success": False, "error": str(response)})
+        except Exception as e:
+            logging.exception(e)
+            return JsonResponse({"success": False, "error": str(e)})
+
+
+class CancelRepairApproval(AuthRequiredMixin, SessionMixin, SOAPMixin, View):
+    async def post(self, request, pk):
+        try:
+            session = self.get_session_context(request)
+            user_id = session.get("User_ID")
+            response = self.call_soap(
+                soap_method="FnCancelInternalRequestApproval",
+                params=[user_id, pk],
+            )
+            if response is True:
+                return JsonResponse({"success": True, "message": "Approval cancelled successfully"})
+            return JsonResponse({"success": False, "error": str(response)})
+        except Exception as e:
+            logging.exception(e)
+            return JsonResponse({"success": False, "error": str(e)})
+
+

@@ -276,24 +276,15 @@
                                                 <td>
                                                     <div class="d-flex align-items-center">
                                                         <i class="mdi mdi-file-pdf-box me-2 fs-5"></i>
-                                                        <span class="fw-semibold">{{ attachment.File_Name }}.{{ attachment.File_Type }}</span>
+                                                        <span class="fw-semibold">
+                                                            {{ attachment.File_Name }}.{{ attachment.File_Type|lower }}
+                                                        </span>
                                                     </div>
                                                 </td>
-                                                <!-- <td>
-                                                                            <span class="badge bg-light text-dark">
-                                                                                {{ attachment.File_Type }}
-                                                                            </span>
-                                                                        </td> -->
-
+                                               
                                                 {% if res.Status == "Open" %}
                                                 <td class="text-center">
-                                                    <!-- Download Button -->
-                                                    <!-- <a href="{{ attachment.file.url }}"
-                                                                                class="btn btn-sm btn-outline-success"
-                                                                                download="{{ attachment.file_name }}" title="Download">
-                                                                                <i class="mdi mdi-download"></i>
-                                                                            </a> -->
-
+                                                   
                                                     <!-- Delete Button -->
                                                     <form action="{% url 'Delete_Finance_Attacment' attachment.No_  %}"
                                                         method="POST" class="attachmentDeleteForm" novalidate>
