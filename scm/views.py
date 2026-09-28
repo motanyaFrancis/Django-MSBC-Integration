@@ -208,8 +208,8 @@ class PurchaseDetails(
                         "alias": "attachments",
                     },
                     {
-                        "endpoint": "/QyEmployees",
-                        "alias": "employees",
+                        "endpoint": "/QyPurchaseRequisitionLines",
+                        "alias": "lines",
                     },
 
                 ]
@@ -234,10 +234,10 @@ class PurchaseDetails(
             user_id = session.get("User_ID")
             # employee_no = request.POST.get("employee_no")
             lineNo = int(request.POST.get("lineNo"))
-            procPlanItem = request.POST.get("procPlanItem")
-            # specification = request.POST.get("specification")
+            procPlanItem = request.POST.get("procPlanItem", "")
+            specification = request.POST.get("specification", "")
             quantity = int(request.POST.get("quantity"))
-            # Unit_of_Measure = request.POST.get("Unit_of_Measure")
+            Unit_of_Measure = request.POST.get("Unit_of_Measure", " ")
             my_action = request.POST.get("myAction")
             response = self.call_soap(
                 soap_method="FnPurchaseRequisitionLine",
@@ -245,9 +245,11 @@ class PurchaseDetails(
                     pk,
                     lineNo,
                     procPlanItem,
+                    specification,
                     quantity,
                     user_id,
                     my_action,
+                    Unit_of_Measure,
                 ],
             )
             # print("SOAP Response:", response)
@@ -260,7 +262,7 @@ class PurchaseDetails(
             return redirect("purchase_details", pk=pk,)
         except Exception as e:
             logging.exception(e)
-            messages.error(request, "Failed to submit transport request",)
+            messages.error(request, "Failed to save the item",)
             return redirect("purchase_details", pk=pk,)
 
 
@@ -584,6 +586,7 @@ class StoreDetails(
             itemCode = request.POST.get("itemCode")
             quantity_raw = request.POST.get("quantity")
             my_action = request.POST.get("myAction")
+            unitOfMeasure = request.POST.get('unitOfMeasure', "")
 
             if not itemCode:
                 return JsonResponse({"success": False, "error": "Item is required"})
@@ -601,6 +604,7 @@ class StoreDetails(
                     itemCode,
                     quantity,
                     my_action,
+                    unitOfMeasure,
                 ],
             )
 

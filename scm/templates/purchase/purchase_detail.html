@@ -329,6 +329,7 @@ Purchase Request - {{res.No_}}
                                     <table class="table table-hover align-middle">
                                         <thead class="table-light">
                                             <tr>
+                                                <th>Description</th>
                                                 <th>Procurement Plan</th>
                                                 <th>Type</th>
                                                 <th>Quantity</th>
@@ -341,6 +342,7 @@ Purchase Request - {{res.No_}}
                                         <tbody>
                                             {% for line in lines %}
                                             <tr>
+                                                <td>{{line.Description}}</td>
                                                 <td>{{line.Procurement_Plan}}</td>
                                                 <td>{{line.Type}}</td>
                                                 <td>{{line.Quantity}}</td>
@@ -353,7 +355,7 @@ Purchase Request - {{res.No_}}
                                                         <input type="hidden" name="myAction" value="delete">
                                                         <button class="btn btn-sm btn-danger text-white">
 
-                                                            <i class="mdi  mdi-account-remove-outline"></i> Remove
+                                                            <i class="mdi  mdi-trash-can"></i> Remove
                                                         </button>
                                                     </form>
                                                 </td>
@@ -362,7 +364,7 @@ Purchase Request - {{res.No_}}
                                             {% empty %}
                                             <tr>
                                                 <td colspan="3" class="text-center py-4 text-muted">
-                                                    No traveling employees added
+                                                    No requisition items added
                                                 </td>
                                             </tr>
                                             {% endfor %}
@@ -419,7 +421,7 @@ Purchase Request - {{res.No_}}
                                                     <div class="d-flex align-items-center">
                                                         <i class="mdi mdi-file-pdf-box me-2 fs-5"></i>
                                                         <span class="fw-semibold">
-                                                            {{ attachment.File_Name }}{{ attachment.File_Type|lower }}
+                                                            {{ attachment.File_Name }}.{{ attachment.File_Type|lower }}
                                                         </span>
                                                     </div>
                                                 </td>

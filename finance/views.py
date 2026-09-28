@@ -1,10 +1,11 @@
 import asyncio
+import base64
 import logging
 from datetime import datetime
 
 import aiohttp
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import FileResponse, JsonResponse
 from django.shortcuts import redirect
 from django.views import View
 
@@ -13,6 +14,8 @@ from core.mixins.session_mixin import SessionMixin
 from core.mixins.odata_mixin import ODataMixin
 from core.mixins.ResponseMixin import ResponseMixin
 from core.mixins.soap_mixin import SOAPMixin
+
+logger = logging.getLogger(__name__)
 
 
 """
@@ -207,7 +210,8 @@ class ImprestDetail(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, 
                         "alias": "types",
                     },
                     {"endpoint": "/QyDestinations", "alias": "destinations"},
-                    {"endpoint": "/QyDimensionValues", "alias": "dimension_values"},
+                    {"endpoint": "/QyDimensionValues",
+                        "alias": "dimension_values"},
                     {"endpoint": "/QyInternalCustomers", "alias": "accounts"},
                 ]
             )
@@ -235,8 +239,10 @@ class ImprestDetail(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, 
         try:
             imprestType = request.POST.get("imprestType")
             destination = request.POST.get("destination")
-            travelDate = datetime.strptime(request.POST.get("travel"), "%Y-%m-%d").date()
-            returnDate = datetime.strptime(request.POST.get("returnDate"), "%Y-%m-%d").date()
+            travelDate = datetime.strptime(
+                request.POST.get("travel"), "%Y-%m-%d").date()
+            returnDate = datetime.strptime(
+                request.POST.get("returnDate"), "%Y-%m-%d").date()
             requisitionType = request.POST.get("requisitionType")
             amount = request.POST.get("amount") or 0
             myAction = request.POST.get("myAction")
@@ -282,8 +288,10 @@ class ImprestSurrender(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixi
 
             async with aiohttp.ClientSession() as client:
                 (imprests, surrenders) = await asyncio.gather(
-                    self.filter_data(endpoint="/QyImprests", field="User_ID", operator="eq", value=user_id),
-                    self.filter_data(endpoint="/QyImprestSurrenders", field="User_Id", operator="eq", value=user_id),
+                    self.filter_data(
+                        endpoint="/QyImprests", field="User_ID", operator="eq", value=user_id),
+                    self.filter_data(endpoint="/QyImprestSurrenders",
+                                     field="User_Id", operator="eq", value=user_id),
                 )
 
             ctx = {
@@ -422,9 +430,14 @@ class StaffClaim(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SOA
             user_id = session.get("User_ID")
 
             async with aiohttp.ClientSession() as client:
-                (claims, surrenders) = await asyncio.gather(
-                    self.filter_data(endpoint="/QyStaffClaims", field="User_Id", operator="eq", value=user_id),
-                    self.filter_data(endpoint="/QyImprestSurrenders", field="User_Id", operator="eq", value=user_id),
+                (
+                    claims, surrenders
+                ) = await asyncio.gather(
+                    self.filter_data(
+                        endpoint="/QyStaffClaims", field="User_Id", operator="eq", value=user_id),
+                    
+                    self.filter_data(
+                        endpoint="/QyImprestSurrenders", field="User_Id", operator="eq", value=user_id),
                 )
 
             ctx = {
@@ -504,20 +517,31 @@ class StaffClaimData(AuthRequiredMixin, SessionMixin, ODataMixin, View):
             logging.exception(e)
             return JsonResponse({"error": str(e)}, safe=False)
 
-
-class ClaimDetail(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SOAPMixin, View):
-    """Detail page for a single claim, and the line-item submission form."""
-
+ 
+class ClaimDetailView( View):
+    """
+    Detail page and management view for a single staff claim.
+    Handles viewing, editing, and managing claim line items.
+    """
+ 
     async def get(self, request, pk):
+        """Fetch and display claim details"""
         try:
             session = self.get_session_context(request)
             user_id = session.get("User_ID")
-
-            document = await self.fetch_one(endpoint="/QyStaffClaims", field="No_", value=pk)
+ 
+            # Fetch main claim document
+            document = await self.fetch_one(
+                endpoint="/QyStaffClaims", 
+                field="No_", 
+                value=pk
+            )
+            
             if not document:
                 messages.error(request, "Claim not found")
                 return redirect("StaffClaim")
-
+ 
+            # Fetch related data in parallel
             related = await self.fetch_related(
                 queries=[
                     {
@@ -531,11 +555,6 @@ class ClaimDetail(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SO
                         "alias": "claimtypes",
                     },
                     {
-                        "endpoint": "/QyImprestSurrenders",
-                        "filters": [{"field": "User_Id", "operator": "eq", "value": user_id}],
-                        "alias": "imprests",
-                    },
-                    {
                         "endpoint": "/QyApprovalEntries",
                         "filters": [{"field": "Document_No_", "operator": "eq", "value": pk}],
                         "alias": "Approvers",
@@ -547,57 +566,330 @@ class ClaimDetail(AuthRequiredMixin, SessionMixin, ODataMixin, ResponseMixin, SO
                     },
                 ]
             )
-
+ 
             ctx = {
                 **session,
                 "res": document,
                 **related,
             }
-
+ 
             return self.render_response(request, "claim/claimDetail.html", ctx)
-
+ 
         except Exception as e:
-            logging.exception(e)
+            logger.exception(f"Error loading claim detail: {e}")
             messages.error(request, "Failed to load claim details")
             return redirect("StaffClaim")
-
+ 
+    async def post(self, request, pk):
+        """Handle claim line creation, update, and deletion"""
+        try:
+            session = self.get_session_context(request)
+            account_no = session.get("Customer_No_")
+            
+            my_action = request.POST.get("myAction", "insert")
+            line_no = int(request.POST.get("lineNo", 0))
+            claim_type = request.POST.get("claimType", "")
+            amount = float(request.POST.get("amount", 0))
+            expenditure_date_str = request.POST.get("expenditureDate", "")
+            expenditure_description = request.POST.get("expenditureDescription", "")
+ 
+            # Validate required fields
+            if not all([claim_type, amount, expenditure_date_str, expenditure_description]):
+                messages.error(request, "Please fill all required fields")
+                return redirect("ClaimDetail", pk=pk)
+ 
+            # Parse date
+            try:
+                expenditure_date = datetime.strptime(expenditure_date_str, "%Y-%m-%d").date()
+            except ValueError:
+                messages.error(request, "Invalid date format")
+                return redirect("ClaimDetail", pk=pk)
+ 
+            # Call SOAP method to process line item
+            response = await self.call_soap_async(
+                soap_method="FnStaffClaimLine",
+                params=[
+                    line_no,
+                    pk,
+                    claim_type,
+                    account_no,
+                    amount,
+                    "",  # claimReceiptNo
+                    "",  # dimension3
+                    expenditure_date.isoformat(),
+                    expenditure_description,
+                    my_action,
+                ],
+            )
+ 
+            logger.info(f"SOAP Response: {response}")
+            
+            if response and "success" in response.lower():
+                if my_action == "insert":
+                    messages.success(request, "Claim line added successfully")
+                elif my_action == "update":
+                    messages.success(request, "Claim line updated successfully")
+                elif my_action == "delete":
+                    messages.success(request, "Claim line deleted successfully")
+            else:
+                messages.error(request, response or "Operation failed")
+ 
+            return redirect("ClaimDetail", pk=pk)
+ 
+        except ValueError as ve:
+            logger.error(f"Validation error: {ve}")
+            messages.error(request, f"Invalid input: {str(ve)}")
+            return redirect("ClaimDetail", pk=pk)
+        except Exception as e:
+            logger.exception(f"Error processing claim line: {e}")
+            messages.error(request, f"Error: {str(e)}")
+            return redirect("ClaimDetail", pk=pk)
+ 
+    # Additional methods inherited from mixins
+    def get_session_context(self, request):
+        """Get session context - implement based on your SessionMixin"""
+        return request.session.get("context", {})
+ 
+    async def fetch_one(self, endpoint, field, value):
+        """Fetch single record from OData - implement via ODataMixin"""
+        pass
+ 
+    async def fetch_related(self, queries):
+        """Fetch multiple related records - implement via ODataMixin"""
+        pass
+ 
+    async def call_soap_async(self, soap_method, params):
+        """Call SOAP method - implement via SOAPMixin"""
+        pass
+ 
+    def render_response(self, request, template, context):
+        """Render template response - implement via ResponseMixin"""
+        pass
+ 
+ 
+class DeleteClaimLineView( View):
+    """Delete a specific claim line item"""
+ 
+    async def post(self, request, pk, line_no):
+        try:
+            session = self.get_session_context(request)
+            account_no = session.get("Customer_No_")
+ 
+            response = await self.call_soap_async(
+                soap_method="FnStaffClaimLine",
+                params=[
+                    int(line_no),
+                    pk,
+                    "",  # claimType
+                    account_no,
+                    0,  # amount
+                    "",  # claimReceiptNo
+                    "",  # dimension3
+                    "",  # expenditureDate
+                    "",  # expenditureDescription
+                    "delete",
+                ],
+            )
+ 
+            messages.success(request, "Claim line deleted successfully")
+            return redirect("ClaimDetail", pk=pk)
+ 
+        except Exception as e:
+            logger.exception(f"Error deleting claim line: {e}")
+            messages.error(request, f"Error deleting line: {str(e)}")
+            return redirect("ClaimDetail", pk=pk)
+ 
+ 
+class UploadClaimAttachmentView( View):
+    """Upload attachment to claim"""
+ 
     async def post(self, request, pk):
         try:
             session = self.get_session_context(request)
-            accountNo = session.get("Customer_No_")
-            lineNo = int(request.POST.get("lineNo"))
-            claimType = request.POST.get("claimType")
-            amount = float(request.POST.get("amount"))
-            expenditureDate = datetime.strptime(request.POST.get("expenditureDate"), "%Y-%m-%d").date()
-            expenditureDescription = request.POST.get("expenditureDescription")
-            myAction = request.POST.get("myAction")
-            claimReceiptNo = ""
-            dimension3 = ""
-
-            response = self.call_soap(
-                soap_method="FnStaffClaimLine",
+            
+            if "attachment" not in request.FILES:
+                messages.error(request, "No file selected")
+                return redirect("ClaimDetail", pk=pk)
+ 
+            file = request.FILES["attachment"]
+            
+            # Validate file size (5MB max)
+            if file.size > 5 * 1024 * 1024:
+                messages.error(request, "File size exceeds 5MB limit")
+                return redirect("ClaimDetail", pk=pk)
+ 
+            # Validate file extension
+            allowed_extensions = {'pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png'}
+            file_ext = file.name.split('.')[-1].lower()
+            
+            if file_ext not in allowed_extensions:
+                messages.error(request, f"File type '.{file_ext}' not allowed")
+                return redirect("ClaimDetail", pk=pk)
+ 
+            # Read file content
+            file_content = file.read()
+            file_name = file.name.rsplit('.', 1)[0]
+            file_type = file_ext
+ 
+            # Call SOAP to save attachment
+            response = await self.call_soap_async(
+                soap_method="FnDocumentAttachment",
                 params=[
-                    lineNo,
-                    pk,
-                    claimType,
-                    accountNo,
-                    amount,
-                    claimReceiptNo,
-                    dimension3,
-                    expenditureDate,
-                    expenditureDescription,
-                    myAction,
+                    pk,  # Document_No_
+                    file_name,
+                    file_type,
+                    base64.b64encode(file_content).decode(),
+                    session.get("User_ID"),
+                    "insert",
                 ],
             )
-            print("SOAP Response:", response)
-            messages.success(request, response)
+ 
+            messages.success(request, "Attachment uploaded successfully")
             return redirect("ClaimDetail", pk=pk)
-
+ 
         except Exception as e:
-            logging.exception(e)
-            messages.error(request, f"{e}")
+            logger.exception(f"Error uploading attachment: {e}")
+            messages.error(request, f"Error uploading file: {str(e)}")
             return redirect("ClaimDetail", pk=pk)
+ 
+ 
+class DownloadClaimAttachmentView( View):
+    """Download attachment from claim"""
+ 
+    async def post(self, request, pk, line_no):
+        try:
+            session = self.get_session_context(request)
+ 
+            # Fetch attachment metadata
+            attachment = await self.fetch_one(
+                endpoint="/QyDocumentAttachments",
+                field="Line_No_",
+                value=line_no,
+            )
+ 
+            if not attachment:
+                messages.error(request, "Attachment not found")
+                return redirect("ClaimDetail", pk=pk)
+ 
+            # Call SOAP to get file content
+            file_content = await self.call_soap_async(
+                soap_method="FnGetDocumentAttachment",
+                params=[
+                    pk,
+                    line_no,
+                ],
+            )
+ 
+            if not file_content:
+                messages.error(request, "Failed to retrieve attachment")
+                return redirect("ClaimDetail", pk=pk)
+ 
+            # Decode base64 if needed
+            if isinstance(file_content, str):
+                try:
+                    file_content = base64.b64decode(file_content)
+                except:
+                    pass
+ 
+            # Return file for download
+            file_name = f"{attachment.get('File_Name', 'attachment')}.{attachment.get('File_Type', 'pdf')}"
+            def ContentFile(file_content):
+                ...
 
+            response = FileResponse(
+                ContentFile(file_content),
+                content_type="application/octet-stream"
+            )
+            response['Content-Disposition'] = f'attachment; filename="{file_name}"'
+            return response
+ 
+        except Exception as e:
+            logger.exception(f"Error downloading attachment: {e}")
+            messages.error(request, f"Error downloading file: {str(e)}")
+            return redirect("ClaimDetail", pk=pk)
+ 
+ 
+class DeleteClaimAttachmentView( View):
+    """Delete attachment from claim"""
+ 
+    async def post(self, request, pk, line_no):
+        try:
+            session = self.get_session_context(request)
+ 
+            # Call SOAP to delete attachment
+            response = await self.call_soap_async(
+                soap_method="FnDocumentAttachment",
+                params=[
+                    pk,  # Document_No_
+                    "",  # file_name
+                    "",  # file_type
+                    "",  # file_content
+                    session.get("User_ID"),
+                    "delete",
+                    line_no,
+                ],
+            )
+ 
+            messages.success(request, "Attachment deleted successfully")
+            return redirect("ClaimDetail", pk=pk)
+ 
+        except Exception as e:
+            logger.exception(f"Error deleting attachment: {e}")
+            messages.error(request, f"Error deleting attachment: {str(e)}")
+            return redirect("ClaimDetail", pk=pk)
+ 
+ 
+class RequestClaimApprovalView( View):
+    """Submit claim for approval"""
+ 
+    async def post(self, request, pk):
+        try:
+            session = self.get_session_context(request)
+ 
+            # Call SOAP to update claim status
+            response = await self.call_soap_async(
+                soap_method="FnUpdateClaimStatus",
+                params=[
+                    pk,
+                    "Pending Approval",
+                    session.get("User_ID"),
+                ],
+            )
+ 
+            messages.success(request, "Claim submitted for approval")
+            return redirect("ClaimDetail", pk=pk)
+ 
+        except Exception as e:
+            logger.exception(f"Error requesting approval: {e}")
+            messages.error(request, f"Error: {str(e)}")
+            return redirect("ClaimDetail", pk=pk)
+ 
+ 
+class CancelClaimApprovalView(View):
+    """Cancel claim approval request"""
+ 
+    async def post(self, request, pk):
+        try:
+            session = self.get_session_context(request)
+ 
+            # Call SOAP to update claim status
+            response = await self.call_soap_async(
+                soap_method="FnUpdateClaimStatus",
+                params=[
+                    pk,
+                    "Open",
+                    session.get("User_ID"),
+                ],
+            )
+ 
+            messages.success(request, "Approval request cancelled")
+            return redirect("ClaimDetail", pk=pk)
+ 
+        except Exception as e:
+            logger.exception(f"Error cancelling approval: {e}")
+            messages.error(request, f"Error: {str(e)}")
+            return redirect("ClaimDetail", pk=pk)
+ 
 
 # ======================================================================
 # APPROVALS (shared payment-approval workflow: Imprest + Claim)
@@ -659,6 +951,24 @@ class ClaimApproval(AuthRequiredMixin, SessionMixin, ODataMixin, SOAPMixin, Resp
             logging.exception(e)
             return JsonResponse({"success": False, "error": str(e)})
 
+class CancelClaimApproval(AuthRequiredMixin, SessionMixin, ODataMixin, SOAPMixin, ResponseMixin, View):
+    """Withdraw a pending imprest approval request."""
+
+    def post(self, request, pk):
+        try:
+            session = self.get_session_context(request)
+            employee_no = session.get("Employee_No_")
+            response = self.call_soap(
+                soap_method="FnCancelPaymentApproval",
+                params=[employee_no, pk],
+            )
+            if response is True:
+                return JsonResponse({"success": True, "message": "Approval cancelled successfully"})
+            return JsonResponse({"success": False, "error": str(response)})
+        except Exception as e:
+            logging.exception(e)
+            return JsonResponse({"success": False, "error": str(e)})
+
 
 # NOTE: No cancel-approval or surrender-approval SOAP method names were
 # present in the source views for Claim or Surrender. If BC exposes
@@ -700,7 +1010,8 @@ class FinanceAttachments(AuthRequiredMixin, SessionMixin, ODataMixin, SOAPMixin,
             if not attachments:
                 return JsonResponse({"success": False, "error": "No files were received"})
 
-            table_id = int(request.POST.get("tableID") or self.DEFAULT_TABLE_ID)
+            table_id = int(request.POST.get("tableID")
+                           or self.DEFAULT_TABLE_ID)
             user_id = request.session["User_ID"]
 
             for file in attachments:
@@ -727,7 +1038,8 @@ class DeleteFinanceAttachment(AuthRequiredMixin, SessionMixin, ODataMixin, SOAPM
     async def post(self, request, pk):
         try:
             docID = int(request.POST.get("docID"))
-            tableID = int(request.POST.get("tableID") or FinanceAttachments.DEFAULT_TABLE_ID)
+            tableID = int(request.POST.get("tableID")
+                          or FinanceAttachments.DEFAULT_TABLE_ID)
 
             response = self.call_soap(
                 soap_method="FnDeleteDocumentAttachment",
@@ -752,7 +1064,8 @@ class GetDocumentAttachment(AuthRequiredMixin, SessionMixin, ODataMixin, SOAPMix
         redirectTo = request.POST.get("redirectTo")
         try:
             attachmentID = request.POST.get("attachmentID")
-            table_id = int(request.POST.get("tableID") or FinanceAttachments.DEFAULT_TABLE_ID)
+            table_id = int(request.POST.get("tableID")
+                           or FinanceAttachments.DEFAULT_TABLE_ID)
 
             response = self.call_soap(
                 soap_method="FnUploadAttachedDocument",

@@ -17,8 +17,46 @@ urlpatterns = [
     # ---------- Staff Claim ----------
     path("StaffClaim/", views.StaffClaim.as_view(), name="StaffClaim"),
     path("StaffClaimData/", views.StaffClaimData.as_view(), name="StaffClaimData"),
-    path("ClaimDetail/<str:pk>", views.ClaimDetail.as_view(), name="ClaimDetail"),
-    path("ClaimApproval/<str:pk>", views.ClaimApproval.as_view(), name="ClaimApproval"),
+       # ==================== CLAIM DETAIL ====================
+    path(
+        'StaffClaim/<str:pk>/',
+        views.ClaimDetailView.as_view(),
+        name='ClaimDetail'
+    ),
+    path(
+        'StaffClaim/<str:pk>/line/<int:line_no>/delete/',
+        views.DeleteClaimLineView.as_view(),
+        name='DeleteClaimLine'
+    ),
+ 
+    # ==================== ATTACHMENTS ====================
+    path(
+        'StaffClaim/<str:pk>/attachment/upload/',
+        views.UploadClaimAttachmentView.as_view(),
+        name='UploadClaimAttachment'
+    ),
+    path(
+        'StaffClaim/<str:pk>/attachment/<str:line_no>/download/',
+        views.DownloadClaimAttachmentView.as_view(),
+        name='DownloadClaimAttachment'
+    ),
+    path(
+        'StaffClaim/<str:pk>/attachment/<str:line_no>/delete/',
+        views.DeleteClaimAttachmentView.as_view(),
+        name='DeleteClaimAttachment'
+    ),
+ 
+    # ==================== APPROVAL WORKFLOW ====================
+    path(
+        'StaffClaim/<str:pk>/request-approval/',
+        views.RequestClaimApprovalView.as_view(),
+        name='RequestClaimApproval'
+    ),
+    path(
+        'StaffClaim/<str:pk>/cancel-approval/',
+        views.CancelClaimApprovalView.as_view(),
+        name='CancelClaimApproval'
+    ),
 
     # ---------- Shared attachments ----------
     path("finance-attachments/<str:pk>/", views.FinanceAttachments.as_view(), name="Finance_Attachments"),
